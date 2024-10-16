@@ -31,6 +31,8 @@ export function formatTimeWithoutSeconds(time) {
 // persist users from home screen
 // persist user from authContext
 // persist messages from chatroom
+// persist lastMessage from chatObject
+
 // change the color of the small space under the go home button to match my screen bg color
 // do not automatically display chat of all users, will only display list of chats a user has a room with
 // make it possible to search users by their username and start a conversation

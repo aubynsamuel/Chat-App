@@ -30,20 +30,11 @@ import {getCurrentTime, formatTimeWithoutSeconds} from '../../commons';
 const ChatScreen = () => {
   const route = useRoute();
   const {userId, username, profileUrl} = route.params;
-  const {user, setLastMsg} = useAuth();
+  const {user} = useAuth();
   const [messages, setMessages] = useState([]);
   const textRef = useRef('');
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
-
-
-  useEffect(() => {
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      setLastMsg(lastMessage);
-      console.log(lastMessage, "from ChatScreen")
-    }
-  }, [messages]);
 
   useEffect(() => {
     flatListRef.current.scrollToEnd({animated: true});
@@ -133,8 +124,8 @@ const ChatScreen = () => {
         <FlatList
           ref={flatListRef}
           data={messages}
-          renderItem={renderItem}
           keyExtractor={item => item.id}
+          renderItem={renderItem}
           contentContainerStyle={styles.messages}
           showsVerticalScrollIndicator={false}
         />

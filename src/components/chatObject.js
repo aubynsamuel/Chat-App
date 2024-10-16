@@ -2,17 +2,45 @@ import {View, StyleSheet, Text, TouchableOpacity, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../AuthContext';
 import {useEffect, useState} from 'react';
-import {formatTimeWithoutSeconds} from '../../commons'
+import {formatTimeWithoutSeconds, getRoomId} from '../../commons';
+import {db} from '../../firebaseConfig';
+import {collection, query, orderBy, onSnapshot, doc, limit} from 'firebase/firestore';
 
 const ChatObject = ({users, unread}) => {
   const navigation = useNavigation();
-  const {lastMessage} = useAuth();
-
+  const {user} = useAuth();
+  const [lastMessage, setLastMessage] = useState(null);  // Updated to null for better handling
   const [lastMessageTime, setLastMessageTime] = useState('');
 
   useEffect(() => {
-    if (lastMessage) {
+    const roomId = getRoomId(user.userId, users.userId);
+    const docRef = doc(db, 'rooms', roomId);
+    const messagesRef = collection(docRef, 'messages');
+
+    // Query to get only the last message, ordered by 'createdAt'
+    const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1));
+
+    // Subscribe to Firestore and listen for real-time updates
+    let unsubscribe = onSnapshot(q, snapshot => {
+      if (!snapshot.empty) {
+        // Get the last message from the snapshot
+        const lastMessageData = snapshot.docs[0].data();
+        setLastMessage(lastMessageData); // Update state with the last message
+      } else {
+        setLastMessage(null); // Clear last message if there's no data
+      }
+    });
+
+    // Cleanup the listener when the component unmounts
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (lastMessage && lastMessage.createdAt) {
+      // Format the last message time only if createdAt is available
       setLastMessageTime(formatTimeWithoutSeconds(lastMessage.createdAt));
+    } else {
+      setLastMessageTime(''); // Clear the time if no message or createdAt
     }
   }, [lastMessage]);
 
@@ -51,18 +79,15 @@ const ChatObject = ({users, unread}) => {
           {/* Last message */}
           <Text numberOfLines={1} style={styles.lastMessage}>
             {lastMessage?.senderId !== users?.userId
-              ? `You: ${lastMessage?.content}`
-              : lastMessage?.content}
+              ? `You: ${lastMessage?.content || ''}`
+              : lastMessage?.content || ''}
           </Text>
         </View>
       </View>
 
       <View>
         {/* Time of last message */}
-        <Text style={styles.time}>
-
-            {lastMessageTime}
-        </Text>
+        <Text style={styles.time}>{lastMessageTime}</Text>
         {/* Number of unread messages */}
         <Text style={styles.unread}>{unread}</Text>
       </View>
@@ -99,12 +124,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'gray',
     marginBottom: 2,
-    // backgroundColor:"red",
     alignSelf: 'flex-end',
-
   },
   unread: {
-    // backgroundColor: 'blue',
     color: 'grey',
     borderRadius: 5,
     padding: 1,

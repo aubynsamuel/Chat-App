@@ -15,10 +15,7 @@ export const useAuth = () => useContext(AuthContext);
 
 // Create Authentication Context Provider
 export const AuthContextProvider = ({children}) => {
-  const [lastMessage, setLastMessage] = useState()
-  const setLastMsg =(lastMessage)=>{
-    setLastMessage(lastMessage)
-  }
+  
   // console.log(lastMessage, "from AuthContext")
 
   const [user, setUser] = useState(null);
@@ -35,8 +32,8 @@ export const AuthContextProvider = ({children}) => {
         setUser(null);
         setIsAuthenticated(false);
       }
-      return unsubscribe;
     });
+    return unsubscribe;
   }, []);
 
   // update user data in Firestore
@@ -119,8 +116,6 @@ export const AuthContextProvider = ({children}) => {
         signUp,
         user,
         isAuthenticated,
-        setLastMsg,
-        lastMessage
       }}>
       {children}
     </AuthContext.Provider>
