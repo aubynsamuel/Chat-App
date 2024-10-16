@@ -37,6 +37,15 @@ const ChatScreen = () => {
   const inputRef = useRef(null);
 
   useEffect(() => {
+    if (flatListRef.current) {
+      setTimeout(() => {
+        flatListRef.current.scrollToEnd({animated: true});
+      }, 1000);
+      return () => clearTimeout();
+    }
+  }, []);
+
+  useEffect(() => {
     flatListRef.current.scrollToEnd({animated: true});
   }, [messages]);
 
@@ -86,32 +95,6 @@ const ChatScreen = () => {
     }
   };
 
-  const renderItem = ({item}) => {
-    const isUserMessage = item.senderId === user?.userId;
-    const messageStyle = isUserMessage
-      ? styles.userMessage
-      : styles.otherMessage;
-    const imageStyle = isUserMessage ? styles.userImage : styles.otherImage;
-
-    if (item.type === 'text') {
-      return (
-        <View
-          style={
-            isUserMessage
-              ? styles.userMessageContainer
-              : styles.otherMessageContainer
-          }>
-          <Text style={messageStyle}>{item.content}</Text>
-          {/* <Text style={isUserMessage ? styles.userTime : styles.otherTime}>
-            {formatTimeWithoutSeconds(item.createdAt)}
-          </Text> */}
-        </View>
-      );
-    } else if (item.type === 'image') {
-      return <Image source={{uri: item.content}} style={imageStyle} />;
-    }
-  };
-
   return (
     <View style={{flex: 1}}>
       <StatusBar barStyle="dark-content" backgroundColor="lightblue" />
@@ -120,12 +103,40 @@ const ChatScreen = () => {
         backButtonShown={true}
         profileUrl={profileUrl}
       />
+
       <View style={styles.container}>
         <FlatList
           ref={flatListRef}
           data={messages}
           keyExtractor={item => item.id}
-          renderItem={renderItem}
+          renderItem={({item}) => {
+            const isUserMessage = item.senderId === user?.userId;
+            const messageStyle = isUserMessage
+              ? styles.userMessage
+              : styles.otherMessage;
+            if (item.type === 'text') {
+              return (
+                <View
+                  style={
+                    isUserMessage
+                      ? styles.userMessageContainer
+                      : styles.otherMessageContainer
+                  }>
+                  <Text style={messageStyle}>{item.content}</Text>
+                  <Text
+                    style={
+                      isUserMessage
+                        ? styles.userTime
+                        : styles.otherTime
+                    }>
+                    {formatTimeWithoutSeconds(item.createdAt)}
+                  </Text>
+                </View>
+              );
+            } else if (item.type === 'image') {
+              return <Image source={{uri: item.content}} style={imageStyle} />;
+            }
+          }}
           contentContainerStyle={styles.messages}
           showsVerticalScrollIndicator={false}
         />
@@ -198,48 +209,27 @@ const styles = StyleSheet.create({
   },
   userMessage: {
     backgroundColor: 'lightgrey',
-    // borderRadius: 7,
-    // marginVertical: 5,
-    // alignSelf: 'flex-end',
     // padding: 8,
     fontSize: 16,
     color: '#000',
   },
   otherMessage: {
     backgroundColor: '#c8ecee',
-    // borderRadius: 7,
-    // marginVertical: 5,
-    // alignSelf: 'flex-start',
     // padding: 8,
     fontSize: 16,
     color: '#000',
   },
-  // userImage: {
-  //   width: 200,
-  //   height: 200,
-  //   borderRadius: 10,
-  //   marginVertical: 5,
-  //   alignSelf: 'flex-end',
-  // },
-  // otherImage: {
-  //   width: 200,
-  //   height: 200,
-  //   borderRadius: 10,
-  //   marginVertical: 5,
-  //   alignSelf: 'flex-start',
 
   // },
   userTime: {
-    fontSize: 12,
+    fontSize: 10,
     color: 'grey',
     alignSelf: 'flex-start',
-    // bottom: 5,
   },
   otherTime: {
-    fontSize: 12,
+    fontSize: 10,
     color: 'grey',
     alignSelf: 'flex-end',
-    // bottom: 5,
   },
   userMessageContainer: {
     backgroundColor: 'lightgrey',
@@ -247,7 +237,9 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     alignSelf: 'flex-end',
     maxWidth: '80%',
-    padding: 8,
+    paddingHorizontal: 5,
+    paddingVertical:3
+    
   },
   otherMessageContainer: {
     backgroundColor: '#c8ecee',
@@ -255,7 +247,9 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     alignSelf: 'flex-start',
     maxWidth: '80%',
-    padding: 8,
+    paddingHorizontal: 5,
+    paddingVertical:3
+    
   },
 });
 
