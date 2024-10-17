@@ -7,6 +7,7 @@ import {
 import {doc, getDoc, setDoc} from 'firebase/firestore';
 import {auth, db} from '../firebaseConfig';
 
+
 // Create Authentication Context
 const AuthContext = createContext();
 
@@ -25,6 +26,7 @@ export const AuthContextProvider = ({children}) => {
     const unsubscribe = onAuthStateChanged(auth, user => {
       if (user) {
         setUser(user);
+
         console.log(`User ${user.email} has logged in.`);
         setIsAuthenticated(true);
         updateUserData(user.uid);

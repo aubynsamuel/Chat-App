@@ -40,14 +40,26 @@ const ChatScreen = () => {
   const inputRef = useRef(null);
 
   useEffect(() => {
+    const getLastMessage = async () => {
+      if (messages.length > 0) {
+        let lastMessage = messages[messages.length - 1];
+        await AsyncStorage.setItem(
+          `lastMessage_${userId}`,
+          JSON.stringify(lastMessage),
+        );
+      }
+    };
+    getLastMessage();
+  }, [messages]);
+
+  useEffect(() => {
     const roomId = getRoomId(user.userId, userId);
-  
     const fetchCachedMessages = async () => {
       try {
         const cachedMessages = await AsyncStorage.getItem(`messages_${roomId}`);
         if (cachedMessages) {
           const sortedCachedMessages = JSON.parse(cachedMessages).sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
           );
           setMessages(sortedCachedMessages); // Set cached messages
           setIsLoading(false); // Loading complete
@@ -58,18 +70,21 @@ const ChatScreen = () => {
         setIsLoading(false); // Ensure loading flag is reset
       }
     };
-  
+
     const cacheMessages = async newMessages => {
       try {
         const sortedMessages = newMessages.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
         );
-        await AsyncStorage.setItem(`messages_${roomId}`, JSON.stringify(sortedMessages));
+        await AsyncStorage.setItem(
+          `messages_${roomId}`,
+          JSON.stringify(sortedMessages),
+        );
       } catch (error) {
         console.error('Failed to cache messages', error);
       }
     };
-  
+
     const fetchLatestMessages = async () => {
       try {
         const docRef = doc(db, 'rooms', roomId);
@@ -78,40 +93,40 @@ const ChatScreen = () => {
         let unsubscribe = onSnapshot(q, snapshot => {
           const allMessages = snapshot.docs.map(doc => doc.data());
           const sortedMessages = allMessages.sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
           );
           setMessages(sortedMessages); // Set latest messages
           cacheMessages(sortedMessages); // Cache the messages
           updateScrollToEnd(); // Ensure to scroll to the bottom
         });
-  
+
         return () => unsubscribe; // Cleanup Firestore listener
       } catch (error) {
         console.error('Failed to fetch latest messages', error);
       }
     };
-  
+
     const initializeMessages = async () => {
       await fetchCachedMessages(); // Fetch cached messages first
       const unsubscribe = await fetchLatestMessages(); // Fetch Firestore messages
       return unsubscribe; // Return cleanup function
     };
-  
+
     createRoomIfItDoesNotExist(roomId);
-  
+
     const unsubscribeFromFirestore = initializeMessages(); // Initialize messages
-  
+
     const KeyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       updateScrollToEnd,
     );
-  
+
     return () => {
       unsubscribeFromFirestore; // Unsubscribe from Firestore on unmount
       KeyboardDidShowListener.remove(); // Remove keyboard listener
     };
   }, [userId, user]);
-  
+
   const updateScrollToEnd = () => {
     setTimeout(() => {
       if (flatListRef.current) {
@@ -187,7 +202,9 @@ const ChatScreen = () => {
                 </View>
               );
             } else if (item.type === 'image') {
-              return <Image source={{uri: item.content}} style={styles.image} />;
+              return (
+                <Image source={{uri: item.content}} style={styles.image} />
+              );
             }
           }}
           contentContainerStyle={styles.messages}
@@ -203,7 +220,9 @@ const ChatScreen = () => {
             placeholderTextColor={'grey'}
             numberOfLines={1}
           />
-          <TouchableOpacity onPress={handleSend} style={styles.imagePickerButton}>
+          <TouchableOpacity
+            onPress={handleSend}
+            style={styles.imagePickerButton}>
             <Icon
               name="send"
               color={'black'}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, View } from 'react-native';
 import ChatObject from './chatObject';
 
 const ChatList = ({ users, navigation}) => {
@@ -10,6 +10,7 @@ const ChatList = ({ users, navigation}) => {
       renderItem={({ item }) => <ChatObject users={item} />}
       keyExtractor={(item, index) => index.toString()}
       onPress={() => navigation.navigate('ChatScreen')}
+      ItemSeparatorComponent={<View style={{height:15}}></View>}
     />
   );
 };

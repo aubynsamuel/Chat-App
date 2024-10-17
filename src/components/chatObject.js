@@ -19,38 +19,34 @@ const ChatObject = ({users, unread}) => {
   const {user} = useAuth();
   const [lastMessage, setLastMessage] = useState(null); // Updated to null for better handling
   const [lastMessageTime, setLastMessageTime] = useState('');
+  const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
 
-  const roomId = getRoomId(user.userId, users.userId);
-  const cachedMessages = AsyncStorage.getItem(`messages_${roomId}`);
+  // helper to initialize useEffect to start listening to firestore
+  const cachedMessages = AsyncStorage.getItem(`lastMessage_${users.userId}`);
 
   useEffect(() => {
-    const roomId = getRoomId(user.userId, users.userId);
+    const roomId = getRoomId(user?.userId, users.userId);
     const docRef = doc(db, 'rooms', roomId);
     const messagesRef = collection(docRef, 'messages');
 
-    // Query to get only the last message, ordered by 'createdAt'
     const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1));
 
-    // Subscribe to Firestore and listen for real-time updates
     let unsubscribe = onSnapshot(q, snapshot => {
       if (!snapshot.empty) {
-        // Get the last message from the snapshot
         const lastMessageData = snapshot.docs[0].data();
-        setLastMessage(lastMessageData); // Update state with the last message
+        setLastMessage(lastMessageData); 
       } else {
-        setLastMessage(null); // Clear last message if there's no data
+        setLastMessage(null);
       }
     });
-    // Cleanup the listener when the component unmounts
     return unsubscribe;
   }, [cachedMessages]);
 
   useEffect(() => {
     if (lastMessage && lastMessage.createdAt) {
-      // Format the last message time only if createdAt is available
       setLastMessageTime(formatTimeWithoutSeconds(lastMessage.createdAt));
     } else {
-      setLastMessageTime(''); // Clear the time if no message or createdAt
+      setLastMessageTime(''); 
     }
   }, [lastMessage]);
 
@@ -69,14 +65,23 @@ const ChatObject = ({users, unread}) => {
         {/* Avatar */}
         <View>
           <TouchableOpacity>
-            <Image
-              style={[styles.avatar]}
-              source={
-                users?.profileUrl
-                  ? {uri: users.profileUrl}
-                  : require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')
-              }
-            />
+            {imageFailedToLoad ? (
+              <Image
+                style={[styles.avatar]}
+                source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
+                transition={500}
+              />
+            ) : (
+              <Image
+                style={[styles.avatar]}
+                source={{uri: users.profileUrl}}
+                transition={500}
+                onError={error => {
+                  console.error('Error loading image:', error);
+                  setImageFailedToLoad(true);
+                }}
+              />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -115,7 +120,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     borderRadius: 25,
-    borderWidth: 2,
+    // borderWidth: 2,
     borderColor: 'gray',
     overflow: 'hidden',
     zIndex: 1,

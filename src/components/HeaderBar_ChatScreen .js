@@ -1,4 +1,4 @@
-import {React} from 'react';
+import {React, useState} from 'react';
 import {
   Text,
   TouchableOpacity,
@@ -18,6 +18,10 @@ import {
 const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
   const navigation = useNavigation();
   const {user, logout} = useAuth();
+  const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
+
+
+
   const handleLogout = () => {
     logout();
     navigation.navigate('Login');
@@ -40,16 +44,23 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
       <View>
         <Menu>
           <MenuTrigger>
-            <Image
-              source={
-                user?.profileUrl
-                  ? {uri: profileUrl}
-                  : require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')
-              }
-              style={{width: 45, height: 45, borderRadius: 30}}
-              transition={500}
-              onError={error => console.error('Error loading image:', error)}
-            />
+          {imageFailedToLoad ? (
+              <Image
+                source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
+                style={{width: 45, height: 45, borderRadius: 30}}
+                transition={500}
+              />
+            ) : (
+              <Image
+                source={{uri: profileUrl}}
+                style={{width: 45, height: 45, borderRadius: 30}}
+                transition={500}
+                onError={error => {
+                  console.error('Error loading image:', error);
+                  setImageFailedToLoad(true);
+                }}
+              />
+            )}
           </MenuTrigger>
           <MenuOptions
             style={styles.container}
