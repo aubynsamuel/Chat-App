@@ -4,13 +4,24 @@ import {useAuth} from '../AuthContext';
 import {useEffect, useState} from 'react';
 import {formatTimeWithoutSeconds, getRoomId} from '../../commons';
 import {db} from '../../firebaseConfig';
-import {collection, query, orderBy, onSnapshot, doc, limit} from 'firebase/firestore';
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  limit,
+} from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatObject = ({users, unread}) => {
   const navigation = useNavigation();
   const {user} = useAuth();
-  const [lastMessage, setLastMessage] = useState(null);  // Updated to null for better handling
+  const [lastMessage, setLastMessage] = useState(null); // Updated to null for better handling
   const [lastMessageTime, setLastMessageTime] = useState('');
+
+  const roomId = getRoomId(user.userId, users.userId);
+  const cachedMessages = AsyncStorage.getItem(`messages_${roomId}`);
 
   useEffect(() => {
     const roomId = getRoomId(user.userId, users.userId);
@@ -30,10 +41,9 @@ const ChatObject = ({users, unread}) => {
         setLastMessage(null); // Clear last message if there's no data
       }
     });
-
     // Cleanup the listener when the component unmounts
     return unsubscribe;
-  }, []);
+  }, [cachedMessages]);
 
   useEffect(() => {
     if (lastMessage && lastMessage.createdAt) {

@@ -6,6 +6,10 @@ export const getRoomId = (userId1, userId2) => {
 
 export const getCurrentTime = () => {
   const now = new Date();
+  // Add day, month and year
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  const day = now.getDate().toString().padStart(2, '0');
 
   let hours = now.getHours().toString().padStart(2, '0');
   const minutes = now.getMinutes().toString().padStart(2, '0');
@@ -16,15 +20,16 @@ export const getCurrentTime = () => {
   hours %= 12;
   hours = hours || 12;
 
-  return `${hours}:${minutes}:${seconds} ${ampm}`;
+  const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
+  return `${year}-${month}-${day} ${formattedTime}`;
 };
 
 export function formatTimeWithoutSeconds(time) {
   // Split the time into its components (hour, minute, second, period)
-  let [timePart, period] = time.split(' '); // e.g. '4:45:18' and 'am'
+  let [date, timePart, period] = time.split(' '); // e.g. '4:45:18' and 'am'
   let [hour, minute] = timePart.split(':'); // Extract hour and minute, ignore seconds
 
-  // Return the formatted time without seconds
+  // Return the formatted time without seconds  
   return `${hour}:${minute} ${period}`;
 }
 
