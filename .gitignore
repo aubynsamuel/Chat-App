@@ -78,3 +78,6 @@ yarn-error.log
 firebaseConfig.js
 BottomSheet.js
 allPackagesList.json
+
+gitignore
+prettierrc.js
