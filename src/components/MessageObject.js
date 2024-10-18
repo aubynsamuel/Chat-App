@@ -18,6 +18,7 @@ const MessageObject = ({item}) => {
       <Text style={isUserMessage ? styles.userTime : styles.otherTime}>
         {formatTimeWithoutSeconds(item.createdAt)}
       </Text>
+      {item.read && isUserMessage && <Text style={{fontSize: 10, color: 'grey', alignSelf: 'flex-end',}}>Read</Text>}
     </View>
   );
 };

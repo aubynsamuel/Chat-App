@@ -11,18 +11,36 @@ import {
   onSnapshot,
   doc,
   limit,
+  where,
 } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ChatObject = ({users, unread}) => {
+const ChatObject = ({users}) => {
   const navigation = useNavigation();
   const {user} = useAuth();
   const [lastMessage, setLastMessage] = useState(null); // Updated to null for better handling
   const [lastMessageTime, setLastMessageTime] = useState('');
   const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
 
   // helper to initialize useEffect to start listening to firestore
   const cachedMessages = AsyncStorage.getItem(`lastMessage_${users.userId}`);
+
+  useEffect(() => {
+    const roomId = getRoomId(user?.userId, users.userId);
+    const docRef = doc(db, 'rooms', roomId);
+    const messagesRef = collection(docRef, 'messages');
+  
+    const q = query(messagesRef, where('senderId', '==', users.userId), where('read', '==', false));
+    
+    const unsubscribe = onSnapshot(q, snapshot => {
+      setUnreadCount(snapshot.docs.length);
+      console.log(unreadCount)
+    });
+  
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const roomId = getRoomId(user?.userId, users.userId);
@@ -35,22 +53,25 @@ const ChatObject = ({users, unread}) => {
       if (!snapshot.empty) {
         const lastMessageData = snapshot.docs[0].data();
         setLastMessage(lastMessageData); 
+        console.log(lastMessage)
       } else {
         setLastMessage(null);
       }
     });
     return unsubscribe;
-  }, [cachedMessages]);
+  }, []);
 
   useEffect(() => {
     if (lastMessage && lastMessage.createdAt) {
       setLastMessageTime(formatTimeWithoutSeconds(lastMessage.createdAt));
+      console.log(lastMessageTime)
     } else {
       setLastMessageTime(''); 
     }
   }, []);
 
   const handlePress = () => {
+    setUnreadCount(0); // Reset unread count when navigating to the chat screen
     navigation.navigate('ChatScreen', {
       userId: users.userId,
       username: users.username,
@@ -104,7 +125,7 @@ const ChatObject = ({users, unread}) => {
         {/* Time of last message */}
         <Text style={styles.time}>{lastMessageTime}</Text>
         {/* Number of unread messages */}
-        <Text style={styles.unread}>{unread}</Text>
+        <Text style={styles.unread}>{unreadCount > 0 ? unreadCount : ''}</Text>
       </View>
     </TouchableOpacity>
   );

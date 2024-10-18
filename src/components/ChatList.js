@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlatList, View } from 'react-native';
-import ChatObject from './ChatObject';
+import ChatObject from './chatObject';
 
 const ChatList = ({ users, navigation}) => {
 

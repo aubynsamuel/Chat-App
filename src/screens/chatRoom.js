@@ -18,7 +18,10 @@ import {
   orderBy,
   onSnapshot,
   doc,
-  setDoc,
+  setDoc, where,
+  getDocs,
+  updateDoc,
+  
 } from 'firebase/firestore';
 import {useAuth} from '../AuthContext';
 import TopHeaderBar from '../components/HeaderBar_ChatScreen ';
@@ -37,6 +40,25 @@ const ChatScreen = () => {
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
 
+  const updateMessagesReadStatus = async () => {
+    try {
+      const roomId = getRoomId(user.userId, userId);
+      const messagesRef = collection(db, 'rooms', roomId, 'messages');
+      const q = query(
+        messagesRef,
+        where('senderId', '!=', user?.userId),
+        where('read', '==', false),
+      );
+      const snapshot = await getDocs(q);
+      snapshot.forEach(async doc => {
+        await updateDoc(doc.ref, {read: true});
+      });
+    } catch (error) {
+      console.error('Failed to update message read status', error);
+    }
+  };
+  updateMessagesReadStatus(); 
+
   useEffect(() => {
     const getLastMessage = async () => {
       if (messages.length > 0) {
@@ -52,6 +74,7 @@ const ChatScreen = () => {
 
   useEffect(() => {
     const roomId = getRoomId(user.userId, userId);
+
     const fetchCachedMessages = async () => {
       try {
         const cachedMessages = await AsyncStorage.getItem(`messages_${roomId}`);
@@ -59,7 +82,7 @@ const ChatScreen = () => {
           const sortedCachedMessages = JSON.parse(cachedMessages).sort(
             (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
           );
-          setMessages(sortedCachedMessages); 
+          setMessages(sortedCachedMessages);
         }
       } catch (error) {
         console.error('Failed to fetch cached messages', error);
@@ -90,9 +113,9 @@ const ChatScreen = () => {
           const sortedMessages = allMessages.sort(
             (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
           );
-          setMessages(sortedMessages); 
+          setMessages(sortedMessages);
           cacheMessages(sortedMessages);
-          updateScrollToEnd(); 
+          updateScrollToEnd();
         });
 
         return () => unsubscribe;
@@ -102,14 +125,15 @@ const ChatScreen = () => {
     };
 
     const initializeMessages = async () => {
-      await fetchCachedMessages(); 
-      const unsubscribe = await fetchLatestMessages(); 
-      return unsubscribe; 
+      await fetchCachedMessages();
+      const unsubscribe = await fetchLatestMessages();
+      // await updateMessagesReadStatus(); // Then update read status
+      return unsubscribe;
     };
 
     createRoomIfItDoesNotExist(roomId);
 
-    const unsubscribeFromFirestore = initializeMessages(); 
+    const unsubscribeFromFirestore = initializeMessages();
 
     const KeyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -117,7 +141,7 @@ const ChatScreen = () => {
     );
 
     return () => {
-      unsubscribeFromFirestore; 
+      unsubscribeFromFirestore;
       KeyboardDidShowListener.remove();
     };
   }, [userId, user]);
@@ -155,6 +179,7 @@ const ChatScreen = () => {
         content: message,
         senderId: user?.userId,
         senderName: user?.username,
+        read: false,
         createdAt: getCurrentTime(),
       });
     } catch (error) {
@@ -190,9 +215,7 @@ const ChatScreen = () => {
             placeholderTextColor={'grey'}
             numberOfLines={1}
           />
-          <TouchableOpacity
-            onPress={handleSend}
-            style={styles.sendButton}>
+          <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
             <Icon
               name="send"
               color={'black'}
