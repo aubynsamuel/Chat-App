@@ -6,37 +6,36 @@ export const getRoomId = (userId1, userId2) => {
 };
 
 
-// Function to get the current Firestore time in the desired format
 export const getCurrentTime = () => {
-  // Firestore's Timestamp.now() returns a Timestamp object with the current time
-  const now = Timestamp.now().toDate(); // Convert Firestore Timestamp to JavaScript Date
-
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, '0');
-  const day = now.getDate().toString().padStart(2, '0');
-
-  let hours = now.getHours().toString().padStart(2, '0');
-  const minutes = now.getMinutes().toString().padStart(2, '0');
-  const seconds = now.getSeconds().toString().padStart(2, '0');
-
-  // Format the time to the 12-hour time format
-  const ampm = hours >= 12 ? 'pm' : 'am';
-  hours %= 12;
-  hours = hours || 12;
-
-  const formattedTime = `${hours}:${minutes}:${seconds} ${ampm}`;
-  return `${year}-${month}-${day} ${formattedTime}`;
+  const now = Timestamp.now(); 
+  return now;
 };
 
 
-export function formatTimeWithoutSeconds(time) {
-  // Split the time into its components (hour, minute, second, period)
-  let [date, timePart, period] = time.split(' '); // e.g. '4:45:18' and 'am'
-  let [hour, minute] = timePart.split(':'); // Extract hour and minute, ignore seconds
+// Function to format Firestore Timestamp, removing seconds and date
+export const formatTimeWithoutSeconds = (firestoreTimestamp) => {
+  // Extract seconds from Firestore Timestamp
+  const seconds = firestoreTimestamp.seconds;
+  
+  // Convert seconds to milliseconds and create a Date object
+  const date = new Date(seconds * 1000);
+  
+  // Get hours and minutes
+  let hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes();
 
-  // Return the formatted time without seconds  
-  return `${hour}:${minute} ${period}`;
-}
+  // Determine AM or PM period
+  const period = hours >= 12 ? 'pm' : 'am';
+
+  // Convert 24-hour time to 12-hour format
+  hours = hours % 12 || 12;
+
+  // Format hours and minutes
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  const formattedTime = `${hours}:${formattedMinutes} ${period}`;
+
+  return formattedTime;
+};
 
 // persist users from home screen
 // persist user from authContext

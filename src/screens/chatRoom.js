@@ -3,9 +3,7 @@ import {
   View,
   StyleSheet,
   TextInput,
-  Text,
   FlatList,
-  Image,
   TouchableOpacity,
   StatusBar,
   Alert,
@@ -26,15 +24,15 @@ import {useAuth} from '../AuthContext';
 import TopHeaderBar from '../components/HeaderBar_ChatScreen ';
 import {getRoomId} from '../../commons';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {getCurrentTime, formatTimeWithoutSeconds} from '../../commons';
+import {getCurrentTime} from '../../commons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MessageObject from '../components/MessageObject';
 
 const ChatScreen = () => {
   const route = useRoute();
   const {userId, username, profileUrl} = route.params;
   const {user} = useAuth();
   const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const textRef = useRef('');
   const flatListRef = useRef(null);
   const inputRef = useRef(null);
@@ -61,13 +59,10 @@ const ChatScreen = () => {
           const sortedCachedMessages = JSON.parse(cachedMessages).sort(
             (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
           );
-          setMessages(sortedCachedMessages); // Set cached messages
-          setIsLoading(false); // Loading complete
+          setMessages(sortedCachedMessages); 
         }
       } catch (error) {
         console.error('Failed to fetch cached messages', error);
-      } finally {
-        setIsLoading(false); // Ensure loading flag is reset
       }
     };
 
@@ -95,26 +90,26 @@ const ChatScreen = () => {
           const sortedMessages = allMessages.sort(
             (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
           );
-          setMessages(sortedMessages); // Set latest messages
-          cacheMessages(sortedMessages); // Cache the messages
-          updateScrollToEnd(); // Ensure to scroll to the bottom
+          setMessages(sortedMessages); 
+          cacheMessages(sortedMessages);
+          updateScrollToEnd(); 
         });
 
-        return () => unsubscribe; // Cleanup Firestore listener
+        return () => unsubscribe;
       } catch (error) {
         console.error('Failed to fetch latest messages', error);
       }
     };
 
     const initializeMessages = async () => {
-      await fetchCachedMessages(); // Fetch cached messages first
-      const unsubscribe = await fetchLatestMessages(); // Fetch Firestore messages
-      return unsubscribe; // Return cleanup function
+      await fetchCachedMessages(); 
+      const unsubscribe = await fetchLatestMessages(); 
+      return unsubscribe; 
     };
 
     createRoomIfItDoesNotExist(roomId);
 
-    const unsubscribeFromFirestore = initializeMessages(); // Initialize messages
+    const unsubscribeFromFirestore = initializeMessages(); 
 
     const KeyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -122,8 +117,8 @@ const ChatScreen = () => {
     );
 
     return () => {
-      unsubscribeFromFirestore; // Unsubscribe from Firestore on unmount
-      KeyboardDidShowListener.remove(); // Remove keyboard listener
+      unsubscribeFromFirestore; 
+      KeyboardDidShowListener.remove();
     };
   }, [userId, user]);
 
@@ -181,32 +176,7 @@ const ChatScreen = () => {
           ref={flatListRef}
           data={messages}
           keyExtractor={(_, index) => index.toString()}
-          renderItem={({item}) => {
-            const isUserMessage = item.senderId === user?.userId;
-            const messageStyle = isUserMessage
-              ? styles.userMessage
-              : styles.otherMessage;
-            if (item.type === 'text') {
-              return (
-                <View
-                  style={
-                    isUserMessage
-                      ? styles.userMessageContainer
-                      : styles.otherMessageContainer
-                  }>
-                  <Text style={messageStyle}>{item.content}</Text>
-                  <Text
-                    style={isUserMessage ? styles.userTime : styles.otherTime}>
-                    {formatTimeWithoutSeconds(item.createdAt)}
-                  </Text>
-                </View>
-              );
-            } else if (item.type === 'image') {
-              return (
-                <Image source={{uri: item.content}} style={styles.image} />
-              );
-            }
-          }}
+          renderItem={({item}) => <MessageObject item={item}/>}
           contentContainerStyle={styles.messages}
           showsVerticalScrollIndicator={false}
           initialNumToRender={messages.length}
@@ -222,7 +192,7 @@ const ChatScreen = () => {
           />
           <TouchableOpacity
             onPress={handleSend}
-            style={styles.imagePickerButton}>
+            style={styles.sendButton}>
             <Icon
               name="send"
               color={'black'}
@@ -262,55 +232,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     flex: 1,
   },
-  imagePickerButton: {
+  sendButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: 'lightblue',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  userMessageContainer: {
-    backgroundColor: 'lightgrey',
-    borderRadius: 7,
-    marginVertical: 5,
-    alignSelf: 'flex-end',
-    maxWidth: '80%',
-    paddingHorizontal: 5,
-    paddingVertical: 3,
-  },
-  otherMessageContainer: {
-    backgroundColor: '#c8ecee',
-    borderRadius: 7,
-    marginVertical: 5,
-    alignSelf: 'flex-start',
-    maxWidth: '80%',
-    paddingHorizontal: 5,
-    paddingVertical: 3,
-  },
-  userMessage: {
-    fontSize: 16,
-    color: '#000',
-  },
-  otherMessage: {
-    fontSize: 16,
-    color: '#000',
-  },
-  userTime: {
-    fontSize: 10,
-    color: 'grey',
-    alignSelf: 'flex-start',
-  },
-  otherTime: {
-    fontSize: 10,
-    color: 'grey',
-    alignSelf: 'flex-end',
-  },
-  image: {
-    width: 200,
-    height: 200,
-    borderRadius: 10,
-    marginVertical: 10,
   },
 });
 
