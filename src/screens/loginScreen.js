@@ -5,9 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  StatusBar
+  StatusBar,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {useAuth} from '../AuthContext';
 import {useNavigation} from '@react-navigation/native';
 import {TextInput} from 'react-native-gesture-handler';
@@ -16,35 +18,53 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import LottieView from 'lottie-react-native';
 
 const LoginScreen = () => {
   const {login} = useAuth();
   const email = useRef('');
   const password = useRef('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLoginPressed = async () => {
+    setIsLoading(true);
     if (!email.current || !password.current) {
       Alert.alert('Login', 'Please enter your email and password');
+      setIsLoading(false);
       return;
     }
     const response = await login(email.current, password.current);
     if (!response.success) {
       Alert.alert('Login', response.msg);
-      console.log(response)
+      console.log(response);
+      setIsLoading(false);
       return;
     }
     navigation.navigate('Home');
+    setIsLoading(false);
   };
-
 
   const navigation = useNavigation();
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1}}>
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#f3f3f3"
-        // animated={true}
+        animated={true}
       />
+      <LottieView
+        source={require('../../assets/Lottie_Files/Online Chat.json')}
+        autoPlay
+        loop={true}
+        style={{
+          flex: 0.8,
+          width: 90 * 6.5,
+          height: 90 * 6.5,
+          alignSelf: 'center',
+        }}
+      />
+      {/* background image */}
+
       <Text style={styles.loginText}>Login</Text>
 
       {/* Input Fields */}
@@ -77,7 +97,11 @@ const LoginScreen = () => {
           onPress={() => {
             handleLoginPressed();
           }}>
-          <Text style={styles.loginButtonText}>Login</Text>
+          {isLoading ? (
+            <ActivityIndicator size="large" color="white" />
+          ) : (
+            <Text style={styles.loginButtonText}>Login</Text>
+          )}
         </TouchableOpacity>
         <View style={{flexDirection: 'row', alignSelf: 'center'}}>
           <Text style={styles.registerText}>Don't have an account? </Text>
@@ -89,8 +113,6 @@ const LoginScreen = () => {
     </SafeAreaView>
   );
 };
-
-// create a style sheet
 
 const styles = StyleSheet.create({
   container: {

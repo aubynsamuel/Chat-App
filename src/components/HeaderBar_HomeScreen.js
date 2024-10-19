@@ -71,17 +71,21 @@ const TopHeaderBar = ({title, backButtonShown}) => {
                 marginLeft: -30,
               },
             }}>
+              {/* Profile */}
             <MenuOption
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
-              onSelect={() => {}}>
+              onSelect={() => {
+                navigation.navigate('UserProfile');
+              }}>
               <Text style={styles.menuText}>Profile</Text>
               <Icon name="person" color="black" size={25} />
             </MenuOption>
 
+            {/* Logout */}
             <MenuOption
               style={{
                 flexDirection: 'row',
@@ -112,13 +116,8 @@ const styles = StyleSheet.create({
     elevation: 10,
     height: 65,
     justifyContent: 'space-between',
-    // alignItems:"flex-end",
     borderBottomRightRadius: 30,
     borderBottomLeftRadius: 30,
-
-    // borderBottomWidth: 1.5,
-    // borderBottomColor: '#0003',
-    // paddingTop: Platform.OS === 'android' ? 5 : 0,
   },
   headerTitle: {
     fontSize: 25,
@@ -127,7 +126,6 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   headerBarIcon: {
-    // color: isDarkMode ? colors.bgLightColor : colors.accent,
     marginHorizontal: 10,
   },
   container: {

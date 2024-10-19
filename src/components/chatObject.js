@@ -13,19 +13,15 @@ import {
   limit,
   where,
 } from 'firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatObject = ({users}) => {
   const navigation = useNavigation();
   const {user} = useAuth();
-  const [lastMessage, setLastMessage] = useState(null); // Updated to null for better handling
+  const [lastMessage, setLastMessage] = useState(null); 
   const [lastMessageTime, setLastMessageTime] = useState('');
   const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-
-  // helper to initialize useEffect to start listening to firestore
-  const cachedMessages = AsyncStorage.getItem(`lastMessage_${users.userId}`);
-
+  
   useEffect(() => {
     const roomId = getRoomId(user?.userId, users.userId);
     const docRef = doc(db, 'rooms', roomId);
@@ -74,7 +70,6 @@ const ChatObject = ({users}) => {
   }, [lastMessage]);
 
   const handlePress = () => {
-    setUnreadCount(0); // Reset unread count when navigating to the chat screen
     navigation.navigate('ChatScreen', {
       userId: users.userId,
       username: users.username,
@@ -144,7 +139,6 @@ const styles = StyleSheet.create({
     height: 50,
     width: 50,
     borderRadius: 25,
-    // borderWidth: 2,
     borderColor: 'gray',
     overflow: 'hidden',
     zIndex: 1,
@@ -171,7 +165,6 @@ const styles = StyleSheet.create({
     padding: 1,
     fontSize: 15,
     alignSelf: 'flex-end',
-    // backgroundColor:"red"
   },
 });
 

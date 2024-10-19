@@ -18,10 +18,10 @@ import {
   orderBy,
   onSnapshot,
   doc,
-  setDoc, where,
+  setDoc,
+  where,
   getDocs,
   updateDoc,
-  
 } from 'firebase/firestore';
 import {useAuth} from '../AuthContext';
 import TopHeaderBar from '../components/HeaderBar_ChatScreen ';
@@ -30,15 +30,16 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {getCurrentTime} from '../../commons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MessageObject from '../components/MessageObject';
+import LottieView from 'lottie-react-native';
 
 const ChatScreen = () => {
   const route = useRoute();
   const {userId, username, profileUrl} = route.params;
   const {user} = useAuth();
   const [messages, setMessages] = useState([]);
-  const textRef = useRef('');
   const flatListRef = useRef(null);
-  const inputRef = useRef(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const [inputText, setInputText] = useState('');
 
   const updateMessagesReadStatus = async () => {
     try {
@@ -57,20 +58,7 @@ const ChatScreen = () => {
       console.error('Failed to update message read status', error);
     }
   };
-  updateMessagesReadStatus(); 
-
-  useEffect(() => {
-    const getLastMessage = async () => {
-      if (messages.length > 0) {
-        let lastMessage = messages[messages.length - 1];
-        await AsyncStorage.setItem(
-          `lastMessage_${userId}`,
-          JSON.stringify(lastMessage),
-        );
-      }
-    };
-    getLastMessage();
-  }, [messages]);
+  updateMessagesReadStatus();
 
   useEffect(() => {
     const roomId = getRoomId(user.userId, userId);
@@ -127,7 +115,6 @@ const ChatScreen = () => {
     const initializeMessages = async () => {
       await fetchCachedMessages();
       const unsubscribe = await fetchLatestMessages();
-      // await updateMessagesReadStatus(); // Then update read status
       return unsubscribe;
     };
 
@@ -166,9 +153,9 @@ const ChatScreen = () => {
   };
 
   const handleSend = async () => {
-    const message = textRef.current.trim();
-    if (inputRef.current) inputRef.current.clear();
-    textRef.current = '';
+    const message = inputText.trim();
+    setInputText('');
+    setIsTyping(false);
     if (!message) return;
     try {
       const roomId = getRoomId(user.userId, userId);
@@ -187,6 +174,14 @@ const ChatScreen = () => {
     }
   };
 
+  useEffect(() => {
+    let typingTimeout;
+    if (isTyping) {
+      typingTimeout = setTimeout(() => setIsTyping(false), 1000);
+    }
+    return () => clearTimeout(typingTimeout);
+  }, [isTyping]);
+
   return (
     <View style={{flex: 1}}>
       <StatusBar barStyle="dark-content" backgroundColor="lightblue" />
@@ -195,21 +190,38 @@ const ChatScreen = () => {
         backButtonShown={true}
         profileUrl={profileUrl}
       />
-
       <View style={styles.container}>
         <FlatList
           ref={flatListRef}
           data={messages}
           keyExtractor={(_, index) => index.toString()}
-          renderItem={({item}) => <MessageObject item={item}/>}
+          renderItem={({item}) => <MessageObject item={item} />}
           contentContainerStyle={styles.messages}
           showsVerticalScrollIndicator={false}
           initialNumToRender={messages.length}
         />
         <View style={styles.inputContainer}>
+          {isTyping && (
+            <LottieView
+              source={require('../../assets/Lottie_Files/Typing Dots.json')}
+              autoPlay
+              loop
+              style={{
+                width: 50,
+                height: 50,
+                alignSelf: 'flex-start',
+                flex: 0.1,
+                position: 'absolute',
+                top: -35,
+              }}
+            />
+          )}
           <TextInput
-            ref={inputRef}
-            onChangeText={value => (textRef.current = value)}
+            value={inputText}
+            onChangeText={text => {
+              setIsTyping(true);
+              setInputText(text);
+            }}
             style={styles.textInputField}
             placeholder="Type a message..."
             placeholderTextColor={'grey'}

@@ -5,9 +5,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
 } from 'react-native';
-import React, {useRef} from 'react';
+import React, {useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {TextInput} from 'react-native-gesture-handler';
 import {
@@ -16,6 +17,7 @@ import {
 } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useAuth} from '../AuthContext';
+import LottieView from 'lottie-react-native';
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -24,17 +26,20 @@ const SignUpScreen = () => {
   const password = useRef('');
   const pictureUrl = useRef('');
   const {signUp} = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUpPressed = async () => {
+    setIsLoading(true);
     if (!email.current || !username.current || !password.current) {
       Alert.alert('Sign Up', 'Please enter your email, username and password');
+      setIsLoading(false);
       return;
     }
     let response = await signUp(
       email.current,
       username.current,
       password.current,
-      pictureUrl.current
+      pictureUrl.current,
     );
     console.log(response);
     if (
@@ -42,18 +47,28 @@ const SignUpScreen = () => {
       !response.msg.includes('Missing or insufficient permissions')
     ) {
       Alert.alert('Sign Up', response.msg);
+      setIsLoading(false);
       return;
     }
     navigation.navigate('Home');
+    setIsLoading(false);
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1}}>
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#f3f3f3"
-        // animated={true}
+        animated={true}
       />
+
+      <LottieView
+        source={require('../../assets/Lottie_Files/Sign Up.json')}
+        autoPlay
+        loop={true}
+        style={{flex: 0.8, left: 10}}
+      />
+
       <Text style={styles.loginText}>Sign Up</Text>
 
       {/* Input Fields */}
@@ -96,13 +111,17 @@ const SignUpScreen = () => {
             onChangeText={value => (pictureUrl.current = value)}
           />
         </View>
-        
+
         <TouchableOpacity
           style={styles.signUp}
           onPress={() => {
             handleSignUpPressed();
           }}>
-          <Text style={styles.signUpText}>Sign Up</Text>
+          {isLoading ? (
+            <ActivityIndicator size="large" color="white" />
+          ) : (
+            <Text style={styles.signUpText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
         <View style={{flexDirection: 'row', alignSelf: 'center'}}>
           <Text style={styles.registerText}>Already have an account? </Text>
@@ -115,14 +134,11 @@ const SignUpScreen = () => {
   );
 };
 
-// create a style sheet
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#F5FCFF',
   },
   loginText: {
     fontSize: 24,

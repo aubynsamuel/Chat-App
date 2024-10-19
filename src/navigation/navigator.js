@@ -7,6 +7,9 @@ import SignUpScreen from '../screens/signUpScreen';
 import LoginScreen from '../screens/loginScreen';
 import {useAuth} from '../AuthContext';
 import {ActivityIndicator, View} from 'react-native';
+import userProfileScreen from '../screens/userProfileScreen';
+import SearchUsersScreen from '../screens/searchUsersScreen';
+
 
 const Stack = createStackNavigator();
 
@@ -34,8 +37,11 @@ const Navigator = () => {
       <Stack.Screen name="Sign Up" component={SignUpScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Search_Users" component={SearchUsersScreen } />
+      <Stack.Screen name="UserProfile" component={userProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
+
     </Stack.Navigator>
   );
 };
