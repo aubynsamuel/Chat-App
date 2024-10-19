@@ -25,26 +25,48 @@ const SignUpScreen = () => {
   const pictureUrl = useRef('');
   const {signUp} = useAuth();
 
+  // Email regex to validate the email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Password regex created to ensure password strength (at least 8 characters, including a number and a special character)
+  const passwordStrengthRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+
   const handleSignUpPressed = async () => {
     if (!email.current || !username.current || !password.current) {
-      Alert.alert('Sign Up', 'Please enter your email, username and password');
+      Alert.alert('Sign Up', 'Please enter your email, username, and password.');
       return;
     }
-    let response = await signUp(
-      email.current,
-      username.current,
-      password.current,
-      pictureUrl.current
-    );
-    console.log(response);
-    if (
-      !response.success &&
-      !response.msg.includes('Missing or insufficient permissions')
-    ) {
-      Alert.alert('Sign Up', response.msg);
+
+    // Email format validation
+    if (!emailRegex.test(email.current)) {
+      Alert.alert('Sign Up', 'Please enter a valid email address.');
       return;
     }
-    navigation.navigate('Home');
+
+    // Password strength validation
+    if (!passwordStrengthRegex.test(password.current)) {
+      Alert.alert('Sign Up', 'Password must be at least 8 characters long and include a number and a special character.');
+      return;
+    }
+
+    try {
+      let response = await signUp(
+        email.current,
+        username.current,
+        password.current,
+        pictureUrl.current
+      );
+      console.log(response);
+
+      if (!response.success && !response.msg.includes('Missing or insufficient permissions')) {
+        Alert.alert('Sign Up Failed', response.msg || 'An unexpected error occurred.');
+        return;
+      }
+
+      navigation.navigate('Home');
+    } catch (error) {
+      Alert.alert('Sign Up Error', 'An error occurred during sign up. Please try again later.');
+    }
   };
 
   return (
@@ -52,7 +74,6 @@ const SignUpScreen = () => {
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#f3f3f3"
-        // animated={true}
       />
       <Text style={styles.loginText}>Sign Up</Text>
 
@@ -70,7 +91,7 @@ const SignUpScreen = () => {
         <View style={styles.InputField}>
           <Icon name="person" color="black" size={25} />
           <TextInput
-            placeholder="username"
+            placeholder="Username"
             style={styles.inputText}
             placeholderTextColor={'grey'}
             onChangeText={value => (username.current = value)}
@@ -96,14 +117,14 @@ const SignUpScreen = () => {
             onChangeText={value => (pictureUrl.current = value)}
           />
         </View>
-        
+
         <TouchableOpacity
           style={styles.signUp}
-          onPress={() => {
-            handleSignUpPressed();
-          }}>
+          onPress={handleSignUpPressed}
+        >
           <Text style={styles.signUpText}>Sign Up</Text>
         </TouchableOpacity>
+        
         <View style={{flexDirection: 'row', alignSelf: 'center'}}>
           <Text style={styles.registerText}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -122,7 +143,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: '#F5FCFF',
   },
   loginText: {
     fontSize: 24,
@@ -165,11 +185,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  forgotPasswordText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    alignSelf: 'flex-end',
   },
   registerText: {
     marginTop: 5,
