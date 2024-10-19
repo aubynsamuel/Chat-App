@@ -23,7 +23,6 @@ const ChatObject = ({users}) => {
   const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
-
   // helper to initialize useEffect to start listening to firestore
   const cachedMessages = AsyncStorage.getItem(`lastMessage_${users.userId}`);
 
@@ -31,16 +30,20 @@ const ChatObject = ({users}) => {
     const roomId = getRoomId(user?.userId, users.userId);
     const docRef = doc(db, 'rooms', roomId);
     const messagesRef = collection(docRef, 'messages');
-  
-    const q = query(messagesRef, where('senderId', '==', users.userId), where('read', '==', false));
-    
+
+    const q = query(
+      messagesRef,
+      where('senderId', '==', users.userId),
+      where('read', '==', false),
+    );
+
     const unsubscribe = onSnapshot(q, snapshot => {
       setUnreadCount(snapshot.docs.length);
-      console.log(unreadCount)
+      console.log(unreadCount);
     });
-  
+
     return unsubscribe;
-  }, []);
+  }, [user?.userId, users.userId]);
 
   useEffect(() => {
     const roomId = getRoomId(user?.userId, users.userId);
@@ -52,23 +55,23 @@ const ChatObject = ({users}) => {
     let unsubscribe = onSnapshot(q, snapshot => {
       if (!snapshot.empty) {
         const lastMessageData = snapshot.docs[0].data();
-        setLastMessage(lastMessageData); 
-        console.log(lastMessage)
+        setLastMessage(lastMessageData);
+        console.log(lastMessage);
       } else {
         setLastMessage(null);
       }
     });
     return unsubscribe;
-  }, []);
+  }, [user?.userId, users.userId]);
 
   useEffect(() => {
     if (lastMessage && lastMessage.createdAt) {
       setLastMessageTime(formatTimeWithoutSeconds(lastMessage.createdAt));
-      console.log(lastMessageTime)
+      console.log(lastMessageTime);
     } else {
-      setLastMessageTime(''); 
+      setLastMessageTime('');
     }
-  }, []);
+  }, [lastMessage]);
 
   const handlePress = () => {
     setUnreadCount(0); // Reset unread count when navigating to the chat screen
@@ -163,11 +166,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
   },
   unread: {
-    color: 'grey',
+    color: 'red',
     borderRadius: 5,
     padding: 1,
-    fontSize: 14,
+    fontSize: 15,
     alignSelf: 'flex-end',
+    // backgroundColor:"red"
   },
 });
 
