@@ -13,6 +13,7 @@ import {
   limit,
   where,
 } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatObject = ({users}) => {
   const navigation = useNavigation();
@@ -42,23 +43,33 @@ const ChatObject = ({users}) => {
   }, [user?.userId, users.userId]);
 
   useEffect(() => {
+    // Async function to get cached last message
+    const fetchCachedMessage = async () => {
+      const cachedLastMessage = await AsyncStorage.getItem(`lastMessage${users.userId}`);
+      if (cachedLastMessage) {
+        setLastMessage(JSON.parse(cachedLastMessage));
+      }
+    };
+  
     const roomId = getRoomId(user?.userId, users.userId);
     const docRef = doc(db, 'rooms', roomId);
     const messagesRef = collection(docRef, 'messages');
-
+    
     const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1));
-
-    let unsubscribe = onSnapshot(q, snapshot => {
+    
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
       if (!snapshot.empty) {
         const lastMessageData = snapshot.docs[0].data();
         setLastMessage(lastMessageData);
-        console.log(lastMessage);
+        await AsyncStorage.setItem(`lastMessage${users.userId}`, JSON.stringify(lastMessageData)); // Store the latest message in AsyncStorage
       } else {
-        setLastMessage(null);
+        fetchCachedMessage();
       }
     });
-    return unsubscribe;
+    return () => unsubscribe(); // Cleanup on unmount or dependencies change
   }, [user?.userId, users.userId]);
+  
+  
 
   useEffect(() => {
     if (lastMessage && lastMessage.createdAt) {
@@ -84,7 +95,7 @@ const ChatObject = ({users}) => {
         {/* Avatar */}
         <View>
           <TouchableOpacity>
-            {imageFailedToLoad ? (
+            {(imageFailedToLoad || users?.profileUrl == '') ? (
               <Image
                 style={[styles.avatar]}
                 source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}

@@ -42,7 +42,7 @@ const TopHeaderBar = ({title, backButtonShown}) => {
       <View>
         <Menu>
           <MenuTrigger>
-            {imageFailedToLoad ? (
+            {(imageFailedToLoad || user?.profileUrl == '') ? (
               <Image
                 source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
                 style={{width: 45, height: 45, borderRadius: 30}}

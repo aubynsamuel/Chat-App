@@ -1,18 +1,54 @@
 import React from 'react';
-import { FlatList, View } from 'react-native';
+import { FlatList, View, ActivityIndicator, RefreshControl, Text, StyleSheet } from 'react-native';
 import ChatObject from './ChatObject';
 
-const ChatList = ({ users, navigation}) => {
+const ChatList = ({ users, isLoading, onRefresh, navigation }) => {
+  const renderEmptyComponent = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>
+        {isLoading ? 'Loading chats...' : 'No chats available'}
+      </Text>
+    </View>
+  );
 
   return (
     <FlatList
       data={users}
       renderItem={({ item }) => <ChatObject users={item} />}
-      keyExtractor={(item, index) => index.toString()}
+      keyExtractor={(item, index) => item.userId || index.toString()}
       onPress={() => navigation.navigate('ChatScreen')}
-      ItemSeparatorComponent={<View style={{height:15}}></View>}
+      ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoading}
+          onRefresh={onRefresh}
+          colors={['#5385F7']} // Match your app's color scheme
+          tintColor="#5385F7"
+        />
+      }
+      ListEmptyComponent={renderEmptyComponent}
+      contentContainerStyle={users.length === 0 ? styles.centerEmptySet : null}
     />
   );
 };
+
+const styles = StyleSheet.create({
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
+  centerEmptySet: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+});
 
 export default ChatList;

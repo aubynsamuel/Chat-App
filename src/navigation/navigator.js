@@ -9,14 +9,14 @@ import {useAuth} from '../AuthContext';
 import {ActivityIndicator, View} from 'react-native';
 import userProfileScreen from '../screens/userProfileScreen';
 import SearchUsersScreen from '../screens/searchUsersScreen';
-
+import LottieView from 'lottie-react-native';
 
 const Stack = createStackNavigator();
 
 const Navigator = () => {
-  const {isAuthenticated} = useAuth();
+  const {isAuthenticated, isLoading} = useAuth();
 
-  if (isAuthenticated === undefined) {
+  if (isLoading) {
     // Loading screen
     return (
       <View
@@ -25,7 +25,18 @@ const Navigator = () => {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <ActivityIndicator size="large" color="#0000ff"></ActivityIndicator>
+        {/* <ActivityIndicator size="large" color="#0000ff"></ActivityIndicator> */}
+        <LottieView
+          source={require('../../assets/Lottie_Files/send.json')}
+          autoPlay
+          loop={false}
+          style={{
+            flex: 0.8,
+            width: 90 * 6.5,
+            height: 90 * 6.5,
+            alignSelf: 'center',
+          }}
+        />
       </View>
     );
   }
@@ -33,15 +44,14 @@ const Navigator = () => {
   return (
     <Stack.Navigator
       initialRouteName={isAuthenticated ? 'Home' : 'Login'}
-      screenOptions={{headerShown: false}}>
+      screenOptions={{headerShown: false, animationEnabled: false}}>
       <Stack.Screen name="Sign Up" component={SignUpScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Search_Users" component={SearchUsersScreen } />
+      <Stack.Screen name="Search_Users" component={SearchUsersScreen} />
       <Stack.Screen name="UserProfile" component={userProfileScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
-
     </Stack.Navigator>
   );
 };

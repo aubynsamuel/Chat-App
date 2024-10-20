@@ -38,7 +38,7 @@ const UserProfileScreen = () => {
       {/* User Profile Section */}
       <View style={styles.profileContainer}>
         <Image
-          source={{uri: profileUrl || 'https://example.com/default-avatar.png'}}
+          source={profileUrl? {uri: profileUrl} : require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
           style={styles.avatar}
         />
         <Text style={styles.username}>{user?.username || 'User Name'}</Text>
