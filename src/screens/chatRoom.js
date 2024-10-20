@@ -148,6 +148,7 @@ const ChatScreen = () => {
   const createRoomIfItDoesNotExist = async roomId => {
     await setDoc(doc(db, 'rooms', roomId), {
       roomId,
+      participants : [user.userId, userId],
       createdAt: getCurrentTime(),
     });
   };

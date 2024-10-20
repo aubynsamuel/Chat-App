@@ -9,8 +9,16 @@ import {useAuth} from '../AuthContext';
 import TopHeaderBar from '../components/HeaderBar_HomeScreen';
 import {useEffect, useState} from 'react';
 import ChatList from '../components/ChatList';
-import {getDocs, query, where} from 'firebase/firestore';
-import {usersRef} from '../../firebaseConfig';
+import {
+  getDocs,
+  query,
+  where,
+  orderBy,
+  collection,
+  doc,
+  getDoc,
+} from 'firebase/firestore';
+import {usersRef, db} from '../../firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -63,27 +71,57 @@ function HomeScreen() {
 
   const getUsers = async () => {
     try {
-      // Fetch users excluding the current user and those in the current user's active chats
-      const q = query(usersRef, where('userId', '!=', user?.userId));
-      const querySnapshot = await getDocs(q);
+      // Step 1: Query the `rooms` collection to get rooms where the current user is a participant
+      const roomsRef = collection(db, 'rooms');
+      const roomsQuery = query(
+        roomsRef,
+        where('participants', 'array-contains', user.uid), // Switch to using participants array instead
+        orderBy('createdAt', 'desc'),
+      );
 
-      const data = querySnapshot.docs.map(doc => ({
-        ...doc.data(),
-        id: doc.id, // Include document ID for better data management
-      }));
+      const roomSnapshot = await getDocs(roomsQuery);
+      let userData = [];
 
-      // Only update state and cache if we actually got new data
-      if (data.length > 0) {
-        setUsers(data);
-        await AsyncStorage.setItem(`users_${user.uid}`, JSON.stringify(data));
+      // Step 3: Iterate through the rooms and extract other user IDs
+      for (let roomDoc of roomSnapshot.docs) {
+        const roomData = roomDoc.data();
+
+        // Get the other userId from the participants array
+        const otherUserId = roomData.participants?.find(id => id !== user.uid);
+
+        if (!otherUserId) {
+          console.warn(`No other participant found in room: ${roomDoc.id}`);
+          continue;
+        }
+
+        // Step 4: Fetch the user data for the other user in the room
+        const userDocRef = doc(usersRef, otherUserId);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          userData.push({
+            ...userDoc.data(),
+            lastCommunication: roomData.createdAt,
+          });
+        } else {
+          console.warn(`User document not found for ID: ${otherUserId}`);
+        }
+      }
+
+      // Cache and update users state
+      if (userData.length > 0) {
+        setUsers(userData);
+        await AsyncStorage.setItem(
+          `users_${user.uid}`,
+          JSON.stringify(userData),
+        );
         console.log('Successfully fetched and cached users from Firebase');
       }
     } catch (error) {
       console.error('Error fetching users from Firebase:', error);
-      // Don't throw the error - we already have cached data displayed
+      // Keep cached data if Firebase query fails
     }
   };
-
   // Clear cache #TODO
   const deleteCache = async () => {
     try {
