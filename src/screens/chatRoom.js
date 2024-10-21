@@ -19,9 +19,10 @@ import {
   onSnapshot,
   doc,
   setDoc,
-  where,
-  getDocs,
   updateDoc,
+  increment,
+  getDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import {useAuth} from '../AuthContext';
 import TopHeaderBar from '../components/HeaderBar_ChatScreen ';
@@ -40,29 +41,9 @@ const ChatScreen = () => {
   const flatListRef = useRef(null);
   const [isTyping, setIsTyping] = useState(false);
   const [inputText, setInputText] = useState('');
-
-  const updateMessagesReadStatus = async () => {
-    try {
-      const roomId = getRoomId(user.userId, userId);
-      const messagesRef = collection(db, 'rooms', roomId, 'messages');
-      const q = query(
-        messagesRef,
-        where('senderId', '!=', user?.userId),
-        where('read', '==', false),
-      );
-      const snapshot = await getDocs(q);
-      snapshot.forEach(async doc => {
-        await updateDoc(doc.ref, {read: true});
-      });
-    } catch (error) {
-      console.error('Failed to update message read status', error);
-    }
-  };
-  updateMessagesReadStatus();
+  const roomId = getRoomId(user.userId, userId);
 
   useEffect(() => {
-    const roomId = getRoomId(user.userId, userId);
-
     const fetchCachedMessages = async () => {
       try {
         const cachedMessages = await AsyncStorage.getItem(`messages_${roomId}`);
@@ -91,36 +72,37 @@ const ChatScreen = () => {
       }
     };
 
-    const fetchLatestMessages = async () => {
-      try {
-        const docRef = doc(db, 'rooms', roomId);
-        const messagesRef = collection(docRef, 'messages');
-        const q = query(messagesRef, orderBy('createdAt', 'asc'));
-        let unsubscribe = onSnapshot(q, snapshot => {
-          const allMessages = snapshot.docs.map(doc => doc.data());
-          const sortedMessages = allMessages.sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-          );
-          setMessages(sortedMessages);
-          cacheMessages(sortedMessages);
-          updateScrollToEnd();
-        });
+    const subscribeToMessages = () => {
+      const docRef = doc(db, 'rooms', roomId);
+      const messagesRef = collection(docRef, 'messages');
+      const q = query(messagesRef, orderBy('createdAt', 'asc'));
 
-        return () => unsubscribe;
-      } catch (error) {
-        console.error('Failed to fetch latest messages', error);
-      }
+      return onSnapshot(q, snapshot => {
+        const allMessages = snapshot.docs.map(doc => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        const sortedMessages = allMessages.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+        );
+        setMessages(sortedMessages);
+        cacheMessages(sortedMessages);
+        updateScrollToEnd();
+      });
     };
 
-    const initializeMessages = async () => {
+    const initializeChat = async () => {
+      await createRoomIfItDoesNotExist();
       await fetchCachedMessages();
-      const unsubscribe = await fetchLatestMessages();
-      return unsubscribe;
+      const unsubscribe = subscribeToMessages();
+      markMessagesAsRead();
+
+      return () => {
+        unsubscribe();
+      };
     };
 
-    createRoomIfItDoesNotExist(roomId);
-
-    const unsubscribeFromFirestore = initializeMessages();
+    const unsubscribe = initializeChat();
 
     const KeyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -128,50 +110,59 @@ const ChatScreen = () => {
     );
 
     return () => {
-      unsubscribeFromFirestore;
+      if (unsubscribe) {
+        unsubscribe;
+      }
       KeyboardDidShowListener.remove();
     };
-  }, [userId, user]);
+  }, [roomId]);
 
   const updateScrollToEnd = () => {
     setTimeout(() => {
       if (flatListRef.current) {
         flatListRef.current.scrollToEnd({animated: true});
       }
-    }, 500);
+    }, 100);
   };
 
-  useEffect(() => {
-    updateScrollToEnd();
-  }, [messages]);
-
-  const createRoomIfItDoesNotExist = async roomId => {
-    await setDoc(doc(db, 'rooms', roomId), {
-      roomId,
-      participants : [user.userId, userId],
-      createdAt: getCurrentTime(),
-    });
-  };
-
-  const handleSend = async () => {
-    const message = inputText.trim();
-    setInputText('');
-    setIsTyping(false);
-    if (!message) return;
-    try {
-      const roomId = getRoomId(user.userId, userId);
-      const docRef = doc(db, 'rooms', roomId);
-      const messagesRef = collection(docRef, 'messages');
-      await addDoc(messagesRef, {
-        type: 'text',
-        content: message,
-        senderId: user?.userId,
-        senderName: user?.username,
-        read: false,
+  const createRoomIfItDoesNotExist = async () => {
+  const roomRef = doc(db, 'rooms', roomId);
+  
+  // Check if the room already exists
+  const roomSnapshot = await getDoc(roomRef);
+  
+  if (!roomSnapshot.exists()) {
+    // Room does not exist, create it with default values
+    await setDoc(
+      roomRef,
+      {
+        roomId,
+        participants: [user.userId, userId],
         createdAt: getCurrentTime(),
+        lastMessage: '',
+        lastMessageTimestamp: getCurrentTime(),
+        lastMessageSenderId: '',
+        unreadCount: {
+          [user.userId]: 0,
+          [userId]: 0,
+        },
+      },
+      { merge: true }
+    );
+  } else {
+    console.log('Room already exists');
+  }
+};
+
+
+  const markMessagesAsRead = async () => {
+    try {
+      const roomRef = doc(db, 'rooms', roomId);
+      await updateDoc(roomRef, {
+        [`unreadCount.${user.userId}`]: 0,
       });
     } catch (error) {
-      Alert.alert('Error', error.message);
+      console.error('Failed to mark messages as read:', error);
     }
   };
 
@@ -182,6 +173,43 @@ const ChatScreen = () => {
     }
     return () => clearTimeout(typingTimeout);
   }, [isTyping]);
+
+  const handleSend = async () => {
+    const message = inputText.trim();
+    setInputText('');
+    setIsTyping(false);
+    if (!message) return;
+
+    try {
+      const currentTime = getCurrentTime();
+      const roomRef = doc(db, 'rooms', roomId);
+      const messagesRef = collection(roomRef, 'messages');
+
+      // Create the message document
+      const messageData = {
+        type: 'text',
+        content: message,
+        senderId: user?.userId,
+        senderName: user?.username,
+        read: false,
+        createdAt: currentTime,
+      };
+
+      // Add the message to the messages collection
+      await addDoc(messagesRef, messageData);
+
+      // Update room metadata
+      await updateDoc(roomRef, {
+        lastMessage: message,
+        lastMessageTimestamp: currentTime,
+        lastMessageSenderId: user?.userId,
+        [`unreadCount.${userId}`]: increment(1),
+      });
+
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
 
   return (
     <View style={{flex: 1}}>
@@ -195,11 +223,12 @@ const ChatScreen = () => {
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={(_, index) => index.toString()}
+          keyExtractor={item => item.id}
           renderItem={({item}) => <MessageObject item={item} />}
           contentContainerStyle={styles.messages}
           showsVerticalScrollIndicator={false}
           initialNumToRender={messages.length}
+          onContentSizeChange={updateScrollToEnd}
         />
         <View style={styles.inputContainer}>
           {isTyping && (
@@ -251,6 +280,7 @@ const styles = StyleSheet.create({
   },
   messages: {
     paddingHorizontal: 10,
+    paddingBottom: 10,
   },
   inputContainer: {
     flexDirection: 'row',

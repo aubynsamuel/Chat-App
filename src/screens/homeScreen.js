@@ -17,120 +17,95 @@ import {
   collection,
   doc,
   getDoc,
+  onSnapshot,
 } from 'firebase/firestore';
 import {usersRef, db} from '../../firebaseConfig';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getRoomId} from '../../commons';
 
 function HomeScreen() {
   const navigation = useNavigation();
   const {user} = useAuth();
-  const [users, setUsers] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (user?.uid) {
-      initializeUsers();
+      initializeRooms();
     }
   }, [user]);
 
-  const initializeUsers = async () => {
+  const initializeRooms = async () => {
     setIsLoading(true);
     try {
       // First load from cache
-      const cachedUsers = await loadCachedUsers();
-      if (cachedUsers) {
-        setUsers(cachedUsers);
+      const cachedRooms = await loadCachedRooms();
+      if (cachedRooms) {
+        setRooms(cachedRooms);
       }
 
-      // Then try to fetch fresh data
-      await getUsers();
+      // Then subscribe to real-time updates
+      subscribeToRooms();
     } catch (error) {
-      console.error('Error initializing users:', error);
+      console.error('Error initializing rooms:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loadCachedUsers = async () => {
+  const loadCachedRooms = async () => {
     try {
-      const cachedData = await AsyncStorage.getItem(`users_${user.uid}`);
+      const cachedData = await AsyncStorage.getItem(`rooms_${user.uid}`);
       if (cachedData) {
-        const parsedData = JSON.parse(cachedData);
-        console.log('Successfully loaded users from cache');
-        return parsedData;
+        return JSON.parse(cachedData);
       }
       return null;
     } catch (error) {
-      console.error('Error loading users from cache:', error);
+      console.error('Error loading rooms from cache:', error);
       return null;
     }
   };
 
-  const getUsers = async () => {
-    try {
-      // Step 1: Query the `rooms` document to get rooms where the current user is a participant
-      // Step 2: Get the last message in each room that the current user is a participant of the sort them by createdAt
-      const roomsRef = collection(db, 'rooms');
-      const roomsQuery = query(
-        roomsRef,
-        where('participants', 'array-contains', user.uid), // Switch to using participants array instead
-        orderBy('createdAt', 'desc'),
-      );
+  const subscribeToRooms = () => {
+    const roomsRef = collection(db, 'rooms');
+    const roomsQuery = query(
+      roomsRef,
+      where('participants', 'array-contains', user.uid),
+      orderBy('lastMessageTimestamp', 'desc')
+    );
 
-      const roomSnapshot = await getDocs(roomsQuery);
-      let userData = [];
+    return onSnapshot(roomsQuery, async (snapshot) => {
+      const roomsData = [];
 
-      // Step 3: Iterate through the rooms and extract other user IDs
-      for (let roomDoc of roomSnapshot.docs) {
+      for (const roomDoc of snapshot.docs) {
         const roomData = roomDoc.data();
+        const otherUserId = roomData.participants.find(id => id !== user.uid);
 
-        // Get the other userId from the participants array
-        const otherUserId = roomData.participants?.find(id => id !== user.uid);
-
-        if (!otherUserId) {
-          console.warn(`No other participant found in room: ${roomDoc.id}`);
-          continue;
-        }
-
-        // Step 4: Fetch the user data for the other user in the room
-        const userDocRef = doc(usersRef, otherUserId);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-          userData.push({
-            ...userDoc.data(),
-            lastCommunication: roomData.createdAt,
-          });
-        } else {
-          console.warn(`User document not found for ID: ${otherUserId}`);
+        if (otherUserId) {
+          const userDocRef = doc(usersRef, otherUserId);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            roomsData.push({
+              roomId: roomDoc.id,
+              lastMessage: roomData?.lastMessage,
+              lastMessageTimestamp: roomData?.lastMessageTimestamp,
+              unreadCount: roomData.unreadCount || 0,
+              otherParticipant: {
+                userId: otherUserId,
+                username: userData.username,
+                profileUrl: userData.profileUrl,
+              },
+            });
+          }
         }
       }
 
-      // Cache and update users state
-      if (userData.length > 0) {
-        setUsers(userData);
-        await AsyncStorage.setItem(
-          `users_${user.uid}`,
-          JSON.stringify(userData),
-        );
-        console.log('Successfully fetched and cached users from Firebase');
-      }
-    } catch (error) {
-      console.error('Error fetching users from Firebase:', error);
-      // Keep cached data if Firebase query fails
-    }
-  };
-  // Clear cache #TODO
-  const deleteCache = async () => {
-    try {
-      await AsyncStorage.removeItem(`users_${user.uid}`);
-      console.log('Cache cleared successfully');
-    } catch (error) {
-      console.error('Error clearing cache:', error);
-    }
+      setRooms(roomsData);
+      await AsyncStorage.setItem(`rooms_${user.uid}`, JSON.stringify(roomsData));
+    });
   };
 
   return (
@@ -145,9 +120,9 @@ function HomeScreen() {
 
       <View style={styles.container}>
         <ChatList
-          users={users}
+          rooms={rooms}
           isLoading={isLoading}
-          onRefresh={initializeUsers}
+          onRefresh={initializeRooms}
         />
       </View>
 

@@ -1,89 +1,17 @@
 import {View, StyleSheet, Text, TouchableOpacity, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../AuthContext';
-import {useEffect, useState} from 'react';
-import {formatTimeWithoutSeconds, getRoomId} from '../../commons';
-import {db} from '../../firebaseConfig';
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  limit,
-  where,
-} from 'firebase/firestore';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {formatTimeWithoutSeconds} from '../../commons';
 
-const ChatObject = ({users}) => {
+const ChatObject = ({room}) => {
   const navigation = useNavigation();
   const {user} = useAuth();
-  const [lastMessage, setLastMessage] = useState(null); 
-  const [lastMessageTime, setLastMessageTime] = useState('');
-  const [unreadCount, setUnreadCount] = useState(0);
-  
-  useEffect(() => {
-    const roomId = getRoomId(user?.userId, users.userId);
-    const docRef = doc(db, 'rooms', roomId);
-    const messagesRef = collection(docRef, 'messages');
-
-    const q = query(
-      messagesRef,
-      where('senderId', '==', users.userId),
-      where('read', '==', false),
-    );
-
-    const unsubscribe = onSnapshot(q, snapshot => {
-      setUnreadCount(snapshot.docs.length);
-      console.log(unreadCount);
-    });
-
-    return unsubscribe;
-  }, [user?.userId, users.userId]);
-
-  useEffect(() => {
-    // Async function to get cached last message
-    const fetchCachedMessage = async () => {
-      const cachedLastMessage = await AsyncStorage.getItem(`lastMessage${users.userId}`);
-      if (cachedLastMessage) {
-        setLastMessage(JSON.parse(cachedLastMessage));
-      }
-    };
-  
-    const roomId = getRoomId(user?.userId, users.userId);
-    const docRef = doc(db, 'rooms', roomId);
-    const messagesRef = collection(docRef, 'messages');
-    
-    const q = query(messagesRef, orderBy('createdAt', 'desc'), limit(1));
-    
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      if (!snapshot.empty) {
-        const lastMessageData = snapshot.docs[0].data();
-        setLastMessage(lastMessageData);
-        await AsyncStorage.setItem(`lastMessage${users.userId}`, JSON.stringify(lastMessageData)); // Store the latest message in AsyncStorage
-      } else {
-        fetchCachedMessage();
-      }
-    });
-    return () => unsubscribe(); // Cleanup on unmount or dependencies change
-  }, [user?.userId, users.userId]);
-  
-  
-
-  useEffect(() => {
-    if (lastMessage && lastMessage.createdAt) {
-      setLastMessageTime(formatTimeWithoutSeconds(lastMessage.createdAt));
-      console.log(lastMessageTime);
-    } else {
-      setLastMessageTime('');
-    }
-  }, [lastMessage]);
 
   const handlePress = () => {
     navigation.navigate('ChatScreen', {
-      userId: users.userId,
-      username: users.username,
-      profileUrl: users.profileUrl,
+      userId: room.otherParticipant.userId,
+      username: room.otherParticipant.username,
+      profileUrl: room.otherParticipant.profileUrl,
     });
   };
 
@@ -94,7 +22,7 @@ const ChatObject = ({users}) => {
         {/* Avatar */}
         <View>
           <TouchableOpacity>
-            {(users?.profileUrl == '') ? (
+            {!room?.otherParticipant.profileUrl ? (
               <Image
                 style={[styles.avatar]}
                 source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
@@ -103,7 +31,7 @@ const ChatObject = ({users}) => {
             ) : (
               <Image
                 style={[styles.avatar]}
-                source={{uri: users.profileUrl}}
+                source={{uri: room?.otherParticipant.profileUrl}}
                 transition={500}
               />
             )}
@@ -113,23 +41,29 @@ const ChatObject = ({users}) => {
         <View style={{marginLeft: 8, width: '80%'}}>
           {/* Username */}
           <Text numberOfLines={1} style={styles.name}>
-            {users.username}
+            {room?.otherParticipant.username}
           </Text>
 
           {/* Last message */}
           <Text numberOfLines={1} style={styles.lastMessage}>
-            {lastMessage?.senderId !== users?.userId
-              ? `You: ${lastMessage?.content || ''}`
-              : lastMessage?.content || ''}
+            {room?.lastMessage.senderId === room?.otherParticipant.userId
+              ? room?.lastMessage
+              : `You: ${room?.lastMessage}`}
           </Text>
         </View>
       </View>
 
       <View>
         {/* Time of last message */}
-        <Text style={styles.time}>{lastMessageTime}</Text>
+        <Text style={styles.time}>
+          {room?.lastMessageTimestamp !== undefined
+            ? formatTimeWithoutSeconds(room?.lastMessageTimestamp)
+            : ''}
+        </Text>
         {/* Number of unread messages */}
-        <Text style={styles.unread}>{unreadCount > 0 ? unreadCount : ''}</Text>
+        <Text style={styles.unread}>
+          {(room?.unreadCount && room?.unreadCount[user?.userId]) || ''}
+        </Text>
       </View>
     </TouchableOpacity>
   );

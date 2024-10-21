@@ -2,7 +2,7 @@ import React from 'react';
 import { FlatList, View, ActivityIndicator, RefreshControl, Text, StyleSheet } from 'react-native';
 import ChatObject from './ChatObject';
 
-const ChatList = ({ users, isLoading, onRefresh, navigation }) => {
+const ChatList = ({ rooms, isLoading, onRefresh }) => {
   const renderEmptyComponent = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyText}>
@@ -13,10 +13,10 @@ const ChatList = ({ users, isLoading, onRefresh, navigation }) => {
 
   return (
     <FlatList
-      data={users}
-      renderItem={({ item }) => <ChatObject users={item} />}
-      keyExtractor={(item, index) => item.userId || index.toString()}
-      onPress={() => navigation.navigate('ChatScreen')}
+      data={rooms}
+      renderItem={({ item }) => <ChatObject room={item} />}
+      keyExtractor={(item, index) => item.roomId || index.toString()}
+      // onPress={() => navigation.navigate('ChatScreen')}
       ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
       refreshControl={
         <RefreshControl
@@ -27,7 +27,7 @@ const ChatList = ({ users, isLoading, onRefresh, navigation }) => {
         />
       }
       ListEmptyComponent={renderEmptyComponent}
-      contentContainerStyle={users.length === 0 ? styles.centerEmptySet : null}
+      contentContainerStyle={rooms.length === 0 ? styles.centerEmptySet : null}
     />
   );
 };
