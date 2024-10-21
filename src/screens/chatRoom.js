@@ -22,6 +22,8 @@ import {
   updateDoc,
   increment,
   getDoc,
+  where,
+  getDocs,
   serverTimestamp,
 } from 'firebase/firestore';
 import {useAuth} from '../AuthContext';
@@ -42,6 +44,25 @@ const ChatScreen = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [inputText, setInputText] = useState('');
   const roomId = getRoomId(user.userId, userId);
+
+  const updateMessagesReadStatus = async () => {
+    try {
+      const roomId = getRoomId(user.userId, userId);
+      const messagesRef = collection(db, 'rooms', roomId, 'messages');
+      const q = query(
+        messagesRef,
+        where('senderId', '!=', user?.userId),
+        where('read', '==', false),
+      );
+      const snapshot = await getDocs(q);
+      snapshot.forEach(async doc => {
+        await updateDoc(doc.ref, {read: true});
+      });
+    } catch (error) {
+      console.error('Failed to update message read status', error);
+    }
+  };
+  updateMessagesReadStatus();
 
   useEffect(() => {
     const fetchCachedMessages = async () => {
@@ -95,7 +116,7 @@ const ChatScreen = () => {
       await createRoomIfItDoesNotExist();
       await fetchCachedMessages();
       const unsubscribe = subscribeToMessages();
-      markMessagesAsRead();
+      // markMessagesAsRead();
 
       return () => {
         unsubscribe();
@@ -142,10 +163,6 @@ const ChatScreen = () => {
         lastMessage: '',
         lastMessageTimestamp: getCurrentTime(),
         lastMessageSenderId: '',
-        unreadCount: {
-          [user.userId]: 0,
-          [userId]: 0,
-        },
       },
       { merge: true }
     );
@@ -155,16 +172,16 @@ const ChatScreen = () => {
 };
 
 
-  const markMessagesAsRead = async () => {
-    try {
-      const roomRef = doc(db, 'rooms', roomId);
-      await updateDoc(roomRef, {
-        [`unreadCount.${user.userId}`]: 0,
-      });
-    } catch (error) {
-      console.error('Failed to mark messages as read:', error);
-    }
-  };
+  // const markMessagesAsRead = async () => {
+  //   try {
+  //     const roomRef = doc(db, 'rooms', roomId);
+  //     await updateDoc(roomRef, {
+  //       [`unreadCount.${user.userId}`]: 0,
+  //     });
+  //   } catch (error) {
+  //     console.error('Failed to mark messages as read:', error);
+  //   }
+  // };
 
   useEffect(() => {
     let typingTimeout;
@@ -203,7 +220,6 @@ const ChatScreen = () => {
         lastMessage: message,
         lastMessageTimestamp: currentTime,
         lastMessageSenderId: user?.userId,
-        [`unreadCount.${userId}`]: increment(1),
       });
 
     } catch (error) {

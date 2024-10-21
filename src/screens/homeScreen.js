@@ -72,10 +72,10 @@ function HomeScreen() {
     const roomsQuery = query(
       roomsRef,
       where('participants', 'array-contains', user.uid),
-      orderBy('lastMessageTimestamp', 'desc')
+      orderBy('lastMessageTimestamp', 'desc'),
     );
 
-    return onSnapshot(roomsQuery, async (snapshot) => {
+    return onSnapshot(roomsQuery, async snapshot => {
       const roomsData = [];
 
       for (const roomDoc of snapshot.docs) {
@@ -85,14 +85,14 @@ function HomeScreen() {
         if (otherUserId) {
           const userDocRef = doc(usersRef, otherUserId);
           const userDoc = await getDoc(userDocRef);
-          
+
           if (userDoc.exists()) {
             const userData = userDoc.data();
             roomsData.push({
               roomId: roomDoc.id,
               lastMessage: roomData?.lastMessage,
               lastMessageTimestamp: roomData?.lastMessageTimestamp,
-              unreadCount: roomData.unreadCount || 0,
+              lastMessageSenderId: roomData?.lastMessageSenderId,
               otherParticipant: {
                 userId: otherUserId,
                 username: userData.username,
@@ -102,9 +102,13 @@ function HomeScreen() {
           }
         }
       }
-
-      setRooms(roomsData);
-      await AsyncStorage.setItem(`rooms_${user.uid}`, JSON.stringify(roomsData));
+      if (roomsData.length > 0) {
+        setRooms(roomsData);
+        await AsyncStorage.setItem(
+          `rooms_${user.uid}`,
+          JSON.stringify(roomsData),
+        );
+      }
     });
   };
 

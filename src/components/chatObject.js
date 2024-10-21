@@ -2,10 +2,34 @@ import {View, StyleSheet, Text, TouchableOpacity, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useAuth} from '../AuthContext';
 import {formatTimeWithoutSeconds} from '../../commons';
+import {useEffect, useState} from 'react';
+import {db} from '../../firebaseConfig';
+import {collection, query, onSnapshot, doc, where} from 'firebase/firestore';
+import {getRoomId} from '../../commons';
 
 const ChatObject = ({room}) => {
   const navigation = useNavigation();
   const {user} = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
+    const docRef = doc(db, 'rooms', roomId);
+    const messagesRef = collection(docRef, 'messages');
+
+    const q = query(
+      messagesRef,
+      where('senderId', '==', room.otherParticipant.userId),
+      where('read', '==', false),
+    );
+
+    const unsubscribe = onSnapshot(q, snapshot => {
+      setUnreadCount(snapshot.docs.length);
+      console.log(unreadCount);
+    });
+
+    return unsubscribe;
+  }, [user?.userId, room.otherParticipant.userId]);
 
   const handlePress = () => {
     navigation.navigate('ChatScreen', {
@@ -46,7 +70,7 @@ const ChatObject = ({room}) => {
 
           {/* Last message */}
           <Text numberOfLines={1} style={styles.lastMessage}>
-            {room?.lastMessage.senderId === room?.otherParticipant.userId
+            {room?.lastMessageSenderId !== user?.userId
               ? room?.lastMessage
               : `You: ${room?.lastMessage}`}
           </Text>
@@ -61,9 +85,7 @@ const ChatObject = ({room}) => {
             : ''}
         </Text>
         {/* Number of unread messages */}
-        <Text style={styles.unread}>
-          {(room?.unreadCount && room?.unreadCount[user?.userId]) || ''}
-        </Text>
+        {unreadCount > 0 && <Text style={styles.unread}>{unreadCount}</Text>}
       </View>
     </TouchableOpacity>
   );
@@ -105,6 +127,7 @@ const styles = StyleSheet.create({
     padding: 1,
     fontSize: 15,
     alignSelf: 'flex-end',
+    backgroundColor: 'lightblue',
   },
 });
 
