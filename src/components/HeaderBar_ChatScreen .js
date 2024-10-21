@@ -18,9 +18,6 @@ import {
 const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
   const navigation = useNavigation();
   const {user, logout} = useAuth();
-  const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
-
-
 
   const handleLogout = () => {
     logout();
@@ -44,7 +41,7 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
       <View>
         <Menu>
           <MenuTrigger>
-          {(imageFailedToLoad || user?.profileUrl == '') ? (
+          {(user?.profileUrl == '') ? (
               <Image
                 source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
                 style={{width: 45, height: 45, borderRadius: 30}}
@@ -55,10 +52,6 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
                 source={{uri: profileUrl}}
                 style={{width: 45, height: 45, borderRadius: 30}}
                 transition={500}
-                onError={error => {
-                  console.error('Error loading image:', error);
-                  setImageFailedToLoad(true);
-                }}
               />
             )}
           </MenuTrigger>

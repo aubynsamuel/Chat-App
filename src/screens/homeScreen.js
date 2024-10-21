@@ -71,7 +71,8 @@ function HomeScreen() {
 
   const getUsers = async () => {
     try {
-      // Step 1: Query the `rooms` collection to get rooms where the current user is a participant
+      // Step 1: Query the `rooms` document to get rooms where the current user is a participant
+      // Step 2: Get the last message in each room that the current user is a participant of the sort them by createdAt
       const roomsRef = collection(db, 'rooms');
       const roomsQuery = query(
         roomsRef,

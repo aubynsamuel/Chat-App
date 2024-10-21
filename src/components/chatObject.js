@@ -20,7 +20,6 @@ const ChatObject = ({users}) => {
   const {user} = useAuth();
   const [lastMessage, setLastMessage] = useState(null); 
   const [lastMessageTime, setLastMessageTime] = useState('');
-  const [imageFailedToLoad, setImageFailedToLoad] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   
   useEffect(() => {
@@ -95,7 +94,7 @@ const ChatObject = ({users}) => {
         {/* Avatar */}
         <View>
           <TouchableOpacity>
-            {(imageFailedToLoad || users?.profileUrl == '') ? (
+            {(users?.profileUrl == '') ? (
               <Image
                 style={[styles.avatar]}
                 source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
@@ -106,10 +105,6 @@ const ChatObject = ({users}) => {
                 style={[styles.avatar]}
                 source={{uri: users.profileUrl}}
                 transition={500}
-                onError={error => {
-                  console.error('Error loading image:', error);
-                  setImageFailedToLoad(true);
-                }}
               />
             )}
           </TouchableOpacity>
