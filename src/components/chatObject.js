@@ -128,6 +128,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     alignSelf: 'flex-end',
     backgroundColor: 'lightblue',
+    width:"auto",
+    paddingHorizontal:5
   },
 });
 

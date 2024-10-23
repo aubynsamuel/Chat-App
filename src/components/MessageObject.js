@@ -1,7 +1,7 @@
 import {View, Text, StyleSheet} from 'react-native';
 import React from 'react';
 import {formatTimeWithoutSeconds} from '../../commons';
-import { useAuth } from '../AuthContext';
+import {useAuth} from '../AuthContext';
 
 const MessageObject = ({item}) => {
   const {user} = useAuth();
@@ -15,10 +15,16 @@ const MessageObject = ({item}) => {
           : styles.otherMessageContainer
       }>
       <Text style={messageStyle}>{item.content}</Text>
-      <Text style={isUserMessage ? styles.userTime : styles.otherTime}>
-        {formatTimeWithoutSeconds(item.createdAt)}
-      </Text>
-      {item.read && isUserMessage && <Text style={{fontSize: 10, color: 'grey', alignSelf: 'flex-end',}}>Read</Text>}
+      <View style={{flexDirection: 'row', justifyContent:'flex-end'}}>
+        <Text style={isUserMessage ? styles.userTime : styles.otherTime}>
+          {formatTimeWithoutSeconds(item.createdAt)}
+        </Text>
+        {item.read && isUserMessage && (
+          <Text style={{fontSize: 10, color: 'grey', marginLeft:5}}>
+            read
+          </Text>
+        )}
+      </View>
     </View>
   );
 };

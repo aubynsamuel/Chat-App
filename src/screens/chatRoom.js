@@ -20,11 +20,9 @@ import {
   doc,
   setDoc,
   updateDoc,
-  increment,
   getDoc,
   where,
   getDocs,
-  serverTimestamp,
 } from 'firebase/firestore';
 import {useAuth} from '../AuthContext';
 import TopHeaderBar from '../components/HeaderBar_ChatScreen ';
@@ -170,18 +168,6 @@ const ChatScreen = () => {
     console.log('Room already exists');
   }
 };
-
-
-  // const markMessagesAsRead = async () => {
-  //   try {
-  //     const roomRef = doc(db, 'rooms', roomId);
-  //     await updateDoc(roomRef, {
-  //       [`unreadCount.${user.userId}`]: 0,
-  //     });
-  //   } catch (error) {
-  //     console.error('Failed to mark messages as read:', error);
-  //   }
-  // };
 
   useEffect(() => {
     let typingTimeout;
