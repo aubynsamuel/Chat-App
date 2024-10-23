@@ -15,14 +15,12 @@ const MessageObject = ({item}) => {
           : styles.otherMessageContainer
       }>
       <Text style={messageStyle}>{item.content}</Text>
-      <View style={{flexDirection: 'row', justifyContent:'flex-end'}}>
+      <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
         <Text style={isUserMessage ? styles.userTime : styles.otherTime}>
           {formatTimeWithoutSeconds(item.createdAt)}
         </Text>
         {item.read && isUserMessage && (
-          <Text style={{fontSize: 10, color: 'grey', marginLeft:5}}>
-            read
-          </Text>
+          <Text style={{fontSize: 10, color: 'grey', marginLeft: 5}}>read</Text>
         )}
       </View>
     </View>
