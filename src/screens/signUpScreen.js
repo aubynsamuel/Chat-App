@@ -8,6 +8,7 @@ import {
   StatusBar,
   ActivityIndicator,
   Button,
+  Image,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -19,17 +20,39 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useAuth} from '../AuthContext';
 import LottieView from 'lottie-react-native';
+import {launchImageLibrary} from 'react-native-image-picker'; // Import image picker
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
   const email = useRef('');
   const username = useRef('');
   const password = useRef('');
-  const [picturePic, setProfilePic ] = useState()
+  const [profileUrl, setProfileUrl] = useState(null);
   const {signUp} = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [passwordReveal, setPasswordReveal] = useState(true);
   const [color, setColor] = useState('black');
+
+  // Function to handle image selection from the gallery
+  const selectImage = () => {
+    const options = {
+      mediaType: 'photo',
+      maxWidth: 300,
+      maxHeight: 300,
+      quality: 0.7,
+    };
+
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorMessage) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      } else if (response.assets && response.assets.length > 0) {
+        const selectedImage = response.assets[0].uri;
+        setProfileUrl (selectedImage); // Set selected image URI to state
+      }
+    });
+  };
 
   const handleSignUpPressed = async () => {
     setIsLoading(true);
@@ -42,7 +65,7 @@ const SignUpScreen = () => {
       email.current,
       username.current,
       password.current,
-      picturePic,
+      profileUrl,
     );
     console.log(response);
     if (
@@ -131,13 +154,18 @@ const SignUpScreen = () => {
           {/* <Icon name="image" color="black" size={25} /> */}
           <TouchableOpacity
             onPress={() => {
-              setProfilePic()
+              selectImage();
               console.log('select image from gallery');
             }}
             style={{flex: 1, alignItems: 'center'}}>
-            <Text style={{color: '#0009'}}>Select a profile picture</Text>
+            <Text style={{color: '#0009'}}>{profileUrl?"Change profile pic":"Select a profile picture"}</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Display selected image (if any) */}
+        {profileUrl && (
+          <Image source={{uri: profileUrl}} style={styles.profileImage} />
+        )}
 
         <TouchableOpacity
           style={styles.signUp}
@@ -225,6 +253,13 @@ const styles = StyleSheet.create({
     color: '#4CAF50',
     fontSize: 15,
     fontWeight: 'bold',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginTop: 10,
+    alignSelf: 'center',
   },
 });
 
