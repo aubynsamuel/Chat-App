@@ -163,9 +163,9 @@ const SignUpScreen = () => {
         </View>
 
         {/* Display selected image (if any) */}
-        {profileUrl && (
+        {/* {profileUrl && (
           <Image source={{uri: profileUrl}} style={styles.profileImage} />
-        )}
+        )} */}
 
         <TouchableOpacity
           style={styles.signUp}

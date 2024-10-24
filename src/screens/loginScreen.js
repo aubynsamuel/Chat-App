@@ -25,6 +25,9 @@ const LoginScreen = () => {
   const email = useRef('');
   const password = useRef('');
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordReveal, setPasswordReveal] = useState(true);
+  const [color, setColor] = useState('black');
+
 
   const handleLoginPressed = async () => {
     setIsLoading(true);
@@ -69,6 +72,8 @@ const LoginScreen = () => {
 
       {/* Input Fields */}
       <View style={styles.form}>
+
+        {/* Email */}
         <View style={styles.InputField}>
           <Icon name="email" color="black" size={25} />
           <TextInput
@@ -78,16 +83,35 @@ const LoginScreen = () => {
             onChangeText={value => (email.current = value)}
           />
         </View>
+
+        {/* Password */}
+        {/* Password */}
         <View style={styles.InputField}>
           <Icon name="lock" color="black" size={25} />
-          <TextInput
-            placeholder="Password"
-            secureTextEntry={true}
-            style={styles.inputText}
-            placeholderTextColor={'grey'}
-            onChangeText={value => (password.current = value)}
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              flex: 1,
+              alignItems: 'center',
+            }}>
+            <TextInput
+              placeholder="Password"
+              secureTextEntry={passwordReveal}
+              style={styles.inputText}
+              placeholderTextColor={'grey'}
+              onChangeText={value => (password.current = value)}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                setPasswordReveal(prev => !prev);
+                setColor(passwordReveal ? 'grey' : 'black');
+              }}>
+              <Icon name="remove-red-eye" color={color} size={25} />
+            </TouchableOpacity>
+          </View>
         </View>
+
         {/* forgot password */}
         <TouchableOpacity onPress={()=>{
           

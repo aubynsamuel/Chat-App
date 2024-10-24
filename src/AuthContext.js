@@ -1,11 +1,17 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {createContext, useContext, useEffect, useState} from 'react';
 import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebaseConfig';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  updateFirebaseAuthProfile,
+} from 'firebase/firestore';
+import {auth, db} from '../firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Create Authentication Context
@@ -21,7 +27,7 @@ const STORAGE_KEYS = {
 };
 
 // Create Authentication Context Provider
-export const AuthContextProvider = ({ children }) => {
+export const AuthContextProvider = ({children}) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +51,7 @@ export const AuthContextProvider = ({ children }) => {
       }
 
       // Set up Firebase auth listener
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
         if (firebaseUser) {
           await handleUserAuthenticated(firebaseUser);
         } else {
@@ -61,23 +67,23 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const handleUserAuthenticated = async (firebaseUser) => {
+  const handleUserAuthenticated = async firebaseUser => {
     try {
       const userData = await updateUserData(firebaseUser.uid);
       const enhancedUser = {
         ...firebaseUser,
         ...userData,
       };
-      
+
       setUser(enhancedUser);
       setIsAuthenticated(true);
-      
+
       // Persist to storage
       await Promise.all([
         AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(enhancedUser)),
         AsyncStorage.setItem(STORAGE_KEYS.AUTH_STATE, 'true'),
       ]);
-      
+
       console.log(`User ${firebaseUser.email} has logged in.`);
     } catch (error) {
       console.error('Error handling user authentication:', error);
@@ -88,7 +94,7 @@ export const AuthContextProvider = ({ children }) => {
     try {
       setUser(null);
       setIsAuthenticated(false);
-      
+
       // Clear from storage
       await Promise.all([
         AsyncStorage.removeItem(STORAGE_KEYS.USER),
@@ -99,7 +105,7 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const updateUserData = async (userId) => {
+  const updateUserData = async userId => {
     try {
       const docRef = doc(db, 'users', userId);
       const docSnap = await getDoc(docRef);
@@ -129,15 +135,43 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async userData => {
+    try {
+      // 1. Update Firebase Authentication profile (for email, password changes)
+      // if (userData.email || userData.password) {
+      //   await updateFirebaseAuthProfile(auth.currentUser, {
+      //     email: userData.email,
+      //     password: userData.password,
+      //   });
+      // }
+
+      // 2. Update Firestore user document (for username, profileUrl, etc.)
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        username: userData.username,
+        profileUrl: userData.profileUrl,
+      });
+
+      // Update the local user state in the context
+      setUser({...user, ...userData});
+
+      return {success: true};
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      return {success: false, msg: error.message};
+    }
+  };
+
   const login = async (email, password) => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
-      return { success: true, data: response?.user };
+      return {success: true, data: response?.user};
     } catch (error) {
       let msg = error.message;
       if (msg.includes('(auth/invalid-email)')) msg = 'Invalid Email';
-      if (msg.includes('(auth/invalid-credential)')) msg = 'Invalid Credentials';
-      return { success: false, msg };
+      if (msg.includes('(auth/invalid-credential)'))
+        msg = 'Invalid Credentials';
+      return {success: false, msg};
     }
   };
 
@@ -169,7 +203,7 @@ export const AuthContextProvider = ({ children }) => {
         email,
         profileUrl,
       };
-      
+
       await setDoc(docRef, userData);
 
       // Cache the user data immediately after signup
@@ -178,15 +212,16 @@ export const AuthContextProvider = ({ children }) => {
         JSON.stringify({
           ...response.user,
           ...userData,
-        })
+        }),
       );
-      
-      return { success: true, data: response?.user };
+
+      return {success: true, data: response?.user};
     } catch (error) {
       let msg = error.message;
       if (msg.includes('(auth/invalid-email)')) msg = 'Invalid Email';
-      if (msg.includes('(auth/email-already-in-use)')) msg = 'Email Already In Use';
-      return { success: false, msg };
+      if (msg.includes('(auth/email-already-in-use)'))
+        msg = 'Email Already In Use';
+      return {success: false, msg};
     }
   };
 
@@ -199,6 +234,7 @@ export const AuthContextProvider = ({ children }) => {
         user,
         isAuthenticated,
         isLoading,
+        updateProfile,
       }}>
       {children}
     </AuthContext.Provider>
