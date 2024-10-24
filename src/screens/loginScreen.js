@@ -21,13 +21,31 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
 
 const LoginScreen = () => {
-  const {login} = useAuth();
+  const {login, resetPassword} = useAuth();
   const email = useRef('');
   const password = useRef('');
   const [isLoading, setIsLoading] = useState(false);
   const [passwordReveal, setPasswordReveal] = useState(true);
   const [color, setColor] = useState('black');
 
+  // Handle forgot password
+  const handleForgotPassword = async () => {
+    if (!email.current) {
+      Alert.alert('Forgot Password', 'Please enter your email address');
+      return;
+    }
+
+    const response = await resetPassword(email.current);
+    if (response.success) {
+      Alert.alert(
+        'Password Reset',
+        'A password reset link has been sent to your email address',
+      );
+    } else {
+      Alert.alert('Password Reset Error', response.msg);
+      console.log(response);
+    }
+  };
 
   const handleLoginPressed = async () => {
     setIsLoading(true);
@@ -72,7 +90,6 @@ const LoginScreen = () => {
 
       {/* Input Fields */}
       <View style={styles.form}>
-
         {/* Email */}
         <View style={styles.InputField}>
           <Icon name="email" color="black" size={25} />
@@ -113,9 +130,7 @@ const LoginScreen = () => {
         </View>
 
         {/* forgot password */}
-        <TouchableOpacity onPress={()=>{
-          
-        }}>
+        <TouchableOpacity onPress={handleForgotPassword}>
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
 

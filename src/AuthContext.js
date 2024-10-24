@@ -3,6 +3,7 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail 
 } from 'firebase/auth';
 import {
   doc,
@@ -87,6 +88,19 @@ export const AuthContextProvider = ({children}) => {
       console.log(`User ${firebaseUser.email} has logged in.`);
     } catch (error) {
       console.error('Error handling user authentication:', error);
+    }
+  };
+
+  const resetPassword = async email => {
+    try {
+      // Send password reset email
+      console.log(email);
+      console.log(auth);
+      // console.log(auth.sendPasswordResetEmail);
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error) {
+      return { success: false, msg: error.message };
     }
   };
 
@@ -235,6 +249,7 @@ export const AuthContextProvider = ({children}) => {
         isAuthenticated,
         isLoading,
         updateProfile,
+        resetPassword,
       }}>
       {children}
     </AuthContext.Provider>
