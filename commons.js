@@ -85,10 +85,7 @@ export const formatTimeWithoutSeconds = firestoreTimestamp => {
 
 /**
  * TO DO before it is production ready
- * 1. Forgot password functionality in login screen
- * 2. Edit profile
  * 3. Push notifications functionality
- * 4. Settings
  * 5. DarkMode
  */
 

@@ -20,11 +20,9 @@ import {
   doc,
   setDoc,
   updateDoc,
-  increment,
   getDoc,
   where,
   getDocs,
-  serverTimestamp,
 } from 'firebase/firestore';
 import {useAuth} from '../AuthContext';
 import TopHeaderBar from '../components/HeaderBar_ChatScreen ';
