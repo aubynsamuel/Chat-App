@@ -16,7 +16,7 @@ import {useAuth} from '../AuthContext';
 const UserProfileScreen = () => {
   const {user, logout} = useAuth(); 
   const navigation = useNavigation();
-  const [profileUrl, setProfileUrl] = useState(user?.profileUrl);
+  const profileUrl = user?.profileUrl;
   const handleLogout = async () => {
     await logout();
     navigation.navigate('Login');
@@ -35,7 +35,7 @@ const UserProfileScreen = () => {
         onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={25} color="black" />
       </TouchableOpacity>
-      {/* User Profile Section */}
+      {/* User Profile Info */}
       <View style={styles.profileContainer}>
         <Image
           source={profileUrl? {uri: profileUrl} : require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
@@ -46,6 +46,8 @@ const UserProfileScreen = () => {
 
       {/* Options Section */}
       <View style={styles.optionsContainer}>
+
+        {/* Edit profile */}
         <TouchableOpacity
           style={styles.option}
           onPress={() => navigation.navigate('EditProfile')}>
@@ -53,11 +55,7 @@ const UserProfileScreen = () => {
           <Text style={styles.optionText}>Edit Profile</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.option}>
-          <Icon name="settings" size={25} color="black" />
-          <Text style={styles.optionText}>Settings</Text>
-        </TouchableOpacity>
-
+        {/* Notifications */}
         <View style={styles.option}>
           <Icon name="notifications" size={25} color="black" />
           <View
@@ -75,10 +73,12 @@ const UserProfileScreen = () => {
           </View>
         </View>
 
+        {/* Logout */}
         <TouchableOpacity style={styles.option} onPress={handleLogout}>
           <Icon name="logout" size={25} color="black" />
           <Text style={styles.optionText}>Logout</Text>
         </TouchableOpacity>
+
       </View>
     </ScrollView>
   );

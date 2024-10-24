@@ -7,6 +7,7 @@ import {
   Alert,
   StatusBar,
   ActivityIndicator,
+  Button,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -24,9 +25,11 @@ const SignUpScreen = () => {
   const email = useRef('');
   const username = useRef('');
   const password = useRef('');
-  const pictureUrl = useRef('');
+  const [picturePic, setProfilePic ] = useState()
   const {signUp} = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordReveal, setPasswordReveal] = useState(true);
+  const [color, setColor] = useState('black');
 
   const handleSignUpPressed = async () => {
     setIsLoading(true);
@@ -39,7 +42,7 @@ const SignUpScreen = () => {
       email.current,
       username.current,
       password.current,
-      pictureUrl.current,
+      picturePic,
     );
     console.log(response);
     if (
@@ -73,6 +76,7 @@ const SignUpScreen = () => {
 
       {/* Input Fields */}
       <View style={styles.form}>
+        {/* Email field */}
         <View style={styles.InputField}>
           <Icon name="email" color="black" size={25} />
           <TextInput
@@ -82,6 +86,8 @@ const SignUpScreen = () => {
             onChangeText={value => (email.current = value)}
           />
         </View>
+
+        {/* Username field */}
         <View style={styles.InputField}>
           <Icon name="person" color="black" size={25} />
           <TextInput
@@ -91,25 +97,46 @@ const SignUpScreen = () => {
             onChangeText={value => (username.current = value)}
           />
         </View>
+
+        {/* Password */}
         <View style={styles.InputField}>
           <Icon name="lock" color="black" size={25} />
-          <TextInput
-            placeholder="Password"
-            secureTextEntry={true}
-            style={styles.inputText}
-            placeholderTextColor={'grey'}
-            onChangeText={value => (password.current = value)}
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              flex: 1,
+              alignItems: 'center',
+            }}>
+            <TextInput
+              placeholder="Password"
+              secureTextEntry={passwordReveal}
+              style={styles.inputText}
+              placeholderTextColor={'grey'}
+              onChangeText={value => (password.current = value)}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                setPasswordReveal(prev => !prev);
+                setColor(passwordReveal ? 'grey' : 'black');
+              }}>
+              <Icon name="remove-red-eye" color={color} size={25} />
+            </TouchableOpacity>
+          </View>
         </View>
 
+        {/* Profile Picture */}
+
         <View style={styles.InputField}>
-          <Icon name="image" color="black" size={25} />
-          <TextInput
-            placeholder="Picture Url"
-            style={styles.inputText}
-            placeholderTextColor={'grey'}
-            onChangeText={value => (pictureUrl.current = value)}
-          />
+          {/* <Icon name="image" color="black" size={25} /> */}
+          <TouchableOpacity
+            onPress={() => {
+              setProfilePic()
+              console.log('select image from gallery');
+            }}
+            style={{flex: 1, alignItems: 'center'}}>
+            <Text style={{color: '#0009'}}>Select a profile picture</Text>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity

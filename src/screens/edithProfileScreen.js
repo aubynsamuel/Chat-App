@@ -1,6 +1,8 @@
 import { View, StyleSheet } from 'react-native';
+import { useAuth } from '../AuthContext';
 
-const SettingsScreen = () => {
+const EditProfileScreen = () => {
+  const {user} = useAuth()
   return (
     <View style={styles.container}>
     </View>
@@ -15,4 +17,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SettingsScreen;
+export default EditProfileScreen;

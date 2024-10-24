@@ -1,7 +1,7 @@
 import {React} from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import HomeScreen from '../screens/homeScreen';
-import SettingsScreen from '../screens/settingsScreen';
+import EditProfileScreen from '../screens/edithProfileScreen';
 import ChatScreen from '../screens/chatRoom';
 import SignUpScreen from '../screens/signUpScreen';
 import LoginScreen from '../screens/loginScreen';
@@ -50,7 +50,7 @@ const Navigator = () => {
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Search_Users" component={SearchUsersScreen} />
       <Stack.Screen name="UserProfile" component={userProfileScreen} />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
       <Stack.Screen name="ChatScreen" component={ChatScreen} />
     </Stack.Navigator>
   );

@@ -147,41 +147,29 @@ const ChatScreen = () => {
   };
 
   const createRoomIfItDoesNotExist = async () => {
-  const roomRef = doc(db, 'rooms', roomId);
-  
-  // Check if the room already exists
-  const roomSnapshot = await getDoc(roomRef);
-  
-  if (!roomSnapshot.exists()) {
-    // Room does not exist, create it with default values
-    await setDoc(
-      roomRef,
-      {
-        roomId,
-        participants: [user.userId, userId],
-        createdAt: getCurrentTime(),
-        lastMessage: '',
-        lastMessageTimestamp: getCurrentTime(),
-        lastMessageSenderId: '',
-      },
-      { merge: true }
-    );
-  } else {
-    console.log('Room already exists');
-  }
-};
+    const roomRef = doc(db, 'rooms', roomId);
 
+    // Check if the room already exists
+    const roomSnapshot = await getDoc(roomRef);
 
-  // const markMessagesAsRead = async () => {
-  //   try {
-  //     const roomRef = doc(db, 'rooms', roomId);
-  //     await updateDoc(roomRef, {
-  //       [`unreadCount.${user.userId}`]: 0,
-  //     });
-  //   } catch (error) {
-  //     console.error('Failed to mark messages as read:', error);
-  //   }
-  // };
+    if (!roomSnapshot.exists()) {
+      // Room does not exist, create it with default values
+      await setDoc(
+        roomRef,
+        {
+          roomId,
+          participants: [user.userId, userId],
+          createdAt: getCurrentTime(),
+          lastMessage: '',
+          lastMessageTimestamp: getCurrentTime(),
+          lastMessageSenderId: '',
+        },
+        {merge: true},
+      );
+    } else {
+      console.log('Room already exists');
+    }
+  };
 
   useEffect(() => {
     let typingTimeout;
@@ -221,7 +209,6 @@ const ChatScreen = () => {
         lastMessageTimestamp: currentTime,
         lastMessageSenderId: user?.userId,
       });
-
     } catch (error) {
       Alert.alert('Error', error.message);
     }
