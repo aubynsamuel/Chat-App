@@ -94,29 +94,35 @@ const ChatScreen = () => {
     };
 
     const subscribeToMessages = () => {
-      const docRef = doc(db, 'rooms', roomId);
-      const messagesRef = collection(docRef, 'messages');
-      const q = query(messagesRef, orderBy('createdAt', 'asc'));
+      try {
+        const docRef = doc(db, 'rooms', roomId);
+        const messagesRef = collection(docRef, 'messages');
+        const q = query(messagesRef, orderBy('createdAt', 'asc'));
 
-      return onSnapshot(q, snapshot => {
-        const allMessages = snapshot.docs.map(doc => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        const sortedMessages = allMessages.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-        );
-        setMessages(sortedMessages);
-        cacheMessages(sortedMessages);
-        updateScrollToEnd();
-      });
+        return onSnapshot(q, snapshot => {
+          const allMessages = snapshot.docs.map(doc => ({
+            ...doc.data(),
+            id: doc.id,
+          }));
+          const sortedMessages = allMessages.sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+          );
+          console.log('Sorted Messages:' + sortedMessages);
+          if (sortedMessages !== null || sortedMessages.length > 0) {
+            setMessages(sortedMessages);
+            cacheMessages(sortedMessages); 
+          }
+          updateScrollToEnd();
+        });
+      } catch (error) {
+        console.error('failed to subscribe to firebase ' + error);
+      }
     };
 
     const initializeChat = async () => {
-      await createRoomIfItDoesNotExist();
       await fetchCachedMessages();
+      await createRoomIfItDoesNotExist();
       const unsubscribe = subscribeToMessages();
-      // markMessagesAsRead();
 
       return () => {
         unsubscribe();
@@ -180,9 +186,9 @@ const ChatScreen = () => {
   }, [isTyping]);
 
   const handleSend = async () => {
+    setIsTyping(false);
     const message = inputText.trim();
     setInputText('');
-    setIsTyping(false);
     if (!message) return;
 
     try {
