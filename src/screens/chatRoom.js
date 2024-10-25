@@ -8,6 +8,7 @@ import {
   StatusBar,
   Alert,
   Keyboard,
+  Text,
 } from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import {db} from '../../firebaseConfig';
@@ -42,6 +43,38 @@ const ChatScreen = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [inputText, setInputText] = useState('');
   const roomId = getRoomId(user.userId, userId);
+
+  const [replyTo, setReplyTo] = useState(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+  // const messageRefs = useRef({});
+  const inputRef = useRef(null);
+
+  const handleReply = message => {
+    setReplyTo({
+      id: message.id,
+      content: message.content,
+      senderId: message.senderId,
+      senderName: message.senderName,
+    });
+    inputRef.current?.focus();
+  };
+
+  const cancelReply = () => {
+    setReplyTo(null);
+  };
+
+  const scrollToMessage = messageId => {
+    const index = messages.findIndex(msg => msg.id === messageId);
+    if (index !== -1 && flatListRef.current) {
+      flatListRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.5,
+      });
+      setHighlightedMessageId(messageId);
+      // setTimeout(() => setHighlightedMessageId(null), 2000);
+    }
+  };
 
   const updateMessagesReadStatus = async () => {
     try {
@@ -108,7 +141,7 @@ const ChatScreen = () => {
           console.log('Sorted Messages:' + sortedMessages);
           if (sortedMessages !== null || sortedMessages.length > 0) {
             setMessages(sortedMessages);
-            cacheMessages(sortedMessages); 
+            cacheMessages(sortedMessages);
           }
           updateScrollToEnd();
         });
@@ -148,6 +181,7 @@ const ChatScreen = () => {
         flatListRef.current.scrollToEnd({animated: true});
       }
     }, 100);
+    setHighlightedMessageId(null);
   };
 
   const createRoomIfItDoesNotExist = async () => {
@@ -189,12 +223,12 @@ const ChatScreen = () => {
     setInputText('');
     if (!message) return;
 
+    cancelReply();
     try {
       const currentTime = getCurrentTime();
       const roomRef = doc(db, 'rooms', roomId);
       const messagesRef = collection(roomRef, 'messages');
 
-      // Create the message document
       const messageData = {
         type: 'text',
         content: message,
@@ -202,17 +236,17 @@ const ChatScreen = () => {
         senderName: user?.username,
         read: false,
         createdAt: currentTime,
+        replyTo: replyTo, // Add reply information if exists
       };
 
-      // Add the message to the messages collection
       await addDoc(messagesRef, messageData);
-
-      // Update room metadata
       await updateDoc(roomRef, {
         lastMessage: message,
         lastMessageTimestamp: currentTime,
         lastMessageSenderId: user?.userId,
       });
+
+      setReplyTo(null); // Clear reply after sending
     } catch (error) {
       Alert.alert('Error', error.message);
     }
@@ -231,12 +265,47 @@ const ChatScreen = () => {
           ref={flatListRef}
           data={messages}
           keyExtractor={item => item.id}
-          renderItem={({item}) => <MessageObject item={item} />}
+          renderItem={({item}) => (
+            <MessageObject
+              item={item}
+              onReply={handleReply}
+              onReplyPress={scrollToMessage}
+              scrollToMessage={scrollToMessage}
+              isReferenceMessage={item.id === highlightedMessageId}
+            />
+          )}
           contentContainerStyle={styles.messages}
           showsVerticalScrollIndicator={false}
           initialNumToRender={messages.length}
           onContentSizeChange={updateScrollToEnd}
+          onScrollToIndexFailed={info => {
+            const wait = new Promise(resolve => setTimeout(resolve, 500));
+            wait.then(() => {
+              flatListRef.current?.scrollToIndex({
+                index: info.index,
+                animated: true,
+              });
+            });
+          }}
         />
+        {replyTo && (
+          <View style={styles.replyPreview}>
+            <View style={styles.replyPreviewContent}>
+              <Text style={styles.replyPreviewName}>
+                Replying to{' '}
+                {replyTo.senderId === user?.userId
+                  ? 'yourself'
+                  : replyTo.senderName}
+              </Text>
+              <Text numberOfLines={1} style={styles.replyPreviewText}>
+                {replyTo.content}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={cancelReply}>
+              <Icon name="close" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.inputContainer}>
           {isTyping && (
             <LottieView
@@ -254,6 +323,7 @@ const ChatScreen = () => {
             />
           )}
           <TextInput
+            ref={inputRef}
             value={inputText}
             onChangeText={text => {
               setIsTyping(true);
@@ -297,6 +367,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     margin: 10,
     borderRadius: 10,
+    zIndex: 2,
+    backgroundColor: '#fff',
   },
   textInputField: {
     width: '90%',
@@ -312,6 +384,31 @@ const styles = StyleSheet.create({
     backgroundColor: 'lightblue',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  replyPreview: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
+    padding: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    top: 16,
+    width: '90%',
+  },
+  replyPreviewContent: {
+    flex: 1,
+    marginRight: 8,
+  },
+  replyPreviewName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#075e54',
+  },
+  replyPreviewText: {
+    fontSize: 12,
+    color: '#666',
   },
 });
 

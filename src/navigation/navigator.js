@@ -6,7 +6,7 @@ import ChatScreen from '../screens/chatRoom';
 import SignUpScreen from '../screens/signUpScreen';
 import LoginScreen from '../screens/loginScreen';
 import {useAuth} from '../AuthContext';
-import {ActivityIndicator, View} from 'react-native';
+import {View} from 'react-native';
 import userProfileScreen from '../screens/userProfileScreen';
 import SearchUsersScreen from '../screens/searchUsersScreen';
 import LottieView from 'lottie-react-native';
@@ -25,7 +25,6 @@ const Navigator = () => {
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        {/* <ActivityIndicator size="large" color="#0000ff"></ActivityIndicator> */}
         <LottieView
           source={require('../../assets/Lottie_Files/send.json')}
           autoPlay

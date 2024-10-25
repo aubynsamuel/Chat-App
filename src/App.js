@@ -5,11 +5,9 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {NavigationContainer} from '@react-navigation/native';
 import {MenuProvider} from 'react-native-popup-menu';
 import changeNavigationBarColor from 'react-native-navigation-bar-color';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 const App = () => {
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
       <AuthContextProvider>
         <MenuProvider>
           <SafeAreaProvider>
@@ -17,7 +15,6 @@ const App = () => {
           </SafeAreaProvider>
         </MenuProvider>
       </AuthContextProvider>
-    </GestureHandlerRootView>
   );
 };
 
