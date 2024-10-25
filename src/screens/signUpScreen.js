@@ -7,8 +7,6 @@ import {
   Alert,
   StatusBar,
   ActivityIndicator,
-  Button,
-  Image,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -49,44 +47,77 @@ const SignUpScreen = () => {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else if (response.assets && response.assets.length > 0) {
         const selectedImage = response.assets[0].uri;
-        setProfileUrl (selectedImage); // Set selected image URI to state
+        setProfileUrl(selectedImage); // Set selected image URI to state
       }
     });
   };
 
+  // Email regex to validate the email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Password regex created to ensure password strength (at least 8 characters, including a number and a special character)
+  const passwordStrengthRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+
   const handleSignUpPressed = async () => {
     setIsLoading(true);
     if (!email.current || !username.current || !password.current) {
-      Alert.alert('Sign Up', 'Please enter your email, username and password');
+      Alert.alert(
+        'Sign Up',
+        'Please enter your email, username, and password.',
+      );
+      return;
+    }
+
+    // Email format validation
+    if (!emailRegex.test(email.current)) {
+      Alert.alert('Sign Up', 'Please enter a valid email address.');
+      return;
+    }
+
+    // Password strength validation
+    if (!passwordStrengthRegex.test(password.current)) {
+      Alert.alert(
+        'Sign Up',
+        'Password must be at least 8 characters long and include a number and a special character.',
+      );
       setIsLoading(false);
       return;
     }
-    let response = await signUp(
-      email.current,
-      username.current,
-      password.current,
-      profileUrl,
-    );
-    console.log(response);
-    if (
-      !response.success &&
-      !response.msg.includes('Missing or insufficient permissions')
-    ) {
-      Alert.alert('Sign Up', response.msg);
+
+    try {
+      let response = await signUp(
+        email.current,
+        username.current,
+        password.current,
+        profileUrl,
+      );
+      console.log(response);
+
+      if (
+        !response.success &&
+        !response.msg.includes('Missing or insufficient permissions')
+      ) {
+        Alert.alert(
+          'Sign Up Failed',
+          response.msg || 'An unexpected error occurred.',
+        );
+        setIsLoading(false);
+        return;
+      }
+
+      navigation.navigate('Home');
       setIsLoading(false);
-      return;
+    } catch (error) {
+      Alert.alert(
+        'Sign Up Error',
+        'An error occurred during sign up. Please try again later.',
+      );
     }
-    navigation.navigate('Home');
-    setIsLoading(false);
   };
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#f3f3f3"
-        animated={true}
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#f3f3f3" />
 
       <LottieView
         source={require('../../assets/Lottie_Files/Sign Up.json')}
@@ -114,7 +145,7 @@ const SignUpScreen = () => {
         <View style={styles.InputField}>
           <Icon name="person" color="black" size={25} />
           <TextInput
-            placeholder="username"
+            placeholder="Username"
             style={styles.inputText}
             placeholderTextColor={'grey'}
             onChangeText={value => (username.current = value)}
@@ -158,7 +189,9 @@ const SignUpScreen = () => {
               console.log('select image from gallery');
             }}
             style={{flex: 1, alignItems: 'center'}}>
-            <Text style={{color: '#0009'}}>{profileUrl?"Change profile pic":"Select a profile picture"}</Text>
+            <Text style={{color: '#0009'}}>
+              {profileUrl ? 'Change profile pic' : 'Select a profile picture'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -167,17 +200,14 @@ const SignUpScreen = () => {
           <Image source={{uri: profileUrl}} style={styles.profileImage} />
         )} */}
 
-        <TouchableOpacity
-          style={styles.signUp}
-          onPress={() => {
-            handleSignUpPressed();
-          }}>
+        <TouchableOpacity style={styles.signUp} onPress={handleSignUpPressed}>
           {isLoading ? (
             <ActivityIndicator size="large" color="white" />
           ) : (
             <Text style={styles.signUpText}>Sign Up</Text>
           )}
         </TouchableOpacity>
+
         <View style={{flexDirection: 'row', alignSelf: 'center'}}>
           <Text style={styles.registerText}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -236,11 +266,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-  },
-  forgotPasswordText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    alignSelf: 'flex-end',
   },
   registerText: {
     marginTop: 5,
