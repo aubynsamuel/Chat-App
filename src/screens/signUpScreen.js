@@ -7,8 +7,6 @@ import {
   Alert,
   StatusBar,
   ActivityIndicator,
-  Button,
-  Image,
 } from 'react-native';
 import React, {useRef, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -49,7 +47,7 @@ const SignUpScreen = () => {
         console.log('ImagePicker Error: ', response.errorMessage);
       } else if (response.assets && response.assets.length > 0) {
         const selectedImage = response.assets[0].uri;
-        setProfileUrl (selectedImage); // Set selected image URI to state
+        setProfileUrl(selectedImage); // Set selected image URI to state
       }
     });
   };
@@ -63,7 +61,10 @@ const SignUpScreen = () => {
   const handleSignUpPressed = async () => {
     setIsLoading(true);
     if (!email.current || !username.current || !password.current) {
-      Alert.alert('Sign Up', 'Please enter your email, username, and password.');
+      Alert.alert(
+        'Sign Up',
+        'Please enter your email, username, and password.',
+      );
       return;
     }
 
@@ -75,7 +76,10 @@ const SignUpScreen = () => {
 
     // Password strength validation
     if (!passwordStrengthRegex.test(password.current)) {
-      Alert.alert('Sign Up', 'Password must be at least 8 characters long and include a number and a special character.');
+      Alert.alert(
+        'Sign Up',
+        'Password must be at least 8 characters long and include a number and a special character.',
+      );
       setIsLoading(false);
       return;
     }
@@ -85,27 +89,35 @@ const SignUpScreen = () => {
         email.current,
         username.current,
         password.current,
-        pictureUrl.current
+        profileUrl,
       );
       console.log(response);
 
-      if (!response.success && !response.msg.includes('Missing or insufficient permissions')) {
-        Alert.alert('Sign Up Failed', response.msg || 'An unexpected error occurred.');
+      if (
+        !response.success &&
+        !response.msg.includes('Missing or insufficient permissions')
+      ) {
+        Alert.alert(
+          'Sign Up Failed',
+          response.msg || 'An unexpected error occurred.',
+        );
+        setIsLoading(false);
         return;
       }
 
       navigation.navigate('Home');
+      setIsLoading(false);
     } catch (error) {
-      Alert.alert('Sign Up Error', 'An error occurred during sign up. Please try again later.');
+      Alert.alert(
+        'Sign Up Error',
+        'An error occurred during sign up. Please try again later.',
+      );
     }
   };
 
   return (
     <SafeAreaView style={{flex: 1}}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#f3f3f3"
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#f3f3f3" />
 
       <LottieView
         source={require('../../assets/Lottie_Files/Sign Up.json')}
@@ -177,7 +189,9 @@ const SignUpScreen = () => {
               console.log('select image from gallery');
             }}
             style={{flex: 1, alignItems: 'center'}}>
-            <Text style={{color: '#0009'}}>{profileUrl?"Change profile pic":"Select a profile picture"}</Text>
+            <Text style={{color: '#0009'}}>
+              {profileUrl ? 'Change profile pic' : 'Select a profile picture'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -186,17 +200,14 @@ const SignUpScreen = () => {
           <Image source={{uri: profileUrl}} style={styles.profileImage} />
         )} */}
 
-        <TouchableOpacity
-          style={styles.signUp}
-          onPress={handleSignUpPressed}
-        >
+        <TouchableOpacity style={styles.signUp} onPress={handleSignUpPressed}>
           {isLoading ? (
             <ActivityIndicator size="large" color="white" />
           ) : (
             <Text style={styles.signUpText}>Sign Up</Text>
           )}
         </TouchableOpacity>
-        
+
         <View style={{flexDirection: 'row', alignSelf: 'center'}}>
           <Text style={styles.registerText}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
