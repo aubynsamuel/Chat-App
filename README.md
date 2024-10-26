@@ -1,6 +1,3 @@
-Here’s a GitHub README template you can use for your chat app repository:
-
----
 
 # 🔥 Real-Time Chat Application
 
