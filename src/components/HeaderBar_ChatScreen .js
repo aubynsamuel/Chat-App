@@ -32,12 +32,12 @@ const MIN_HEADER_HEIGHT = 65;
 
 // Spring configuration for smoother animations
 const SPRING_CONFIG = {
-  damping: 20,
-  mass: 0.8,
-  stiffness: 120,
-  overshootClamping: false,
-  restSpeedThreshold: 0.3,
-  restDisplacementThreshold: 0.3,
+  damping: 30/1.5, // Increase damping for less bounciness
+  mass: 1/1.5,
+  stiffness: 150*1.5,
+  overshootClamping: true, // Prevent overshooting the target
+  restSpeedThreshold: 0.1, // Adjust thresholds for quicker settling
+  restDisplacementThreshold: 0.1,
 };
 
 const FADE_CONFIG = {
@@ -61,16 +61,13 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
     },
     onEnd: event => {
       const velocity = event.velocityY / 1000;
-      const shouldExpand = gestureProgress.value > 0.5 || velocity > 0.5;
-      
-      gestureProgress.value = withSpring(
-        shouldExpand ? 1 : 0,
-        {
-          ...SPRING_CONFIG,
-          velocity,
-        },
-      );
-      
+      const shouldExpand = gestureProgress.value > 0.9 || velocity > 0.9;
+
+      gestureProgress.value = withSpring(shouldExpand ? 1 : 0, {
+        ...SPRING_CONFIG,
+        velocity,
+      });
+
       runOnJS(setIsHeaderExpanded)(shouldExpand);
     },
   });
@@ -91,26 +88,76 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
     width: withSpring(
       interpolate(
         gestureProgress.value,
-        [0, 1],
-        [45, MAX_IMAGE_WIDTH],
+        [
+          0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6,
+          0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1,
+        ],
+        [
+          45,
+          MAX_IMAGE_WIDTH / 20,
+          MAX_IMAGE_WIDTH / 19,
+          MAX_IMAGE_WIDTH / 18,
+          MAX_IMAGE_WIDTH / 17,
+          MAX_IMAGE_WIDTH / 16,
+          MAX_IMAGE_WIDTH / 15,
+          MAX_IMAGE_WIDTH / 14,
+          MAX_IMAGE_WIDTH / 13,
+          MAX_IMAGE_WIDTH / 12,
+          MAX_IMAGE_WIDTH / 11,
+          MAX_IMAGE_WIDTH / 10,
+          MAX_IMAGE_WIDTH / 9,
+          MAX_IMAGE_WIDTH / 8,
+          MAX_IMAGE_WIDTH / 7,
+          MAX_IMAGE_WIDTH / 6,
+          MAX_IMAGE_WIDTH / 5,
+          MAX_IMAGE_WIDTH / 4,
+          MAX_IMAGE_WIDTH / 3,
+          MAX_IMAGE_WIDTH / 2,
+          MAX_IMAGE_WIDTH,
+        ],
         Extrapolate.CLAMP,
       ),
-      SPRING_CONFIG,
+      // SPRING_CONFIG,
     ),
     height: withSpring(
       interpolate(
         gestureProgress.value,
-        [0, 1],
-        [45, MAX_HEADER_HEIGHT],
+        [
+          0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6,
+          0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1,
+        ],
+        [
+          45,
+          MAX_HEADER_HEIGHT / 20,
+          MAX_HEADER_HEIGHT / 19,
+          MAX_HEADER_HEIGHT / 18,
+          MAX_HEADER_HEIGHT / 17,
+          MAX_HEADER_HEIGHT / 16,
+          MAX_HEADER_HEIGHT / 15,
+          MAX_HEADER_HEIGHT / 14,
+          MAX_HEADER_HEIGHT / 13,
+          MAX_HEADER_HEIGHT / 12,
+          MAX_HEADER_HEIGHT / 11,
+          MAX_HEADER_HEIGHT / 10,
+          MAX_HEADER_HEIGHT / 9,
+          MAX_HEADER_HEIGHT / 8,
+          MAX_HEADER_HEIGHT / 7,
+          MAX_HEADER_HEIGHT / 6,
+          MAX_HEADER_HEIGHT / 5,
+          MAX_HEADER_HEIGHT / 4,
+          MAX_HEADER_HEIGHT / 3,
+          MAX_HEADER_HEIGHT / 2,
+          MAX_HEADER_HEIGHT,
+        ],
         Extrapolate.CLAMP,
       ),
-      SPRING_CONFIG,
+      // SPRING_CONFIG,
     ),
     borderRadius: withSpring(
       interpolate(
         gestureProgress.value,
-        [0, 1],
-        [30, 0],
+        [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+        [30, 25.5, 21, 16.5, 12, 7.5, 3, -1.5, -6, -10.5, 0],
         Extrapolate.CLAMP,
       ),
       SPRING_CONFIG,
@@ -120,8 +167,9 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
         translateX: withSpring(
           interpolate(
             gestureProgress.value,
-            [0, 1],
-            [0, -10],
+            [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+            [0, -0.5, -1, -1.5, -2, -2.5, -3, -3.5, -4, -4.5, -5, -5.5, -6, -6.5, -7, -7.5, -8, -8.5, -9, -9.5, -10],
+            
             Extrapolate.CLAMP,
           ),
           SPRING_CONFIG,
@@ -131,8 +179,9 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
         translateY: withSpring(
           interpolate(
             gestureProgress.value,
-            [0, 1],
-            [0, 1],
+           [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+           [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1],
+           
             Extrapolate.CLAMP,
           ),
           SPRING_CONFIG,
@@ -143,12 +192,7 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
 
   const animatedTitleStyle = useAnimatedStyle(() => ({
     opacity: withTiming(
-      interpolate(
-        gestureProgress.value,
-        [0, 0.3],
-        [1, 0],
-        Extrapolate.CLAMP,
-      ),
+      interpolate(gestureProgress.value, [0, 0.3], [1, 0], Extrapolate.CLAMP),
       FADE_CONFIG,
     ),
     transform: [
@@ -192,15 +236,14 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
           <Menu>
             <MenuTrigger>
               <View>
-                {isHeaderExpanded && (
-                  <Animated.Text 
-                    style={styles.titleOnTop} 
-                    entering={FadeIn.duration(400)} 
-                    exiting={FadeOut.duration(300)}
-                  >
+                {/* {isHeaderExpanded && (
+                  <Animated.Text
+                    style={styles.titleOnTop}
+                    entering={FadeIn.duration(100)}
+                    exiting={FadeOut.duration(100)}>
                     {title}
                   </Animated.Text>
-                )}
+                )} */}
                 {imageFailed || !profileUrl ? (
                   <Animated.Image
                     style={[styles.avatar, animatedImageStyle]}
@@ -277,8 +320,8 @@ const styles = StyleSheet.create({
     marginLeft: -30,
   },
   titleOnTop: {
-    backgroundColor: "lightblue",
-    opacity:0.9,
+    backgroundColor: 'lightblue',
+    opacity: 0.9,
     position: 'absolute',
     top: -10,
     left: -10,
@@ -288,7 +331,7 @@ const styles = StyleSheet.create({
     fontSize: 22.5,
     fontWeight: '500',
     textAlign: 'center',
-    zIndex:5,
+    zIndex: 5,
     fontSize: 22.5,
     fontWeight: '500',
   },

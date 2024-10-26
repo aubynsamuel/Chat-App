@@ -48,7 +48,7 @@ const ChatScreen = () => {
   const [highlightedMessageId, setHighlightedMessageId] = useState(null);
   // const messageRefs = useRef({});
   const inputRef = useRef(null);
-  console.log(profileUrl)
+  console.log(profileUrl);
 
   const handleReply = message => {
     setReplyTo({
@@ -256,11 +256,13 @@ const ChatScreen = () => {
   return (
     <View style={{flex: 1}}>
       <StatusBar barStyle="dark-content" backgroundColor="lightblue" />
-      <TopHeaderBar
-        title={username}
-        backButtonShown={true}
-        profileUrl={profileUrl}
-      />
+      <View style={{position:"absolute", zIndex:5, width:"100%"}}>
+        <TopHeaderBar
+          title={username}
+          backButtonShown={true}
+          profileUrl={profileUrl}
+        />
+      </View>
       <View style={styles.container}>
         <FlatList
           ref={flatListRef}
@@ -334,6 +336,7 @@ const ChatScreen = () => {
             placeholder="Type a message..."
             placeholderTextColor={'grey'}
             numberOfLines={1}
+            multiline={true}
           />
           <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
             <Icon
@@ -358,7 +361,8 @@ const styles = StyleSheet.create({
   },
   messages: {
     paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingTop:65,
+    // paddingBottom: 10,
   },
   inputContainer: {
     flexDirection: 'row',
