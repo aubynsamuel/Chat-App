@@ -1,5 +1,5 @@
 
-# 🔥 Real-Time Chat Application
+# 🔥 Flash Send (Real-Time Chat Application)
 
 Welcome to the **Real-Time Chat Application** built using **React Native** and **Firebase**. This app allows users to chat in real-time with messaging features such as message caching, user presence, and seamless chat history.
 
