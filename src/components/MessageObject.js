@@ -4,6 +4,14 @@ import {formatTimeWithoutSeconds} from '../../commons';
 import {useAuth} from '../AuthContext';
 import {GestureHandlerRootView, Swipeable} from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import PopUpMenu from './PopUpMenu';
+import {Clipboard} from 'react-native';
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 
 const MessageObject = ({
   item,
@@ -16,6 +24,15 @@ const MessageObject = ({
   const swipeableRef = useRef(null);
   const isUserMessage = item.senderId === user?.userId;
   const messageStyle = isUserMessage ? styles.userMessage : styles.otherMessage;
+
+  const copyToClipboard = async textToCopy => {
+    try {
+      Clipboard.setString(textToCopy);
+      console.log('Text copied to clipboard!');
+    } catch (error) {
+      console.error('Error copying text to clipboard:', error);
+    }
+  };
 
   const renderRightActions = (progress, dragX) => {
     const trans = dragX.interpolate({
@@ -70,14 +87,14 @@ const MessageObject = ({
     <GestureHandlerRootView>
       <Swipeable
         ref={swipeableRef}
-        renderLeftActions={isUserMessage ? null : renderLeftActions} 
+        renderLeftActions={isUserMessage ? null : renderLeftActions}
         renderRightActions={isUserMessage ? renderRightActions : null}
         onSwipeableOpen={handleReply}
-        leftThreshold={50} 
-        rightThreshold={50} 
+        leftThreshold={50}
+        rightThreshold={50}
         overshootLeft={false}
         overshootRight={false}
-        friction={0.5} 
+        friction={0.5}
         enabled={!isReferenceMessage}>
         <View
           style={[
@@ -89,7 +106,8 @@ const MessageObject = ({
           {item.replyTo && (
             <TouchableOpacity
               onPress={handleReplyReference}
-              style={styles.replyToContainer}>
+              style={styles.replyToContainer}
+              activeOpacity={0.3}>
               <View
                 style={[
                   styles.replyIndicator,
@@ -111,17 +129,61 @@ const MessageObject = ({
               </View>
             </TouchableOpacity>
           )}
-          <Text style={messageStyle}>{item.content}</Text>
-          <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
-            <Text style={isUserMessage ? styles.userTime : styles.otherTime}>
-              {formatTimeWithoutSeconds(item.createdAt)}
-            </Text>
-            {item.read && isUserMessage && (
-              <Text style={{fontSize: 10, color: 'grey', marginLeft: 5}}>
-                read
-              </Text>
-            )}
-          </View>
+          <Menu>
+            <MenuTrigger>
+              <Text style={messageStyle}>{item.content}</Text>
+              <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+                <Text
+                  style={isUserMessage ? styles.userTime : styles.otherTime}>
+                  {formatTimeWithoutSeconds(item.createdAt)}
+                </Text>
+                {item.read && isUserMessage && (
+                  <Text style={{fontSize: 10, color: 'grey', marginLeft: 5}}>
+                    read
+                  </Text>
+                )}
+              </View>
+            </MenuTrigger>
+            <MenuOptions
+              style={styles.container}
+              customStyles={{
+                optionsContainer: {
+                  // elevation: 5,
+                  borderRadius: 10,
+                  borderCurve: 'circular',
+                  marginTop: 40,
+                  marginLeft: -10,
+                },
+              }}>
+              {/* Copy Message */}
+              <MenuOption
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+                onSelect={() => {
+                  copyToClipboard(item.content)
+                }}>
+                <Text style={styles.menuText}>Copy</Text>
+                <Icon name="content-paste" color="black" size={25} />
+              </MenuOption>
+
+              {/* Reply */}
+              <MenuOption
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+                onSelect={() => {
+                  handleReply()
+                }}>
+                <Text style={styles.menuText}>Reply</Text>
+                <Icon name="reply" color="black" size={25} />
+              </MenuOption>
+            </MenuOptions>
+          </Menu>
         </View>
       </Swipeable>
     </GestureHandlerRootView>
@@ -194,6 +256,15 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     borderWidth: 1,
     borderColor: '#075e54',
+  },
+  container: {
+    backgroundColor: 'lightblue',
+    elevation: 2,
+  },
+  menuText: {
+    fontSize: 15,
+    margin: 8,
+    color: 'black',
   },
 });
 
