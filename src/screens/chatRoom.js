@@ -48,6 +48,7 @@ const ChatScreen = () => {
   const [highlightedMessageId, setHighlightedMessageId] = useState(null);
   // const messageRefs = useRef({});
   const inputRef = useRef(null);
+  console.log(profileUrl)
 
   const handleReply = message => {
     setReplyTo({

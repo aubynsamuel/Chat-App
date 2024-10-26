@@ -13,6 +13,7 @@ import {
 const TopHeaderBar = ({title, backButtonShown}) => {
   const navigation = useNavigation();
   const {user, logout} = useAuth();
+  const [imageFailed, setImageFailed] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -41,7 +42,7 @@ const TopHeaderBar = ({title, backButtonShown}) => {
       <View>
         <Menu>
           <MenuTrigger>
-            {(user?.profileUrl == '') ? (
+            {(user?.profileUrl == '' || user?.profileUrl == null || imageFailed)? (
               <Image
                 source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
                 style={{width: 45, height: 45, borderRadius: 30}}
@@ -52,6 +53,7 @@ const TopHeaderBar = ({title, backButtonShown}) => {
                 source={{uri: user?.profileUrl}}
                 style={{width: 45, height: 45, borderRadius: 30}}
                 transition={500}
+                onError={() => setImageFailed(true)}
               />
             )}
           </MenuTrigger>
@@ -66,7 +68,7 @@ const TopHeaderBar = ({title, backButtonShown}) => {
                 marginLeft: -30,
               },
             }}>
-              {/* Profile */}
+            {/* Profile */}
             <MenuOption
               style={{
                 flexDirection: 'row',

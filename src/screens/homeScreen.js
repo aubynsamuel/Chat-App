@@ -120,7 +120,7 @@ function HomeScreen() {
         animated={true}
       />
 
-      <TopHeaderBar title={'Chats'} backButtonShown={false} />
+      <TopHeaderBar title={'Chats'} backButtonShown={false}  />
 
       <View style={styles.container}>
         <ChatList

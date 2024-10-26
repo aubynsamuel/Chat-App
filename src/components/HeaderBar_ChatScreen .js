@@ -1,36 +1,24 @@
 import {React, useState} from 'react';
-import {
-  Text,
-  TouchableOpacity,
-  View,
-  StyleSheet,
-  Image,
-} from 'react-native';
+import {Text, TouchableOpacity, View, StyleSheet, Image} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useAuth} from '../AuthContext';
-import {
-  Menu,
-  MenuOptions,
-  MenuTrigger,
-} from 'react-native-popup-menu';
+import {Menu, MenuOptions, MenuTrigger} from 'react-native-popup-menu';
 
 const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
   const navigation = useNavigation();
-  const {user, logout} = useAuth();
-
-  const handleLogout = () => {
-    logout();
-    navigation.navigate('Login');
-  };
-  // Fetch user profile picture when component mounts
+  const [imageFailed, setImageFailed] = useState(false);
 
   return (
     <View style={styles.headerContainer}>
       {/* Back Button */}
       {backButtonShown && (
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" style={styles.headerBarIcon} color={"black"} size={25} />
+          <Icon
+            name="arrow-back"
+            style={styles.headerBarIcon}
+            color={'black'}
+            size={25}
+          />
         </TouchableOpacity>
       )}
 
@@ -41,17 +29,18 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
       <View>
         <Menu>
           <MenuTrigger>
-          {(user.profileUrl == '') ? (
+            {(imageFailed || profileUrl == '' || profileUrl == null) ? (
               <Image
-                source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
                 style={{width: 45, height: 45, borderRadius: 30}}
+                source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
                 transition={500}
               />
             ) : (
               <Image
-                source={{uri: profileUrl}}
                 style={{width: 45, height: 45, borderRadius: 30}}
+                source={{uri: profileUrl}}
                 transition={500}
+                onError={() => setImageFailed(true)}
               />
             )}
           </MenuTrigger>
@@ -65,29 +54,7 @@ const TopHeaderBar = ({title, backButtonShown, profileUrl}) => {
                 marginTop: 40,
                 marginLeft: -30,
               },
-            }}>
-            {/* <MenuOption
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-              onSelect={() => {}}>
-              <Text style={styles.menuText}>Profile</Text>
-              <Icon name="person" color="black" size={25} />
-            </MenuOption>
-
-            <MenuOption
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-              onSelect={() => {handleLogout()}}>
-              <Text style={styles.menuText}>Sign Out</Text>
-              <Icon name="logout" color="black" size={25} />
-            </MenuOption> */}
-          </MenuOptions>
+            }}></MenuOptions>
         </Menu>
       </View>
     </View>
@@ -125,6 +92,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     margin: 8,
     color: 'black',
+  },
+  avatar: {
+    height: 50,
+    width: 50,
+    borderRadius: 25,
+    // borderColor: 'gray',
+    // overflow: 'hidden',
+    // zIndex: 1,
   },
 });
 export default TopHeaderBar;

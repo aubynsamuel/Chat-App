@@ -11,12 +11,13 @@ import {
 import React, {useState} from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
-import {useAuth} from '../AuthContext'; 
+import {useAuth} from '../AuthContext';
 
 const UserProfileScreen = () => {
-  const {user, logout} = useAuth(); 
+  const {user, logout} = useAuth();
   const navigation = useNavigation();
   const profileUrl = user?.profileUrl;
+  const [imageFailed, setImageFailed] = useState(false);
   const handleLogout = async () => {
     await logout();
     navigation.navigate('Login');
@@ -37,16 +38,25 @@ const UserProfileScreen = () => {
       </TouchableOpacity>
       {/* User Profile Info */}
       <View style={styles.profileContainer}>
-        <Image
-          source={profileUrl? {uri: profileUrl} : require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
-          style={styles.avatar}
-        />
+        {imageFailed || profileUrl == '' ? (
+          <Image
+            style={styles.avatar}
+            source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
+            transition={500}
+          />
+        ) : (
+          <Image
+            style={styles.avatar}
+            source={{uri: profileUrl}}
+            transition={500}
+            onError={() => setImageFailed(true)}
+          />
+        )}
         <Text style={styles.username}>{user?.username || 'User Name'}</Text>
       </View>
 
       {/* Options Section */}
       <View style={styles.optionsContainer}>
-
         {/* Edit profile */}
         <TouchableOpacity
           style={styles.option}
@@ -65,7 +75,8 @@ const UserProfileScreen = () => {
               justifyContent: 'space-between',
             }}>
             <Text style={styles.optionText}>Notifications</Text>
-            <Switch value={true}
+            <Switch
+              value={true}
               trackColor={{false: '#767577', true: '#313236'}}
               style={{
                 marginLeft: 10,
@@ -78,7 +89,6 @@ const UserProfileScreen = () => {
           <Icon name="logout" size={25} color="black" />
           <Text style={styles.optionText}>Logout</Text>
         </TouchableOpacity>
-
       </View>
     </ScrollView>
   );

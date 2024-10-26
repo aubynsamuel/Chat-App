@@ -18,6 +18,12 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {useNavigation} from '@react-navigation/native';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from 'firebase/storage';
 
 const EditProfileScreen = () => {
   const {user, updateProfile} = useAuth(); // Assuming `updateProfile` is a function from `useAuth` to save user changes
@@ -58,19 +64,58 @@ const EditProfileScreen = () => {
     }
 
     try {
-      const response = await updateProfile({
-        username,
-        profileUrl,
-      });
+      let downloadURL = profileUrl;
 
-      if (!response.success) {
-        Alert.alert('Error', response.msg);
+      // If profileUrl is a local URI (starts with file://), upload it to Firebase Storage
+      if (profileUrl && profileUrl.startsWith('file://')) {
+        const storage = getStorage();
+        const storageRef = ref(storage, `profilePictures/${user.uid}`);
+
+        const response = await fetch(profileUrl);
+        const blob = await response.blob();
+
+        const uploadTask = uploadBytesResumable(storageRef, blob, {
+          contentType: 'image/jpeg',
+        });
+
+        uploadTask.on(
+          'state_changed',
+          snapshot => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+          },
+          error => {
+            console.error('Upload failed:', error.message);
+            Alert.alert('Upload Error', error.message);
+            setIsLoading(false);
+          },
+          async () => {
+            downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            console.log('File available at', downloadURL);
+
+            const response = await updateProfile({
+              username,
+              profileUrl: downloadURL, // Use Firebase Storage URL
+            });
+
+            if (!response.success) {
+              Alert.alert('Error', response.msg);
+            } else {
+              Alert.alert('Profile Update', 'Profile updated successfully!');
+            }
+            setIsLoading(false);
+          },
+        );
+      } else {
+        const response = await updateProfile({username, profileUrl});
+        if (!response.success) {
+          Alert.alert('Error', response.msg);
+        } else {
+          Alert.alert('Profile Update', 'Profile updated successfully!');
+        }
         setIsLoading(false);
-        return;
       }
-
-      Alert.alert('Profile Update', 'Profile updated successfully!');
-      setIsLoading(false);
     } catch (error) {
       console.error('Error updating profile:', error);
       Alert.alert('Profile Update', 'Failed to update profile');

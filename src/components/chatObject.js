@@ -11,6 +11,7 @@ const ChatObject = ({room}) => {
   const navigation = useNavigation();
   const {user} = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
@@ -46,17 +47,20 @@ const ChatObject = ({room}) => {
         {/* Avatar */}
         <View>
           <TouchableOpacity>
-            {!room?.otherParticipant.profileUrl ? (
+            {imageFailed ||
+            room?.otherParticipant.profileUrl == '' ||
+            room?.otherParticipant.profileUrl == null ? (
               <Image
-                style={[styles.avatar]}
+                style={{width: 50, height: 50, borderRadius: 30}}
                 source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
                 transition={500}
               />
             ) : (
               <Image
-                style={[styles.avatar]}
+                style={{width: 50, height: 50, borderRadius: 30}}
                 source={{uri: room?.otherParticipant.profileUrl}}
                 transition={500}
+                onError={() => setImageFailed(true)}
               />
             )}
           </TouchableOpacity>
@@ -128,8 +132,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     alignSelf: 'flex-end',
     backgroundColor: 'lightblue',
-    width:"auto",
-    paddingHorizontal:5
+    width: 'auto',
+    paddingHorizontal: 5,
   },
 });
 

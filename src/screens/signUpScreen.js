@@ -18,18 +18,20 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useAuth} from '../AuthContext';
 import LottieView from 'lottie-react-native';
-import {launchImageLibrary} from 'react-native-image-picker'; // Import image picker
+import {launchImageLibrary} from 'react-native-image-picker';
+import {storage} from '../../firebaseConfig';
+import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
   const email = useRef('');
   const username = useRef('');
   const password = useRef('');
-  const [profileUrl, setProfileUrl] = useState(null);
   const {signUp} = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [passwordReveal, setPasswordReveal] = useState(true);
   const [color, setColor] = useState('black');
+  const [profileUrl, setProfileUrl] = useState(null);
 
   // Function to handle image selection from the gallery
   const selectImage = () => {
@@ -37,10 +39,10 @@ const SignUpScreen = () => {
       mediaType: 'photo',
       maxWidth: 300,
       maxHeight: 300,
-      quality: 0.7,
+      quality: 1,
     };
 
-    launchImageLibrary(options, response => {
+    launchImageLibrary(options, async response => {
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.errorMessage) {
@@ -65,12 +67,14 @@ const SignUpScreen = () => {
         'Sign Up',
         'Please enter your email, username, and password.',
       );
+      setIsLoading(false);
       return;
     }
 
     // Email format validation
     if (!emailRegex.test(email.current)) {
       Alert.alert('Sign Up', 'Please enter a valid email address.');
+      setIsLoading(false);
       return;
     }
 
@@ -85,33 +89,50 @@ const SignUpScreen = () => {
     }
 
     try {
+      let downloadURL = null;
+
+      // Upload the profile picture if selected
+      if (profileUrl) {
+        const response = await fetch(profileUrl); // Fetch the local file
+        const blob = await response.blob(); // Convert to Blob for Firebase
+
+        // Create a reference in Firebase Storage
+        const storageRef = ref(
+          storage,
+          `profilePictures/${username.current}.jpg`,
+        );
+
+        // Upload the blob
+        await uploadBytes(storageRef, blob);
+
+        // Get the download URL
+        downloadURL = await getDownloadURL(storageRef);
+      }
+
+      // Use the downloadURL in your signUp function
       let response = await signUp(
         email.current,
         username.current,
         password.current,
-        profileUrl,
+        downloadURL,
       );
-      console.log(response);
 
-      if (
-        !response.success &&
-        !response.msg.includes('Missing or insufficient permissions')
-      ) {
+      if (response.success) {
+        navigation.navigate('Home');
+      } else {
         Alert.alert(
           'Sign Up Failed',
           response.msg || 'An unexpected error occurred.',
         );
-        setIsLoading(false);
-        return;
       }
-
-      navigation.navigate('Home');
-      setIsLoading(false);
     } catch (error) {
+      console.error('Error signing up:', error);
       Alert.alert(
         'Sign Up Error',
         'An error occurred during sign up. Please try again later.',
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
