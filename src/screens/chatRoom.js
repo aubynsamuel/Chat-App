@@ -182,7 +182,6 @@ const ChatScreen = () => {
         flatListRef.current.scrollToEnd({animated: true});
       }
     }, 100);
-    setHighlightedMessageId(null);
   };
 
   const createRoomIfItDoesNotExist = async () => {
@@ -223,7 +222,7 @@ const ChatScreen = () => {
     const message = inputText.trim();
     setInputText('');
     if (!message) return;
-
+    setHighlightedMessageId(null);
     cancelReply();
     try {
       const currentTime = getCurrentTime();
