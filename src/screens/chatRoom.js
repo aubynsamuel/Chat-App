@@ -212,7 +212,7 @@ const ChatScreen = () => {
   useEffect(() => {
     let typingTimeout;
     if (isTyping) {
-      typingTimeout = setTimeout(() => setIsTyping(false), 1000);
+      typingTimeout = setTimeout(() => setIsTyping(false), 500);
     }
     return () => clearTimeout(typingTimeout);
   }, [isTyping]);
