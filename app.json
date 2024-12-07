@@ -2,14 +2,14 @@
   "expo": {
     "name": "Flash Send",
     "slug": "FlashSend",
-    "version": "2.0.2",
+    "version": "3.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "flashsend",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "cover",
+      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {

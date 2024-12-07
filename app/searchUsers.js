@@ -9,13 +9,14 @@ import {
   Image,
 } from "react-native";
 import { getDocs, query, where, collection } from "firebase/firestore";
-import { db } from "../../env/firebaseConfig";
-import { useAuth } from "../AuthContext";
+import { db } from "../env/firebaseConfig";
+import { useAuth } from "../src/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./sreen_Styles";
-import { useTheme } from "../ThemeContext";
+import getStyles from "../src/sreen_Styles";
+import { useTheme } from "../src/ThemeContext";
 import { StatusBar } from "expo-status-bar";
+import { router } from "expo-router";
 
 const SearchUsersScreen = () => {
   const { user } = useAuth();
@@ -53,7 +54,7 @@ const SearchUsersScreen = () => {
   };
 
   const handleUserPress = (selectedUser) => {
-    navigation.navigate("ChatScreen", {
+    router.navigate("/chatRoom", {
       userId: selectedUser.userId,
       username: selectedUser.username,
       profileUrl: selectedUser.profileUrl,
@@ -87,7 +88,7 @@ const SearchUsersScreen = () => {
               ? "lightgrey"
               : "black"
           }
-          onPress={() => navigation.goBack()}
+          onPress={() => router.navigate("..")}
         />
         <TextInput
           style={styles.searchInput}
@@ -111,7 +112,7 @@ const SearchUsersScreen = () => {
             <Image
               source={
                 { uri: item.profileUrl } ||
-                require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
+                require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
               }
               style={{ width: 50, height: 50, borderRadius: 25 }}
             />

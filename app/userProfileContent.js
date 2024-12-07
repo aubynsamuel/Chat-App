@@ -8,12 +8,13 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../src/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./sreen_Styles";
-import { useTheme } from "../ThemeContext";
+import getStyles from "../src/sreen_Styles";
+import { useTheme } from "../src/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { launchImageLibrary } from "react-native-image-picker";
+import { router } from "expo-router";
 
 const UserProfileContent = ({ children }) => {
   const { user, logout, showToast } = useAuth();
@@ -26,7 +27,7 @@ const UserProfileContent = ({ children }) => {
   const [selected, setSelected] = useState();
   const handleLogout = async () => {
     await logout();
-    navigation.replace("Login");
+    router.replace("login");
   };
 
   const selectImage = async () => {
@@ -62,7 +63,7 @@ const UserProfileContent = ({ children }) => {
       {/* back icon */}
       <TouchableOpacity
         // style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.navigate("..")}
       >
         <MaterialIcons name="arrow-back" size={25} color={styles.IconColor} />
       </TouchableOpacity>
@@ -71,7 +72,7 @@ const UserProfileContent = ({ children }) => {
         {imageFailed || profileUrl == "" ? (
           <Image
             style={styles.upAvatar}
-            source={require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+            source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
             transition={500}
           />
         ) : (
@@ -90,7 +91,7 @@ const UserProfileContent = ({ children }) => {
         {/* Edit profile */}
         <TouchableOpacity
           style={styles.upOption}
-          onPress={() => navigation.navigate("EditProfile")}
+          onPress={() => router.navigate("/editProfile")}
         >
           <MaterialIcons
             name="edit"

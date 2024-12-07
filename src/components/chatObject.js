@@ -6,6 +6,7 @@ import { memo, useEffect, useState } from "react";
 import { db } from "../../env/firebaseConfig";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import getStyles from "./Component_Styles";
+import { router } from "expo-router";
 
 const ChatObject = memo(({ room, theme }) => {
   const navigation = useNavigation();
@@ -34,11 +35,14 @@ const ChatObject = memo(({ room, theme }) => {
   }, [user?.userId, room.otherParticipant.userId]);
 
   const handlePress = () => {
-    navigation.navigate("ChatScreen", {
-      userId: room.otherParticipant.userId,
-      username: room.otherParticipant.username,
-      profileUrl: room.otherParticipant.profileUrl,
-      deviceToken: room.otherParticipant.deviceToken,
+    router.navigate({
+      pathname: "/chatRoom",
+      params: {
+        userId: room.otherParticipants.userId,
+        username: room.otherParticipant.username,
+        profileUrl: room.otherParticipant.profileUrl,
+        deviceToken: room.otherParticipant.deviceToken,
+      }
     });
   };
 

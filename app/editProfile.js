@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../src/AuthContext";
 import { launchImageLibrary } from "react-native-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import {
@@ -18,9 +18,10 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./sreen_Styles";
-import { useTheme } from "../ThemeContext";
+import getStyles from "../src/sreen_Styles";
+import { useTheme } from "../src/ThemeContext";
 import { StatusBar } from "expo-status-bar";
+import { router } from "expo-router";
 
 const EditProfileScreen = () => {
   const { user, updateProfile, showToast } = useAuth();
@@ -128,7 +129,7 @@ const EditProfileScreen = () => {
       {/* back icon */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        onPress={() => router.navigate("..")}
       >
         <MaterialIcons name="arrow-back" size={25} color={styles.IconColor} />
       </TouchableOpacity>
@@ -139,7 +140,7 @@ const EditProfileScreen = () => {
           <Image source={{ uri: profileUrl }} style={styles.epProfileImage} />
         ) : (
           <Image
-            source={require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+            source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
             style={styles.epProfileImage}
           />
         )}

@@ -6,14 +6,15 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useRef, useState } from "react";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../src/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./sreen_Styles";
-import { useTheme } from "../ThemeContext";
+import getStyles from "../src/sreen_Styles";
+import { useTheme } from "../src/ThemeContext";
 import { StatusBar } from "expo-status-bar";
+import { router } from "expo-router";
 
 
 const LoginScreen = () => {
@@ -58,7 +59,7 @@ const LoginScreen = () => {
       setIsLoading(false);
       return;
     }
-    navigation.replace("Home");
+    router.replace("/home");
     setIsLoading(false);
   };
 
@@ -77,7 +78,7 @@ const LoginScreen = () => {
         animated={true}
       />
       <LottieView
-        source={require("../../myAssets/Lottie_Files/Online Chat.json")}
+        source={require("../myAssets/Lottie_Files/Online Chat.json")}
         autoPlay
         loop={true}
         style={{
@@ -157,7 +158,7 @@ const LoginScreen = () => {
           <Text style={styles.lsDontHaveAnAccount}>
             Don't have an account?{" "}
           </Text>
-          <TouchableOpacity onPress={() => navigation.replace("Sign Up")}>
+          <TouchableOpacity onPress={() => router.navigate("/signUp")}>
             <Text style={styles.lsSignUp}>Sign up</Text>
           </TouchableOpacity>
         </View>

@@ -14,6 +14,7 @@ import Animated, {
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "./Component_Styles";
+import { router } from "expo-router";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const { width: IMAGE_WIDTH } = Dimensions.get("window");
@@ -89,7 +90,7 @@ const TopHeaderBar = memo(({ title, profileUrl, theme }) => {
           <AnimatedTouchableOpacity
             onPress={() => {
               Keyboard.dismiss();
-              navigation.goBack();
+              router.navigate("..");
             }}
           >
             <MaterialIcons

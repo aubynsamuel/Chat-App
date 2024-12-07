@@ -1,8 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 const IntermediaryScreen = () => {
   const navigation = useNavigation();
-  navigation.navigate("Home");
+  router.navigate("/home");
 };
 
 export default IntermediaryScreen;

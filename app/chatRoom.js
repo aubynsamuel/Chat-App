@@ -16,7 +16,7 @@ import {
   Composer,
 } from "react-native-gifted-chat";
 import { useRoute } from "@react-navigation/native";
-import { db } from "../../env/firebaseConfig";
+import { db } from "../env/firebaseConfig";
 import {
   collection,
   query,
@@ -31,25 +31,29 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import { useAuth } from "../AuthContext";
-import { getCurrentTime, getRoomId } from "../Functions/Commons";
-import { sendNotification } from "../services/ExpoPushNotifications";
-import { useTheme } from "../ThemeContext";
-import ChatRoomBackground from "../components/ChatRoomBackground";
-import TopHeaderBar from "../components/HeaderBar_ChatScreen";
+import { useAuth } from "../src/AuthContext";
+import { getCurrentTime, getRoomId } from "../src/Functions/Commons";
+import { sendNotification } from "../src/services/ExpoPushNotifications";
+import { useTheme } from "../src/ThemeContext";
+import ChatRoomBackground from "../src/components/ChatRoomBackground";
+import TopHeaderBar from "../src/components/HeaderBar_ChatScreen";
 import { StatusBar } from "expo-status-bar";
-import { fetchCachedMessages, cacheMessages } from "../Functions/CacheMessages";
-import createRoomIfItDoesNotExist from "../Functions/CreateRoomIfItDoesNotExist";
+import {
+  fetchCachedMessages,
+  cacheMessages,
+} from "../src/Functions/CacheMessages";
+import createRoomIfItDoesNotExist from "../src/Functions/CreateRoomIfItDoesNotExist";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./sreen_Styles";
+import getStyles from "../src/sreen_Styles";
 import * as Clipboard from "expo-clipboard";
-import EmptyChatRoomList from "../components/EmptyChatRoomList";
+import EmptyChatRoomList from "../src/components/EmptyChatRoomList";
 import { useNavigation } from "@react-navigation/native";
+import { router, useLocalSearchParams } from "expo-router";
 
 const ChatScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { userId, username, profileUrl } = route.params;
+  const { userId, username, profileUrl } = useLocalSearchParams(); 
   const { user } = useAuth();
   const { selectedTheme, chatBackgroundPic } = useTheme();
   const [messages, setMessages] = useState([]);
@@ -61,7 +65,7 @@ const ChatScreen = () => {
   const [editText, setEditText] = useState("");
 
   const onHardwareBackPress = () => {
-    navigation.navigate("Inter");
+    router.navigate("/intermediary");
     // navigation.replace("Home");
     return true;
   };
@@ -146,7 +150,7 @@ const ChatScreen = () => {
           createdAt: getCurrentTime(),
           replyTo: newMessage.replyTo || null,
           read: false,
-          delivered: true, 
+          delivered: true,
         };
 
         await setDoc(doc(messagesRef), messageData);
@@ -195,9 +199,8 @@ const ChatScreen = () => {
 
               await deleteDoc(messageRef);
 
-              setMessages(
-                (prevMessages) =>
-                  prevMessages.filter((msg) => msg._id !== message._id)
+              setMessages((prevMessages) =>
+                prevMessages.filter((msg) => msg._id !== message._id)
               );
             } catch (error) {
               console.error("Failed to delete message", error);
@@ -332,7 +335,7 @@ const ChatScreen = () => {
           >
             ✓
           </Text>
-        ); 
+        );
       }
     }
 

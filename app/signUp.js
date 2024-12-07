@@ -9,15 +9,16 @@ import {
 import React, { useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { TextInput } from "react-native-gesture-handler";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../src/AuthContext";
 import LottieView from "lottie-react-native";
 import { launchImageLibrary } from "react-native-image-picker";
-import { storage } from "../../env/firebaseConfig";
+import { storage } from "../env/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./sreen_Styles";
-import { useTheme } from "../ThemeContext";
+import getStyles from "../src/sreen_Styles";
+import { useTheme } from "../src/ThemeContext";
 import { StatusBar } from "expo-status-bar";
+import { router } from "expo-router";
 
 
 const SignUpScreen = () => {
@@ -117,7 +118,7 @@ const SignUpScreen = () => {
       );
 
       if (response.success) {
-        navigation.replace("Home");
+        router.replace("/home");
       } else {
         showToast(response.msg || "An unexpected error occurred.");
       }
@@ -144,7 +145,7 @@ const SignUpScreen = () => {
       />
 
       <LottieView
-        source={require("../../myAssets/Lottie_Files/Sign Up.json")}
+        source={require("../myAssets/Lottie_Files/Sign Up.json")}
         autoPlay
         loop={true}
         style={{ flex: 0.8, left: 10 }}
@@ -255,7 +256,7 @@ const SignUpScreen = () => {
           style={{ flexDirection: "row", alignSelf: "center", marginTop: 5 }}
         >
           <Text style={styles.suHaveAnAccount}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.replace("Login")}>
+          <TouchableOpacity onPress={() => router.navigate("/login")}>
             <Text style={styles.suLoginText}>Login</Text>
           </TouchableOpacity>
         </View>

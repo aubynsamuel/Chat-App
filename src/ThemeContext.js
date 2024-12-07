@@ -11,7 +11,7 @@ export const useTheme = () => useContext(ThemeContext);
 
 const themes = [greenTheme, lightBlueTheme, darkTheme, purpleTheme];
 
-export default ThemeContextProvider = ({ children }) => {
+  export const ThemeContextProvider = ({ children }) => {
   const [selectedTheme, setSelectedTheme] = useState(themes[1]);
   const [chatBackgroundPic, setChatBackgroundPic] = useState();
 

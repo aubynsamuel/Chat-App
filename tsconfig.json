@@ -13,5 +13,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "app/_layout.js"
-, "src/services/ExpoPushNotifications.js", "src/components/ThemeSelector.tsx", "src/screens/userProfileScreen.js", "src/screens/userProfileScreenContent.js", "src/screens/chatRoom.js", "src/screens/chatRoom.js", "src/MessagesContext.js"]
+, "src/services/ExpoPushNotifications.js", "src/components/ThemeSelector.tsx", "app/userProfile.js", "app/usapp/userProfileContent.jsp/chatRoom.js", "app/chatRoom.js", "src/MessagesContext.js"]
 }

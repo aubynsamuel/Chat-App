@@ -10,6 +10,7 @@ import {
 } from "react-native-popup-menu";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "./Component_Styles";
+import { router } from "expo-router";
 
 const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
   const navigation = useNavigation();
@@ -19,7 +20,7 @@ const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
 
   const handleLogout = () => {
     logout();
-    navigation.replace("Login");
+    router.replace("login");
   };
   // Fetch user profile picture when component mounts
 
@@ -27,7 +28,7 @@ const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
     <View style={styles.hhHeaderContainer}>
       {/* Back Button */}
       {backButtonShown && (
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => router.navigate("..")}>
           <MaterialIcons
             name="arrow-back"
             style={styles.hhHeaderBarIcon}
@@ -81,7 +82,7 @@ const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
                 alignItems: "center",
               }}
               onSelect={() => {
-                navigation.navigate("UserProfile");
+                router.navigate("/userProfile");
               }}
             >
               <Text style={styles.hhMenuText}>Profile</Text>
