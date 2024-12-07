@@ -1,150 +1,131 @@
+import React, { useCallback, useMemo, useRef } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
-  View,
-  Text,
-  StyleSheet,
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetModalProvider,
   TouchableOpacity,
-  Image,
-  ScrollView,
-  StatusBar,
-  Switch,
-} from 'react-native';
-import React, {useState} from 'react';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useNavigation} from '@react-navigation/native';
-import {useAuth} from '../AuthContext';
+  BottomSheetBackdrop,
+} from "@gorhom/bottom-sheet";
+import UserProfileContent from "./userProfileScreenContent";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useTheme } from "../ThemeContext";
+import getStyles from "./sreen_Styles";
+import changeNavigationBarColor from "react-native-navigation-bar-color";
+import { ScrollView } from "react-native-gesture-handler";
 
 const UserProfileScreen = () => {
-  const {user, logout} = useAuth();
-  const navigation = useNavigation();
-  const profileUrl = user?.profileUrl;
-  const [imageFailed, setImageFailed] = useState(false);
-  const handleLogout = async () => {
-    await logout();
-    navigation.navigate('Login');
-  };
+  const { selectedTheme, changeTheme } = useTheme();
+  const styles = getStyles(selectedTheme);
+  // ref
+  const bottomSheetModalRef = useRef(null);
+
+  // snap points
+  const snapPoints = useMemo(() => ["25%"], []);
+
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+    changeNavigationBarColor("lightgrey", false, true);
+  }, []);
+
+  const handleSheetChanges = useCallback((index) => {
+    console.log("handleSheetChanges", index);
+  }, []);
+
+  const themes = [
+    { id: "0", color: "lightgreen", name: "Green Day" },
+    { id: "1", color: "lightblue", name: "Sky Lander" },
+    { id: "2", color: "black", name: "Dark Angel" },
+    { id: "3", color: "purple", name: "Nothing Much" },
+  ];
 
   return (
-    <ScrollView style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#f9f9f9"
-        animated={true}
-      />
-      {/* back icon */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}>
-        <Icon name="arrow-back" size={25} color="black" />
-      </TouchableOpacity>
-      {/* User Profile Info */}
-      <View style={styles.profileContainer}>
-        {imageFailed || profileUrl == '' ? (
-          <Image
-            style={styles.avatar}
-            source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
-            transition={500}
-          />
-        ) : (
-          <Image
-            style={styles.avatar}
-            source={{uri: profileUrl}}
-            transition={500}
-            onError={() => setImageFailed(true)}
-          />
-        )}
-        <Text style={styles.username}>{user?.username || 'User Name'}</Text>
-      </View>
-
-      {/* Options Section */}
-      <View style={styles.optionsContainer}>
-        {/* Edit profile */}
-        <TouchableOpacity
-          style={styles.option}
-          onPress={() => navigation.navigate('EditProfile')}>
-          <Icon name="edit" size={25} color="black" />
-          <Text style={styles.optionText}>Edit Profile</Text>
-        </TouchableOpacity>
-
-        {/* Notifications */}
-        <View style={styles.option}>
-          <Icon name="notifications" size={25} color="black" />
-          <View
-            style={{
-              flexDirection: 'row',
-              flex: 1,
-              justifyContent: 'space-between',
-            }}>
-            <Text style={styles.optionText}>Notifications</Text>
-            <Switch
-              value={true}
-              trackColor={{false: '#767577', true: '#313236'}}
-              style={{
-                marginLeft: 10,
-              }}></Switch>
-          </View>
-        </View>
-
-        {/* Logout */}
-        <TouchableOpacity style={styles.option} onPress={handleLogout}>
-          <Icon name="logout" size={25} color="black" />
-          <Text style={styles.optionText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+    <GestureHandlerRootView>
+      <BottomSheetModalProvider>
+        <UserProfileContent>
+          <TouchableOpacity
+            onPress={handlePresentModalPress}
+            style={styles.upOption}
+          >
+            <MaterialIcons
+              name="palette"
+              size={25}
+              color={selectedTheme.text.primary}
+            />
+            <Text style={styles.upOptionText}>Change Theme</Text>
+          </TouchableOpacity>
+        </UserProfileContent>
+        <BottomSheetModal
+          maxDynamicContentSize={250}
+          ref={bottomSheetModalRef}
+          snapPoints={snapPoints}
+          onChange={handleSheetChanges}
+          backgroundStyle={{ backgroundColor: "lightgrey" }}
+          onDismiss={() =>
+            changeNavigationBarColor(selectedTheme.background, false, true)
+          }
+          backdropComponent={(props) => (
+            <BottomSheetBackdrop
+              {...props}
+              disappearsOnIndex={-1}
+              appearsOnIndex={0}
+              opacity={0.5}
+            />
+          )}
+        >
+          <BottomSheetView style={stylesSheet.contentContainer}>
+            <Text style={{ fontSize: 16, margin: 10 }}>
+              Select Your Preferred Theme
+            </Text>
+            <ScrollView
+              showsHorizontalScrollIndicator={false}
+              horizontal={true}
+              contentContainerStyle={stylesSheet.flatListContentContainer}
+            >
+              {themes.map((item) => (
+                <View key={item.id} style={stylesSheet.themeContainer}>
+                  <TouchableOpacity
+                    onPress={() => changeTheme(parseInt(item.id))}
+                    style={[
+                      stylesSheet.colorBox,
+                      { backgroundColor: item.color },
+                    ]}
+                  />
+                  <Text>{item.name}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </BottomSheetView>
+        </BottomSheetModal>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9f9f9',
-    padding: 15,
+const stylesSheet = StyleSheet.create({
+  contentContainer: {
+    alignItems: "center",
+    backgroundColor: "lightgrey",
+    flexDirection: "column",
+    justifyContent: "space-evenly",
   },
-  profileContainer: {
-    alignItems: 'center',
-    marginVertical: 20,
-  },
-  avatar: {
-    height: 150,
-    width: 150,
+
+  colorBox: {
+    width: 90,
+    height: 90,
     borderRadius: 100,
     marginBottom: 10,
+    elevation: 4,
   },
-  username: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  email: {
-    fontSize: 16,
-    color: 'black',
-    marginVertical: 5,
-  },
-  optionsContainer: {
-    marginVertical: 15,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: 'white',
-    borderRadius: 8,
+  themeContainer: {
+    alignItems: "center",
+    marginHorizontal: 15,
     marginBottom: 10,
-    elevation: 1,
   },
-  optionText: {
-    marginLeft: 10,
-    fontSize: 16,
-    color: '#333',
-  },
-  section: {
-    marginVertical: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#555',
-    marginBottom: 10,
+  flatListContentContainer: {
+    flexDirection: "row",
   },
 });
 

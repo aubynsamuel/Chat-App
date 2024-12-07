@@ -1,36 +1,41 @@
-Here’s a GitHub README template you can use for your chat app repository:
 
----
+# 🔥 Flash Send (Real-Time Chat Application)
 
-# 🔥 Real-Time Chat Application
 
 Welcome to the **Real-Time Chat Application** built using **React Native** and **Firebase**. This app allows users to chat in real-time with messaging features such as message caching, user presence, and seamless chat history.
 
+
 ## 📱 Features
+
 
 - **Real-Time Messaging**: Send and receive messages instantly with the help of Firebase Firestore.
 - **User Authentication**: Secure login and sign-up system using Firebase Authentication.
 - **Cached Messages**: Store and retrieve messages locally to allow offline access.
-- **Profile Picture Handling**: Each user can set a profile picture that displays in chats.
+- **Profile Picture Handling**: Each user can set a profile picture displayed in chats.
 - **Unread Message Count**: Keep track of unread messages for each conversation.
 - **Smooth UI and UX**: A user-friendly interface with smooth transitions and responsive layouts.
 - **Status Indicators**: Display the last message sent, message timestamps, and user activity status.
 - **Push Notifications**: Receive notifications for new messages (optional).
 
+
 ## 🚀 Getting Started
 
+
 ### Prerequisites
+
 
 - **Node.js** (>= 12.x)
 - **React Native CLI** or **Expo CLI** (optional, if using Expo)
 - **Firebase Project** with Firestore and Authentication enabled
 
+
 ### Installation
+
 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/your-username/chat-app.git
+   git clone https://github.com/aubynsamuel/React-Native-Chat-App.git
    cd chat-app
    ```
 
@@ -40,44 +45,28 @@ Welcome to the **Real-Time Chat Application** built using **React Native** and *
    npm install
    ```
 
+
 3. Set up Firebase:
 
    - Go to [Firebase Console](https://console.firebase.google.com/)
    - Create a Firebase project and enable **Firestore** and **Authentication**
    - Copy the Firebase config and paste it into `firebaseConfig.js` in the app’s root folder.
-
-4. Run the app:
-
-   For iOS:
-
-   ```bash
-   npx react-native run-ios
-   ```
-
-   For Android:
-
-   ```bash
-   npx react-native run-android
-   ```
-
-   If you are using **Expo**:
-
-   ```bash
-   expo start
-   ```
-
+  
+  
 ### Firebase Configuration
 
+
 Make sure to configure Firebase in `firebaseConfig.js`:
+
 
 ```js
 // firebaseConfig.js
 
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getFirestore, collection } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -91,11 +80,43 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
-});
+})
+export const storage = getStorage(app);
+
+
+export const db = getFirestore(app);
+export const usersRef = collection(db, "users");
+export const roomRef = collection(db, "rooms")
 ```
+
+
+4. Run the app:
+
+   For Expo
+   
+   First create a development build
+   ```bash
+   npx eas build --profile development --platform android
+   ```
+   Then
+   ```bash
+   npx expo start
+   ```
+
+   For iOS:
+
+   ```bash
+   npx react-native run-ios
+   ```
+
+   For Android:
+
+   ```bash
+   npx react-native run-android
+   ```
+
 
 ## 🛠️ App Structure
 
@@ -110,24 +131,31 @@ export const auth = initializeAuth(app, {
 
 - **Login/Sign Up**: Users can sign up or log in to the app using their email and password.
 - **Real-Time Messaging**: Once logged in, users can view their chat history, send new messages, and receive messages in real-time.
-- **Offline Access**: Messages are cached locally, so users can view previous messages even when offline.
+- **Offline Access**: Messages are cached locally so that users can view previous messages even when offline.
 - **Profile Management**: Users can upload a profile picture and update their details.
 
-## 📂 Project Layout
 
+## 📂 Project Layout
 ```
+
 /chat-app
 │
-├── /assets/                    # Image and font assets
-├── /components/                # Reusable UI components (e.g. Header, ChatBubble)
+├── /myAssets/                    # Images and lottie animations
+├── /components/                # Reusable UI components (e.g., Header, ChatBubble)
 ├── /navigation/                # Navigation setup with React Navigation
-├── /screens/                   # App screens (Chat, Home, Login, Sign Up)
-├── /AuthContext.js             # User authentication context
-├── /firebaseConfig.js          # Firebase configuration
-├── /commons.js                 # Utility functions
+├── /screens/                   # App screens (e.g., Chat, Home, Login, Sign Up)
+├── /Functions/                 # Utility functions
+├── /env/                       # Firebase configuration, google-services and service account files
+├──/Theme/                      # Themes for the app
+├── /Services/                  # ExpoPushNotifications
+├── AuthContext.js              # User authentication context
+├── NotificationTokenManager.js # Ensures that a valid token is available for notifications
+├── ThemeContext.js             # Handles theme switching 
 ├── App.js                      # Main app entry point
 └── package.json                # Project dependencies and scripts
+
 ```
+
 
 ## 🤝 Contributing
 

@@ -1,16 +1,9 @@
+import { SafeAreaView, View, TouchableOpacity, Button } from "react-native";
+import { useAuth } from "../AuthContext";
+import TopHeaderBar from "../components/HeaderBar_HomeScreen";
+import { useEffect, useState } from "react";
+import ChatList from "../components/ChatList";
 import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  StatusBar,
-  TouchableOpacity,
-} from 'react-native';
-import {useAuth} from '../AuthContext';
-import TopHeaderBar from '../components/HeaderBar_HomeScreen';
-import {useEffect, useState} from 'react';
-import ChatList from '../components/ChatList';
-import {
-  getDocs,
   query,
   where,
   orderBy,
@@ -18,17 +11,28 @@ import {
   doc,
   getDoc,
   onSnapshot,
-} from 'firebase/firestore';
-import {usersRef, db} from '../../firebaseConfig';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "firebase/firestore";
+import { usersRef, db } from "../../env/firebaseConfig";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NotificationTokenManager from "../NotificationTokenManager";
+import { MaterialIcons } from "@expo/vector-icons";
+import getStyles from "./sreen_Styles";
+import { useTheme } from "../ThemeContext";
+import { StatusBar } from "expo-status-bar";
+// import {schedulePushNotification} from '../services/ExpoPushNotifications'
 
 function HomeScreen() {
   const navigation = useNavigation();
-  const {user} = useAuth();
+  const { user } = useAuth();
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { selectedTheme } = useTheme();
+  const styles = getStyles(selectedTheme);
+
+  useEffect(() => {
+    NotificationTokenManager.initializeAndUpdateToken(user?.userId);
+  }, [user]);
 
   useEffect(() => {
     if (user?.uid) {
@@ -48,7 +52,7 @@ function HomeScreen() {
       // Then subscribe to real-time updates
       subscribeToRooms();
     } catch (error) {
-      console.error('Error initializing rooms:', error);
+      console.error("Error initializing rooms:", error);
     } finally {
       setIsLoading(false);
     }
@@ -62,25 +66,25 @@ function HomeScreen() {
       }
       return null;
     } catch (error) {
-      console.error('Error loading rooms from cache:', error);
+      console.error("Error loading rooms from cache:", error);
       return null;
     }
   };
 
   const subscribeToRooms = () => {
-    const roomsRef = collection(db, 'rooms');
+    const roomsRef = collection(db, "rooms");
     const roomsQuery = query(
       roomsRef,
-      where('participants', 'array-contains', user.uid),
-      orderBy('lastMessageTimestamp', 'desc'),
+      where("participants", "array-contains", user.uid),
+      orderBy("lastMessageTimestamp", "desc")
     );
 
-    return onSnapshot(roomsQuery, async snapshot => {
+    return onSnapshot(roomsQuery, async (snapshot) => {
       const roomsData = [];
 
       for (const roomDoc of snapshot.docs) {
         const roomData = roomDoc.data();
-        const otherUserId = roomData.participants.find(id => id !== user.uid);
+        const otherUserId = roomData.participants.find((id) => id !== user.uid);
 
         if (otherUserId) {
           const userDocRef = doc(usersRef, otherUserId);
@@ -97,6 +101,7 @@ function HomeScreen() {
                 userId: otherUserId,
                 username: userData.username,
                 profileUrl: userData.profileUrl,
+                otherUsersDeviceToken: userData.deviceToken,
               },
             });
           }
@@ -106,55 +111,58 @@ function HomeScreen() {
         setRooms(roomsData);
         await AsyncStorage.setItem(
           `rooms_${user.uid}`,
-          JSON.stringify(roomsData),
+          JSON.stringify(roomsData)
         );
       }
     });
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: 24,
+        backgroundColor:
+          selectedTheme === darkTheme ? selectedTheme.background : null,
+      }}
+    >
+      {/* <Button title="Message Actions" onPress={()=>schedulePushNotification("Hey", "What up", "ReplyTo", "RoomId")}></Button> */}
       <StatusBar
-        barStyle="dark-content"
-        backgroundColor="lightblue"
+        style={`${
+          selectedTheme === purpleTheme
+            ? "light"
+            : selectedTheme.Statusbar.style
+        }`}
+        backgroundColor={selectedTheme.primary}
         animated={true}
       />
 
-      <TopHeaderBar title={'Chats'} backButtonShown={false}  />
+      <TopHeaderBar
+        title={"Chats"}
+        backButtonShown={false}
+        theme={selectedTheme}
+      />
 
-      <View style={styles.container}>
+      <View style={styles.hsContainer}>
         <ChatList
           rooms={rooms}
           isLoading={isLoading}
           onRefresh={initializeRooms}
+          theme={selectedTheme}
         />
       </View>
-
       <TouchableOpacity
         style={styles.floatingButton}
-        onPress={() => navigation.navigate('Search_Users')}>
-        <Icon name="add-circle" size={30} color="lightblue" />
+        onPress={() => navigation.navigate("Search_Users")}
+      >
+        <MaterialIcons
+          name="search"
+          size={30}
+          color={selectedTheme.text.primary}
+        />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-    marginTop: 10,
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 50,
-    right: 20,
-    backgroundColor: '#5385F7',
-    borderRadius: 50,
-    width: 50,
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
 
 export default HomeScreen;

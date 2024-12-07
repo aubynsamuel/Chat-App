@@ -1,40 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  StyleSheet, 
-  SafeAreaView, 
-  View, 
-  TextInput, 
-  FlatList, 
-  Text, 
+import React, { useState } from "react";
+import {
+  SafeAreaView,
+  View,
+  TextInput,
+  FlatList,
+  Text,
   TouchableOpacity,
-  StatusBar 
-} from 'react-native';
-import { getDocs, query, where, collection } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
-import { useAuth } from '../AuthContext';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation } from '@react-navigation/native';
+  Image,
+} from "react-native";
+import { getDocs, query, where, collection } from "firebase/firestore";
+import { db } from "../../env/firebaseConfig";
+import { useAuth } from "../AuthContext";
+import { useNavigation } from "@react-navigation/native";
+import { MaterialIcons } from "@expo/vector-icons";
+import getStyles from "./sreen_Styles";
+import { useTheme } from "../ThemeContext";
+import { StatusBar } from "expo-status-bar";
 
 const SearchUsersScreen = () => {
   const { user } = useAuth();
   const navigation = useNavigation();
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const { selectedTheme } = useTheme();
+  const styles = getStyles(selectedTheme);
 
   const handleSearch = async (text) => {
     setSearchText(text);
-    if (text.trim() === '') {
-      setFilteredUsers([]); 
+    if (text.trim() === "") {
+      setFilteredUsers([]);
       return;
     }
 
     try {
-      const usersRef = collection(db, 'users'); 
-      const q = query(usersRef, where('username', '!=', user?.username), where('username', '>=', text), where('username', '<=', text + '\uf8ff'));
+      const usersRef = collection(db, "users");
+      const q = query(
+        usersRef,
+        where("username", "!=", user?.username),
+        where("username", ">=", text),
+        where("username", "<=", text + "\uf8ff")
+      );
       const querySnapshot = await getDocs(q);
 
       const userData = [];
-      querySnapshot.forEach(doc => {
+      querySnapshot.forEach((doc) => {
         userData.push({ ...doc.data() });
       });
       setFilteredUsers(userData);
@@ -44,7 +53,7 @@ const SearchUsersScreen = () => {
   };
 
   const handleUserPress = (selectedUser) => {
-    navigation.navigate('ChatScreen', {
+    navigation.navigate("ChatScreen", {
       userId: selectedUser.userId,
       username: selectedUser.username,
       profileUrl: selectedUser.profileUrl,
@@ -52,14 +61,40 @@ const SearchUsersScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar barStyle="dark-content" backgroundColor="lightblue" />
+    <SafeAreaView
+      style={{
+        flex: 1,
+        paddingTop: 24,
+        backgroundColor:
+          selectedTheme === darkTheme ? selectedTheme.background : null,
+      }}
+    >
+      <StatusBar
+        style={`${
+          selectedTheme === purpleTheme
+            ? "light"
+            : selectedTheme.Statusbar.style
+        }`}
+        backgroundColor={selectedTheme.primary}
+        animated={true}
+      />
       <View style={styles.header}>
-        <Icon name="arrow-back" size={25} color="black" onPress={() => navigation.goBack()} />
+        <MaterialIcons
+          name="arrow-back"
+          size={25}
+          color={
+            selectedTheme === darkTheme || selectedTheme === purpleTheme
+              ? "lightgrey"
+              : "black"
+          }
+          onPress={() => navigation.goBack()}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Search users..."
-          placeholderTextColor="grey" 
+          placeholderTextColor={
+            selectedTheme === darkTheme ? "lightgrey" : "black"
+          }
           value={searchText}
           onChangeText={handleSearch}
         />
@@ -67,49 +102,28 @@ const SearchUsersScreen = () => {
 
       <FlatList
         data={filteredUsers}
-        keyExtractor={item => item.userId} 
+        keyExtractor={(item) => item.userId}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.userItem} onPress={() => handleUserPress(item)}>
+          <TouchableOpacity
+            style={styles.userItem}
+            onPress={() => handleUserPress(item)}
+          >
+            <Image
+              source={
+                { uri: item.profileUrl } ||
+                require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
+              }
+              style={{ width: 50, height: 50, borderRadius: 25 }}
+            />
             <Text style={styles.username}>{item.username}</Text>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<Text style={styles.noResults}>No users found</Text>}
+        ListEmptyComponent={
+          <Text style={styles.noResults}>No users found</Text>
+        }
       />
     </SafeAreaView>
   );
-}
-
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: 'lightblue',
-  },
-  searchInput: {
-    marginLeft: 10,
-    padding: 8,
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    fontSize: 16,
-    color:"black"
-  },
-  userItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  username: {
-    fontSize: 18,
-    color: '#333',
-  },
-  noResults: {
-    padding: 20,
-    textAlign: 'center',
-    color: 'gray',
-    fontSize: 16,
-  },
-});
+};
 
 export default SearchUsersScreen;

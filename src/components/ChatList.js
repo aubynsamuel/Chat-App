@@ -1,12 +1,14 @@
-import React from 'react';
-import { FlatList, View, ActivityIndicator, RefreshControl, Text, StyleSheet } from 'react-native';
-import ChatObject from './chatObject';
+import React, { memo } from "react";
+import { FlatList, View, RefreshControl, Text } from "react-native";
+import ChatObject from "./ChatObject";
+import getStyles from "./Component_Styles";
 
-const ChatList = ({ rooms, isLoading, onRefresh }) => {
+const ChatList = memo(({ rooms, isLoading, onRefresh, theme }) => {
+  const styles = getStyles(theme);
   const renderEmptyComponent = () => (
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>
-        {isLoading ? 'Loading chats...' : 'No chats available'}
+    <View style={styles.clEmptyContainer}>
+      <Text style={styles.clEmptyText}>
+        {isLoading ? "Loading chats..." : "No chats available"}
       </Text>
     </View>
   );
@@ -14,41 +16,24 @@ const ChatList = ({ rooms, isLoading, onRefresh }) => {
   return (
     <FlatList
       data={rooms}
-      renderItem={({ item }) => <ChatObject room={item} />}
+      renderItem={({ item }) => <ChatObject room={item} theme={theme} />}
       keyExtractor={(item, index) => item.roomId || index.toString()}
-      // onPress={() => navigation.navigate('ChatScreen')}
       ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
       refreshControl={
         <RefreshControl
           refreshing={isLoading}
           onRefresh={onRefresh}
-          colors={['#5385F7']} // Match your app's color scheme
+          colors={["#5385F7"]} // Match your app's color scheme
           tintColor="#5385F7"
         />
       }
       ListEmptyComponent={renderEmptyComponent}
-      contentContainerStyle={rooms.length === 0 ? styles.centerEmptySet : null}
+      contentContainerStyle={[
+        rooms.length === 0 ? styles.clCenterEmptySet : null,
+        { paddingTop: 7 },
+      ]}
     />
   );
-};
-
-const styles = StyleSheet.create({
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 50,
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-  centerEmptySet: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
 });
 
 export default ChatList;

@@ -1,51 +1,50 @@
-import React, {useState} from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   Image,
-  StyleSheet,
-  Alert,
   ActivityIndicator,
-  StatusBar,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useAuth} from '../AuthContext';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
-import {useNavigation} from '@react-navigation/native';
+  ScrollView,
+} from "react-native";
+import { useAuth } from "../AuthContext";
+import { launchImageLibrary } from "react-native-image-picker";
+import { useNavigation } from "@react-navigation/native";
 import {
   getStorage,
   ref,
   uploadBytesResumable,
   getDownloadURL,
-} from 'firebase/storage';
+} from "firebase/storage";
+import { MaterialIcons } from "@expo/vector-icons";
+import getStyles from "./sreen_Styles";
+import { useTheme } from "../ThemeContext";
+import { StatusBar } from "expo-status-bar";
 
 const EditProfileScreen = () => {
-  const {user, updateProfile} = useAuth(); // Assuming `updateProfile` is a function from `useAuth` to save user changes
-  const [username, setUsername] = useState(user.username || '');
+  const { user, updateProfile, showToast } = useAuth();
+  const [username, setUsername] = useState(user.username || "");
   const [profileUrl, setProfileUrl] = useState(user.profileUrl || null);
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation();
+  const { selectedTheme } = useTheme();
+  const styles = getStyles(selectedTheme);
 
   // Handle image selection
   const selectImage = () => {
     const options = {
-      mediaType: 'photo',
+      mediaType: "photo",
       maxWidth: 300,
       maxHeight: 300,
-      quality: 0.7,
+      quality: 2,
     };
 
-    launchImageLibrary(options, response => {
+    launchImageLibrary(options, (response) => {
       if (response.didCancel) {
-        console.log('User cancelled image picker');
+        console.log("User cancelled image picker");
       } else if (response.errorMessage) {
-        console.log('ImagePicker Error: ', response.errorMessage);
+        console.log("ImagePicker Error: ", response.errorMessage);
       } else if (response.assets && response.assets.length > 0) {
         const selectedImage = response.assets[0].uri;
         setProfileUrl(selectedImage);
@@ -58,7 +57,7 @@ const EditProfileScreen = () => {
     setIsLoading(true);
 
     if (!username) {
-      Alert.alert('Profile Update', 'Username cannot be empty');
+      showToast("Username cannot be empty");
       setIsLoading(false);
       return;
     }
@@ -67,7 +66,7 @@ const EditProfileScreen = () => {
       let downloadURL = profileUrl;
 
       // If profileUrl is a local URI (starts with file://), upload it to Firebase Storage
-      if (profileUrl && profileUrl.startsWith('file://')) {
+      if (profileUrl && profileUrl.startsWith("file://")) {
         const storage = getStorage();
         const storageRef = ref(storage, `profilePictures/${user.uid}`);
 
@@ -75,24 +74,24 @@ const EditProfileScreen = () => {
         const blob = await response.blob();
 
         const uploadTask = uploadBytesResumable(storageRef, blob, {
-          contentType: 'image/jpeg',
+          contentType: "image/jpeg",
         });
 
         uploadTask.on(
-          'state_changed',
-          snapshot => {
+          "state_changed",
+          (snapshot) => {
             const progress =
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log('Upload is ' + progress + '% done');
+            console.log("Upload is " + progress + "% done");
           },
-          error => {
-            console.error('Upload failed:', error.message);
-            Alert.alert('Upload Error', error.message);
+          (error) => {
+            console.error("Upload failed:", error.message);
+            showToast("Picture Could Not Be Uploaded");
             setIsLoading(false);
           },
           async () => {
             downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            console.log('File available at', downloadURL);
+            console.log("File available at", downloadURL);
 
             const response = await updateProfile({
               username,
@@ -100,64 +99,61 @@ const EditProfileScreen = () => {
             });
 
             if (!response.success) {
-              Alert.alert('Error', response.msg);
+              showToast(response.msg);
             } else {
-              Alert.alert('Profile Update', 'Profile updated successfully!');
+              showToast("Profile updated successfully!");
             }
             setIsLoading(false);
-          },
+          }
         );
       } else {
-        const response = await updateProfile({username, profileUrl});
+        const response = await updateProfile({ username, profileUrl });
         if (!response.success) {
-          Alert.alert('Error', response.msg);
+          showToast(response.msg);
         } else {
-          Alert.alert('Profile Update', 'Profile updated successfully!');
+          showToast("Profile updated successfully!");
         }
         setIsLoading(false);
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Profile Update', 'Failed to update profile');
+      console.error("Error updating profile:", error);
+      showToast("Failed to update profile");
       setIsLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#f9f9f9"
-        animated={true}
-      />
+    <ScrollView style={styles.epContainer}>
+      <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
       {/* back icon */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.goBack()}>
-        <Icon name="arrow-back" size={25} color="black" />
+        onPress={() => navigation.goBack()}
+      >
+        <MaterialIcons name="arrow-back" size={25} color={styles.IconColor} />
       </TouchableOpacity>
 
-      <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+      <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
         {/* Profile Picture */}
+        {profileUrl ? (
+          <Image source={{ uri: profileUrl }} style={styles.epProfileImage} />
+        ) : (
+          <Image
+            source={require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+            style={styles.epProfileImage}
+          />
+        )}
         <TouchableOpacity onPress={selectImage}>
-          {profileUrl ? (
-            <Image source={{uri: profileUrl}} style={styles.profileImage} />
-          ) : (
-            <Image
-              source={require('../../assets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp')}
-              style={styles.profileImage}
-            />
-          )}
-          <Text style={styles.changePicText}>Change Profile Picture</Text>
+          <Text style={styles.epChangePicText}>Change Profile Picture</Text>
         </TouchableOpacity>
 
         {/* Username */}
-        <View style={styles.InputField}>
-          <Icon name="person" color="black" size={25} />
+        <View style={styles.epInputField}>
+          <MaterialIcons name="person" color={styles.IconColor} size={25} />
           <TextInput
             placeholder="Username"
-            style={styles.inputText}
-            placeholderTextColor={'grey'}
+            style={styles.epInputText}
+            placeholderTextColor={"grey"}
             value={username}
             onChangeText={setUsername}
           />
@@ -165,69 +161,18 @@ const EditProfileScreen = () => {
 
         {/* Save Button */}
         <TouchableOpacity
-          style={styles.saveButton}
-          onPress={handleUpdateProfile}>
+          style={styles.epSaveButton}
+          onPress={handleUpdateProfile}
+        >
           {isLoading ? (
             <ActivityIndicator size="large" color="white" />
           ) : (
-            <Text style={styles.saveButtonText}>Save</Text>
+            <Text style={styles.epSaveButtonText}>Save</Text>
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 };
-
-// Styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 20,
-    alignSelf: 'center',
-  },
-  changePicText: {
-    color: '#4CAF50',
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  InputField: {
-    marginBottom: 20,
-    paddingHorizontal: 8,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    height: hp('6%'),
-    width: wp('80%'),
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  inputText: {
-    marginLeft: 10,
-    fontSize: 16,
-    flex: 1,
-    color: 'black',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    borderRadius: 8,
-    width: wp('80%'),
-    alignSelf: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
 
 export default EditProfileScreen;

@@ -1,416 +1,477 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
-  StyleSheet,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StatusBar,
-  Alert,
-  Keyboard,
   Text,
-} from 'react-native';
-import {useRoute} from '@react-navigation/native';
-import {db} from '../../firebaseConfig';
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  BackHandler,
+} from "react-native";
+import {
+  GiftedChat,
+  InputToolbar,
+  Bubble,
+  Send,
+  MessageText,
+  Composer,
+} from "react-native-gifted-chat";
+import { useRoute } from "@react-navigation/native";
+import { db } from "../../env/firebaseConfig";
 import {
   collection,
-  addDoc,
   query,
   orderBy,
   onSnapshot,
   doc,
   setDoc,
-  updateDoc,
   getDoc,
   where,
   getDocs,
-} from 'firebase/firestore';
-import {useAuth} from '../AuthContext';
-import TopHeaderBar from '../components/HeaderBar_ChatScreen ';
-import {getRoomId} from '../../commons';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import {getCurrentTime} from '../../commons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import MessageObject from '../components/MessageObject';
-import LottieView from 'lottie-react-native';
+  writeBatch,
+  deleteDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { useAuth } from "../AuthContext";
+import { getCurrentTime, getRoomId } from "../Functions/Commons";
+import { sendNotification } from "../services/ExpoPushNotifications";
+import { useTheme } from "../ThemeContext";
+import ChatRoomBackground from "../components/ChatRoomBackground";
+import TopHeaderBar from "../components/HeaderBar_ChatScreen";
+import { StatusBar } from "expo-status-bar";
+import { fetchCachedMessages, cacheMessages } from "../Functions/CacheMessages";
+import createRoomIfItDoesNotExist from "../Functions/CreateRoomIfItDoesNotExist";
+import { MaterialIcons } from "@expo/vector-icons";
+import getStyles from "./sreen_Styles";
+import * as Clipboard from "expo-clipboard";
+import EmptyChatRoomList from "../components/EmptyChatRoomList";
+import { useNavigation } from "@react-navigation/native";
 
 const ChatScreen = () => {
+  const navigation = useNavigation();
   const route = useRoute();
-  const {userId, username, profileUrl} = route.params;
-  const {user} = useAuth();
+  const { userId, username, profileUrl } = route.params;
+  const { user } = useAuth();
+  const { selectedTheme, chatBackgroundPic } = useTheme();
   const [messages, setMessages] = useState([]);
-  const flatListRef = useRef(null);
-  const [isTyping, setIsTyping] = useState(false);
-  const [inputText, setInputText] = useState('');
-  const roomId = getRoomId(user.userId, userId);
+  const [otherUserToken, setOtherUserToken] = useState("");
+  const roomId = getRoomId(user?.userId, userId);
+  const styles = getStyles(selectedTheme);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editMessage, setEditMessage] = useState(null);
+  const [editText, setEditText] = useState("");
 
-  const [replyTo, setReplyTo] = useState(null);
-  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
-  // const messageRefs = useRef({});
-  const inputRef = useRef(null);
-  console.log(profileUrl)
-
-  const handleReply = message => {
-    setReplyTo({
-      id: message.id,
-      content: message.content,
-      senderId: message.senderId,
-      senderName: message.senderName,
-    });
-    inputRef.current?.focus();
+  const onHardwareBackPress = () => {
+    navigation.navigate("Inter");
+    // navigation.replace("Home");
+    return true;
   };
-
-  const cancelReply = () => {
-    setReplyTo(null);
-  };
-
-  const scrollToMessage = messageId => {
-    const index = messages.findIndex(msg => msg.id === messageId);
-    if (index !== -1 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({
-        index,
-        animated: true,
-        viewPosition: 0.5,
-      });
-      setHighlightedMessageId(messageId);
-      // setTimeout(() => setHighlightedMessageId(null), 2000);
-    }
-  };
-
-  const updateMessagesReadStatus = async () => {
-    try {
-      const roomId = getRoomId(user.userId, userId);
-      const messagesRef = collection(db, 'rooms', roomId, 'messages');
-      const q = query(
-        messagesRef,
-        where('senderId', '!=', user?.userId),
-        where('read', '==', false),
-      );
-      const snapshot = await getDocs(q);
-      snapshot.forEach(async doc => {
-        await updateDoc(doc.ref, {read: true});
-      });
-    } catch (error) {
-      console.error('Failed to update message read status', error);
-    }
-  };
-  updateMessagesReadStatus();
 
   useEffect(() => {
-    const fetchCachedMessages = async () => {
-      try {
-        const cachedMessages = await AsyncStorage.getItem(`messages_${roomId}`);
-        if (cachedMessages) {
-          const sortedCachedMessages = JSON.parse(cachedMessages).sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-          );
-          setMessages(sortedCachedMessages);
-        }
-      } catch (error) {
-        console.error('Failed to fetch cached messages', error);
-      }
-    };
+    const handleBackPress = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onHardwareBackPress
+    );
+    return () => handleBackPress.remove();
+  }, []);
 
-    const cacheMessages = async newMessages => {
-      try {
-        const sortedMessages = newMessages.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-        );
-        await AsyncStorage.setItem(
-          `messages_${roomId}`,
-          JSON.stringify(sortedMessages),
-        );
-      } catch (error) {
-        console.error('Failed to cache messages', error);
-      }
-    };
-
-    const subscribeToMessages = () => {
-      try {
-        const docRef = doc(db, 'rooms', roomId);
-        const messagesRef = collection(docRef, 'messages');
-        const q = query(messagesRef, orderBy('createdAt', 'asc'));
-
-        return onSnapshot(q, snapshot => {
-          const allMessages = snapshot.docs.map(doc => ({
-            ...doc.data(),
-            id: doc.id,
-          }));
-          const sortedMessages = allMessages.sort(
-            (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-          );
-          console.log('Sorted Messages:' + sortedMessages);
-          if (sortedMessages !== null || sortedMessages.length > 0) {
-            setMessages(sortedMessages);
-            cacheMessages(sortedMessages);
-          }
-          updateScrollToEnd();
-        });
-      } catch (error) {
-        console.error('failed to subscribe to firebase ' + error);
-      }
-    };
+  useEffect(() => {
+    const roomRef = doc(db, "rooms", roomId);
+    const messagesRef = collection(roomRef, "messages");
+    const q = query(messagesRef, orderBy("createdAt", "desc"));
 
     const initializeChat = async () => {
-      await fetchCachedMessages();
-      await createRoomIfItDoesNotExist();
-      const unsubscribe = subscribeToMessages();
+      const cachedMessages = await fetchCachedMessages(roomId);
+      if (cachedMessages && cachedMessages.length > 0) {
+        setMessages(cachedMessages);
+      }
 
-      return () => {
-        unsubscribe();
-      };
+      await createRoomIfItDoesNotExist(roomId, user, userId);
+
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetchedMessages = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            _id: doc.id,
+            text: data.content,
+            createdAt: data.createdAt.toDate(),
+            user: {
+              _id: data.senderId,
+              name: data.senderName,
+            },
+            replyTo: data.replyTo,
+            read: data.read || false,
+            delivered: data.delivered || false,
+          };
+        });
+        setMessages(fetchedMessages);
+        cacheMessages(roomId, fetchedMessages);
+      });
+
+      return unsubscribe;
     };
 
     const unsubscribe = initializeChat();
 
-    const KeyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      updateScrollToEnd,
-    );
-
     return () => {
-      if (unsubscribe) {
-        unsubscribe;
-      }
-      KeyboardDidShowListener.remove();
+      if (unsubscribe) unsubscribe;
     };
-  }, [roomId]);
+  }, [roomId, user, userId]);
 
-  const updateScrollToEnd = () => {
-    setTimeout(() => {
-      if (flatListRef.current) {
-        flatListRef.current.scrollToEnd({animated: true});
+  useEffect(() => {
+    const fetchOtherUserToken = async () => {
+      const userRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        setOtherUserToken(userDoc.data().deviceToken);
       }
-    }, 100);
-    setHighlightedMessageId(null);
-  };
+    };
+    fetchOtherUserToken();
+  }, [userId]);
 
-  const createRoomIfItDoesNotExist = async () => {
-    const roomRef = doc(db, 'rooms', roomId);
-
-    // Check if the room already exists
-    const roomSnapshot = await getDoc(roomRef);
-
-    if (!roomSnapshot.exists()) {
-      // Room does not exist, create it with default values
-      await setDoc(
-        roomRef,
-        {
-          roomId,
-          participants: [user.userId, userId],
-          createdAt: getCurrentTime(),
-          lastMessage: '',
-          lastMessageTimestamp: getCurrentTime(),
-          lastMessageSenderId: '',
-        },
-        {merge: true},
+  const handleSend = useCallback(
+    async (newMessages = []) => {
+      const newMessage = newMessages[0];
+      setMessages((prevMessages) =>
+        GiftedChat.append(prevMessages, newMessages)
       );
-    } else {
-      console.log('Room already exists');
-    }
+
+      const roomRef = doc(db, "rooms", roomId);
+      const messagesRef = collection(roomRef, "messages");
+
+      try {
+        const messageData = {
+          content: newMessage.text,
+          senderId: user.userId,
+          senderName: user.username,
+          createdAt: getCurrentTime(),
+          replyTo: newMessage.replyTo || null,
+          read: false,
+          delivered: true, 
+        };
+
+        await setDoc(doc(messagesRef), messageData);
+
+        await setDoc(
+          roomRef,
+          {
+            lastMessage: newMessage.text,
+            lastMessageTimestamp: getCurrentTime(),
+            lastMessageSenderId: user.userId,
+          },
+          { merge: true }
+        );
+
+        if (otherUserToken) {
+          sendNotification(
+            otherUserToken,
+            `New message from ${user.username}`,
+            newMessage.text,
+            roomId
+          );
+        }
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
+    },
+    [roomId, user, otherUserToken]
+  );
+
+  const handleDelete = async (message) => {
+    Alert.alert(
+      "Delete message",
+      "This action cannot be undone, do you want to continue?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const roomRef = doc(db, "rooms", roomId);
+              const messageRef = doc(roomRef, "messages", message._id);
+
+              await deleteDoc(messageRef);
+
+              setMessages(
+                (prevMessages) =>
+                  prevMessages.filter((msg) => msg._id !== message._id)
+              );
+            } catch (error) {
+              console.error("Failed to delete message", error);
+            }
+          },
+        },
+      ]
+    );
   };
 
   useEffect(() => {
-    let typingTimeout;
-    if (isTyping) {
-      typingTimeout = setTimeout(() => setIsTyping(false), 1000);
-    }
-    return () => clearTimeout(typingTimeout);
-  }, [isTyping]);
+    const markMessagesAsRead = async () => {
+      const roomRef = doc(db, "rooms", roomId);
+      const messagesRef = collection(roomRef, "messages");
+      const unreadMessagesQuery = query(
+        messagesRef,
+        where("senderId", "!=", user.userId),
+        where("read", "==", false)
+      );
 
-  const handleSend = async () => {
-    setIsTyping(false);
-    const message = inputText.trim();
-    setInputText('');
-    if (!message) return;
+      const snapshot = await getDocs(unreadMessagesQuery);
+      const batch = writeBatch(db);
 
-    cancelReply();
-    try {
-      const currentTime = getCurrentTime();
-      const roomRef = doc(db, 'rooms', roomId);
-      const messagesRef = collection(roomRef, 'messages');
-
-      const messageData = {
-        type: 'text',
-        content: message,
-        senderId: user?.userId,
-        senderName: user?.username,
-        read: false,
-        createdAt: currentTime,
-        replyTo: replyTo, // Add reply information if exists
-      };
-
-      await addDoc(messagesRef, messageData);
-      await updateDoc(roomRef, {
-        lastMessage: message,
-        lastMessageTimestamp: currentTime,
-        lastMessageSenderId: user?.userId,
+      snapshot.forEach((doc) => {
+        batch.update(doc.ref, { read: true });
       });
 
-      setReplyTo(null); // Clear reply after sending
+      if (!snapshot.empty) {
+        await batch.commit();
+      }
+    };
+
+    markMessagesAsRead();
+  }, [roomId, user.userId, messages]);
+
+  const handlePress = useCallback(
+    (context, currentMessage) => {
+      if (!currentMessage.text) return;
+
+      const options = [];
+
+      if (currentMessage.user._id === user.userId) {
+        options.push("Copy text");
+        options.push("Edit Message");
+        options.push("Delete message");
+      } else {
+        options.push("Copy text");
+      }
+      options.push("Cancel");
+      const cancelButtonIndex = options.length - 1;
+
+      context.actionSheet().showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+        },
+        (buttonIndex) => {
+          switch (buttonIndex) {
+            case 0:
+              Clipboard.setStringAsync(currentMessage.text);
+              break;
+            case 1:
+              if (currentMessage.user._id === user.userId) {
+                setIsEditing(true);
+                setEditMessage(currentMessage);
+                setEditText(currentMessage.text);
+              }
+              break;
+            case 2:
+              if (currentMessage.user._id === user.userId)
+                handleDelete(currentMessage);
+              break;
+            default:
+              break;
+          }
+        }
+      );
+    },
+    [user.userId, handleDelete, isEditing]
+  );
+
+  const handleEditSave = async () => {
+    if (!editMessage || !editText) return;
+
+    try {
+      const roomRef = doc(db, "rooms", roomId);
+      const messageRef = doc(roomRef, "messages", editMessage._id);
+
+      await updateDoc(messageRef, { content: editText });
+
+      setEditText("");
+      setEditMessage(null);
+      setIsEditing(false);
+
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === editMessage._id ? { ...msg, text: editText } : msg
+        )
+      );
     } catch (error) {
-      Alert.alert('Error', error.message);
+      console.error("Failed to edit message:", error);
+      Alert.alert("Error", "Failed to edit message. Please try again.");
     }
   };
 
-  return (
-    <View style={{flex: 1}}>
-      <StatusBar barStyle="dark-content" backgroundColor="lightblue" />
-      <TopHeaderBar
-        title={username}
-        backButtonShown={true}
-        profileUrl={profileUrl}
-      />
-      <View style={styles.container}>
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <MessageObject
-              item={item}
-              onReply={handleReply}
-              onReplyPress={scrollToMessage}
-              scrollToMessage={scrollToMessage}
-              isReferenceMessage={item.id === highlightedMessageId}
-            />
-          )}
-          contentContainerStyle={styles.messages}
-          showsVerticalScrollIndicator={false}
-          initialNumToRender={messages.length}
-          onContentSizeChange={updateScrollToEnd}
-          onScrollToIndexFailed={info => {
-            const wait = new Promise(resolve => setTimeout(resolve, 500));
-            wait.then(() => {
-              flatListRef.current?.scrollToIndex({
-                index: info.index,
-                animated: true,
-              });
-            });
-          }}
-        />
-        {replyTo && (
-          <View style={styles.replyPreview}>
-            <View style={styles.replyPreviewContent}>
-              <Text style={styles.replyPreviewName}>
-                Replying to{' '}
-                {replyTo.senderId === user?.userId
-                  ? 'yourself'
-                  : replyTo.senderName}
-              </Text>
-              <Text numberOfLines={1} style={styles.replyPreviewText}>
-                {replyTo.content}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={cancelReply}>
-              <Icon name="close" size={24} color="#666" />
-            </TouchableOpacity>
-          </View>
-        )}
-        <View style={styles.inputContainer}>
-          {isTyping && (
-            <LottieView
-              source={require('../../assets/Lottie_Files/Typing Dots.json')}
-              autoPlay
-              loop
-              style={{
-                width: 50,
-                height: 50,
-                alignSelf: 'flex-start',
-                flex: 0.1,
-                position: 'absolute',
-                top: -35,
-              }}
-            />
-          )}
-          <TextInput
-            ref={inputRef}
-            value={inputText}
-            onChangeText={text => {
-              setIsTyping(true);
-              setInputText(text);
+  const renderBubble = (props) => {
+    const { currentMessage } = props;
+
+    let ticks = null;
+    if (currentMessage.user._id === user.userId) {
+      // Only for user's messages
+      if (currentMessage.read) {
+        ticks = (
+          <Text
+            style={{
+              fontSize: 12,
+              color: selectedTheme.secondary,
+              paddingRight: 5,
             }}
-            style={styles.textInputField}
-            placeholder="Type a message..."
-            placeholderTextColor={'grey'}
-            numberOfLines={1}
-          />
-          <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
-            <Icon
-              name="send"
-              color={'black'}
-              size={25}
-              style={{
-                transform: [{rotate: '-50deg'}],
+          >
+            ✓✓
+          </Text>
+        );
+      } else if (currentMessage.delivered) {
+        ticks = (
+          <Text
+            style={{
+              fontSize: 12,
+              color: selectedTheme.secondary,
+              paddingRight: 5,
+            }}
+          >
+            ✓
+          </Text>
+        ); 
+      }
+    }
+
+    return (
+      <Bubble
+        {...props}
+        renderTicks={() => ticks}
+        wrapperStyle={{
+          left: {
+            backgroundColor: selectedTheme.message.other.background,
+          },
+          right: {
+            backgroundColor: selectedTheme.message.user.background,
+          },
+        }}
+      />
+    );
+  };
+
+  return (
+    <View style={{ flex: 1 }}>
+      <ChatRoomBackground source={chatBackgroundPic} />
+      <StatusBar
+        style={`${
+          selectedTheme === purpleTheme
+            ? "light"
+            : selectedTheme.Statusbar.style
+        }`}
+        backgroundColor={selectedTheme.primary}
+        animated={true}
+      />
+      <View style={{ position: "absolute", zIndex: 5, width: "100%" }}>
+        <TopHeaderBar
+          theme={selectedTheme}
+          title={username}
+          profileUrl={profileUrl}
+        />
+      </View>
+      <View style={styles.crContainer}>
+        <GiftedChat
+          messagesContainerStyle={styles.crMessages}
+          keyboardShouldPersistTaps="never"
+          minComposerHeight={55}
+          alwaysShowSend={true}
+          renderComposer={(props) =>
+            isEditing ? (
+              <View style={styles.editContainer}>
+                <TextInput
+                  value={editText}
+                  onChangeText={setEditText}
+                  style={styles.editInput}
+                  autoFocus
+                />
+                <TouchableOpacity
+                  onPress={handleEditSave}
+                  style={styles.editButton}
+                >
+                  <Text style={styles.editButtonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setIsEditing(false)}
+                  style={styles.editButton}
+                >
+                  {/* {" "} */}
+                  <Text style={styles.editButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Composer
+                {...props}
+                textInputStyle={{ color: selectedTheme.text.primary }}
+              />
+            )
+          }
+          messages={messages}
+          onSend={(newMessages) => handleSend(newMessages)}
+          user={{
+            _id: user.userId,
+            name: user.username,
+          }}
+          renderMessageText={(props) => (
+            <MessageText
+              {...props}
+              textStyle={{
+                left: { color: selectedTheme.message.other.text },
+                right: { color: selectedTheme.message.user.text },
               }}
             />
-          </TouchableOpacity>
-        </View>
+          )}
+          timeTextStyle={{
+            left: { color: selectedTheme.message.other.time },
+            right: { color: selectedTheme.message.user.time },
+          }}
+          renderBubble={renderBubble} // Use the custom renderBubble function
+          renderInputToolbar={(props) => (
+            <InputToolbar
+              {...props}
+              containerStyle={{ backgroundColor: selectedTheme.background }}
+            />
+          )}
+          renderChatEmpty={() => (
+            <View style={{ transform: [{ rotate: "180deg" }], bottom: -300 }}>
+              <EmptyChatRoomList />
+            </View>
+          )}
+          scrollToBottom={true}
+          scrollToBottomComponent={() => (
+            <MaterialIcons
+              style={styles.crScrollToEndButton}
+              name="double-arrow"
+              color={"#000"}
+              size={30}
+            />
+          )}
+          onPress={handlePress}
+          renderAvatar={null}
+          renderSend={(props) => (
+            <Send
+              {...props}
+              disabled={!props.text}
+              containerStyle={{
+                width: 44,
+                height: 44,
+                alignItems: "center",
+                justifyContent: "center",
+                marginHorizontal: 4,
+              }}
+            >
+              <MaterialIcons
+                name="send"
+                color={selectedTheme.text.primary}
+                size={25}
+              />
+            </Send>
+          )}
+        />
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 1,
-  },
-  messages: {
-    paddingHorizontal: 10,
-    paddingBottom: 10,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    margin: 10,
-    borderRadius: 10,
-    zIndex: 2,
-    backgroundColor: '#fff',
-  },
-  textInputField: {
-    width: '90%',
-    color: '#000',
-    paddingHorizontal: 10,
-    fontSize: 16,
-    flex: 1,
-  },
-  sendButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'lightblue',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  replyPreview: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f0f0f0',
-    padding: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    top: 16,
-    width: '90%',
-  },
-  replyPreviewContent: {
-    flex: 1,
-    marginRight: 8,
-  },
-  replyPreviewName: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#075e54',
-  },
-  replyPreviewText: {
-    fontSize: 12,
-    color: '#666',
-  },
-});
 
 export default ChatScreen;

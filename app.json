@@ -1,4 +1,47 @@
 {
-  "name": "flashSend",
-  "displayName": "flashSend"
+  "expo": {
+    "name": "Flash Send",
+    "slug": "FlashSend",
+    "version": "2.0.2",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "flashsend",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.flashsend",
+      "googleServicesFile": "./env/google-services.json"
+    },
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "fe9b89da-f74b-4905-8d16-89fdb244fbfa"
+      }
+    }
+  }
 }
