@@ -31,8 +31,8 @@ export const AuthContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   userDetails = user
 
-  const showToast = (message, styles = null) => {
-    showToastMessage(message, 3000, true, styles);
+  const showToast = (message, containerStyles = null, textStyles = null) => {
+    showToastMessage(message, 3000, true, containerStyles, textStyles);
   };
 
   // Initialize auth state from storage
