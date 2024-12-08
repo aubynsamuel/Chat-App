@@ -1,4 +1,4 @@
-import { db } from "../../env/firebaseConfig";
+import { db } from "../env/firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { getCurrentTime } from "./Commons";
 

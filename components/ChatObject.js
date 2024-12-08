@@ -1,15 +1,13 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { formatTimeWithoutSeconds , getRoomId} from "../Functions/Commons";
 import { memo, useEffect, useState } from "react";
-import { db } from "../../env/firebaseConfig";
+import { db } from "../env/firebaseConfig";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
-import getStyles from "./Component_Styles";
+import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
 
 const ChatObject = memo(({ room, theme }) => {
-  const navigation = useNavigation();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
@@ -38,7 +36,7 @@ const ChatObject = memo(({ room, theme }) => {
     router.navigate({
       pathname: "/chatRoom",
       params: {
-        userId: room.otherParticipants.userId,
+        userId: room.otherParticipant.userId,
         username: room.otherParticipant.username,
         profileUrl: room.otherParticipant.profileUrl,
         deviceToken: room.otherParticipant.deviceToken,
@@ -59,7 +57,7 @@ const ChatObject = memo(({ room, theme }) => {
             room?.otherParticipant.profileUrl == null ? (
               <Image
                 style={{ width: 50, height: 50, borderRadius: 30 }}
-                source={require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+                source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
                 transition={500}
               />
             ) : (

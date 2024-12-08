@@ -4,7 +4,7 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import React from "react";
-import { db } from "../../env/firebaseConfig";
+import { db } from "../env/firebaseConfig";
 import {
   collection,
   query,
@@ -14,7 +14,7 @@ import {
   getDocs,
   writeBatch,
 } from "firebase/firestore";
-import { userDetails as user } from "../AuthContext";
+import { userDetails as user } from "../context/AuthContext";
 import { getCurrentTime } from "../Functions/Commons";
 
 

@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { FlatList, View, RefreshControl, Text } from "react-native";
 import ChatObject from "./ChatObject";
-import getStyles from "./Component_Styles";
+import getStyles from "../styles/Component_Styles";
 
 const ChatList = memo(({ rooms, isLoading, onRefresh, theme }) => {
   const styles = getStyles(theme);

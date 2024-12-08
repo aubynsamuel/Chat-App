@@ -1,7 +1,7 @@
 import { View, Text } from "react-native";
 import React, { useEffect } from "react";
-import { useAuth } from "../src/AuthContext";
-import { useTheme } from "../src/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import LottieView from "lottie-react-native";
 import { Redirect, router } from "expo-router";
 

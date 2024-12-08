@@ -7,8 +7,9 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../env/firebaseConfig";
-import { deviceToken } from "./services/ExpoPushNotifications";
-import storage from "./Functions/Storage";
+import { deviceToken } from "../services/ExpoPushNotifications";
+import storage from "../Functions/Storage";
+import { showToast as showToastMessage } from "@/components/ToastMessage";
 
 // Create Authentication Context
 const AuthContext = createContext();
@@ -28,11 +29,10 @@ export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  const [toastMessage, setToastMessage] = useState("");
   userDetails = user
-  const showToast = (message) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(""), 2800);
+
+  const showToast = (message, styles = null) => {
+    showToastMessage(message, 3000, true, styles);
   };
 
   // Initialize auth state from storage
@@ -248,7 +248,6 @@ export const AuthContextProvider = ({ children }) => {
         updateProfile,
         resetPassword,
         showToast, 
-        toastMessage
       }}
     >
       {children}

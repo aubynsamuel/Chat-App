@@ -6,7 +6,7 @@ const EmptyChatRoomList = () => {
   return (
     <View style={{ flex: 1, }}>
       <LottieView
-        source={require("../../myAssets/Lottie_Files/Animation - 1730912642416.json")}
+        source={require("../myAssets/Lottie_Files/Animation - 1730912642416.json")}
         autoPlay
         loop={true}
         style={styles.lottieImage}

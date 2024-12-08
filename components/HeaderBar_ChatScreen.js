@@ -13,7 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./Component_Styles";
+import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -121,7 +121,7 @@ const TopHeaderBar = memo(({ title, profileUrl, theme }) => {
                   <Animated.View style={[animatedImageContainerStyle]}>
                     <Animated.Image
                       style={[styles.hcAvatar, animatedImageStyle]}
-                      source={require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+                      source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
                     />
                   </Animated.View>
                 ) : (

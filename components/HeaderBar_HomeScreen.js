@@ -1,7 +1,7 @@
 import { memo, React, useState } from "react";
 import { Text, TouchableOpacity, View, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../context/AuthContext";
 import {
   Menu,
   MenuOptions,
@@ -9,7 +9,7 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "./Component_Styles";
+import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
 
 const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
@@ -49,7 +49,7 @@ const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
             user?.profileUrl == null ||
             imageFailed ? (
               <Image
-                source={require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+                source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
                 style={{ width: 45, height: 45, borderRadius: 30 }}
                 transition={500}
               />

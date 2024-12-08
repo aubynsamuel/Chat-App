@@ -1,8 +1,8 @@
 import { SafeAreaView, View, TouchableOpacity, Button } from "react-native";
-import { useAuth } from "../src/AuthContext";
-import TopHeaderBar from "../src/components/HeaderBar_HomeScreen";
+import { useAuth } from "../context/AuthContext";
+import TopHeaderBar from "../components/HeaderBar_HomeScreen";
 import { useEffect, useState } from "react";
-import ChatList from "../src/components/ChatList";
+import ChatList from "../components/ChatList";
 import {
   query,
   where,
@@ -15,10 +15,10 @@ import {
 import { usersRef, db } from "../env/firebaseConfig";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import NotificationTokenManager from "../src/NotificationTokenManager";
+import NotificationTokenManager from "../Functions/NotificationTokenManager";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../src/sreen_Styles";
-import { useTheme } from "../src/ThemeContext";
+import getStyles from "../styles/sreen_Styles";
+import { useTheme } from "../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 // import {schedulePushNotification} from '../services/ExpoPushNotifications'

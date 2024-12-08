@@ -1,13 +1,13 @@
 import React from "react";
-import { useAuth, AuthContextProvider } from "../src/AuthContext";
-import { ThemeContextProvider } from "../src/ThemeContext";
+import { useAuth, AuthContextProvider } from "../context/AuthContext";
+import { ThemeContextProvider } from "../context/ThemeContext";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { MenuProvider } from "react-native-popup-menu";
-import ExpoPushNotifications from "../src/services/ExpoPushNotifications";
-import Toast from "../src/components/ToastMessage";
+import ExpoPushNotifications from "../services/ExpoPushNotifications";
+import Toast from "../components/ToastMessage";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useTheme } from "../src/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
 
 const App = () => {
   return (
@@ -26,14 +26,12 @@ const App = () => {
 };
 
 const RootLayout = () => {
-  const { toastMessage } = useAuth();
   const { selectedTheme } = useTheme();
   return (
     <SafeAreaProvider>
       <Stack
         screenOptions={{
           headerShown: false,
-          animationEnabled: false,
           navigationBarColor: selectedTheme.background,
         }}
       >
@@ -44,10 +42,10 @@ const RootLayout = () => {
         <Stack.Screen name="searchUsers" />
         <Stack.Screen name="userProfile" />
         <Stack.Screen name="editProfile" />
-        <Stack.Screen name="intermediary" />
-        <Stack.Screen name="chatRoom" />
+        {/* <Stack.Screen name="intermediary" /> */}
+        <Stack.Screen name="chatRoom"/>
       </Stack>
-      <Toast message={toastMessage} duration={2500} />
+      <Toast />
     </SafeAreaProvider>
   );
 };

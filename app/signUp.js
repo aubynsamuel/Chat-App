@@ -9,14 +9,14 @@ import {
 import React, { useRef, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { TextInput } from "react-native-gesture-handler";
-import { useAuth } from "../src/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import LottieView from "lottie-react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import { storage } from "../env/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../src/sreen_Styles";
-import { useTheme } from "../src/ThemeContext";
+import getStyles from "../styles/sreen_Styles";
+import { useTheme } from "../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 
@@ -256,7 +256,7 @@ const SignUpScreen = () => {
           style={{ flexDirection: "row", alignSelf: "center", marginTop: 5 }}
         >
           <Text style={styles.suHaveAnAccount}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.navigate("/login")}>
+          <TouchableOpacity onPress={() => router.replace("/login")}>
             <Text style={styles.suLoginText}>Login</Text>
           </TouchableOpacity>
         </View>

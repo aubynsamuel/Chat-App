@@ -8,10 +8,10 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { useAuth } from "../src/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../src/sreen_Styles";
-import { useTheme } from "../src/ThemeContext";
+import getStyles from "../styles/sreen_Styles";
+import { useTheme } from "../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { launchImageLibrary } from "react-native-image-picker";
 import { router } from "expo-router";

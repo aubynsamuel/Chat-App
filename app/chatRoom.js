@@ -15,7 +15,6 @@ import {
   MessageText,
   Composer,
 } from "react-native-gifted-chat";
-import { useRoute } from "@react-navigation/native";
 import { db } from "../env/firebaseConfig";
 import {
   collection,
@@ -31,28 +30,25 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import { useAuth } from "../src/AuthContext";
-import { getCurrentTime, getRoomId } from "../src/Functions/Commons";
-import { sendNotification } from "../src/services/ExpoPushNotifications";
-import { useTheme } from "../src/ThemeContext";
-import ChatRoomBackground from "../src/components/ChatRoomBackground";
-import TopHeaderBar from "../src/components/HeaderBar_ChatScreen";
+import { useAuth } from "../context/AuthContext";
+import { getCurrentTime, getRoomId } from "../Functions/Commons";
+import { sendNotification } from "../services/ExpoPushNotifications";
+import { useTheme } from "../context/ThemeContext";
+import ChatRoomBackground from "../components/ChatRoomBackground";
+import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import { StatusBar } from "expo-status-bar";
 import {
   fetchCachedMessages,
   cacheMessages,
-} from "../src/Functions/CacheMessages";
-import createRoomIfItDoesNotExist from "../src/Functions/CreateRoomIfItDoesNotExist";
+} from "../Functions/CacheMessages";
+import createRoomIfItDoesNotExist from "../Functions/CreateRoomIfItDoesNotExist";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../src/sreen_Styles";
+import getStyles from "../styles/sreen_Styles";
 import * as Clipboard from "expo-clipboard";
-import EmptyChatRoomList from "../src/components/EmptyChatRoomList";
-import { useNavigation } from "@react-navigation/native";
+import EmptyChatRoomList from "../components/EmptyChatRoomList";
 import { router, useLocalSearchParams } from "expo-router";
 
 const ChatScreen = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
   const { userId, username, profileUrl } = useLocalSearchParams(); 
   const { user } = useAuth();
   const { selectedTheme, chatBackgroundPic } = useTheme();
@@ -64,19 +60,19 @@ const ChatScreen = () => {
   const [editMessage, setEditMessage] = useState(null);
   const [editText, setEditText] = useState("");
 
-  const onHardwareBackPress = () => {
-    router.navigate("/intermediary");
-    // navigation.replace("Home");
-    return true;
-  };
+  // const onHardwareBackPress = () => {
+  //   router.navigate("/intermediary");
+  //   // navigation.replace("Home");
+  //   return true;
+  // };
 
-  useEffect(() => {
-    const handleBackPress = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onHardwareBackPress
-    );
-    return () => handleBackPress.remove();
-  }, []);
+  // useEffect(() => {
+  //   const handleBackPress = BackHandler.addEventListener(
+  //     "hardwareBackPress",
+  //     onHardwareBackPress
+  //   );
+  //   return () => handleBackPress.remove();
+  // }, []);
 
   useEffect(() => {
     const roomRef = doc(db, "rooms", roomId);

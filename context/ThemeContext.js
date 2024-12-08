@@ -1,9 +1,9 @@
 // ThemeContext.js
 import { createContext, useContext, useEffect, useState } from "react";
-import greenTheme from "./Themes/Greenday";
-import darkTheme from "./Themes/DarkMode";
-import lightBlueTheme from "./Themes/SkyLander";
-import purpleTheme from "./Themes/Purple";
+import greenTheme from "../Themes/Greenday";
+import darkTheme from "../Themes/DarkMode";
+import lightBlueTheme from "../Themes/SkyLander";
+import purpleTheme from "../Themes/Purple";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ThemeContext = createContext();
