@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth, AuthContextProvider } from "../context/AuthContext";
+import { AuthContextProvider } from "../context/AuthContext";
 import { ThemeContextProvider } from "../context/ThemeContext";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -42,7 +42,6 @@ const RootLayout = () => {
         <Stack.Screen name="searchUsers" />
         <Stack.Screen name="userProfile" />
         <Stack.Screen name="editProfile" />
-        {/* <Stack.Screen name="intermediary" /> */}
         <Stack.Screen name="chatRoom"/>
       </Stack>
       <Toast />

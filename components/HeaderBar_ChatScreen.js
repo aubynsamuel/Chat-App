@@ -1,6 +1,5 @@
 import React, { memo, useState } from "react";
 import { TouchableOpacity, View, Dimensions, Keyboard } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Menu, MenuOptions, MenuTrigger } from "react-native-popup-menu";
 import Animated, {
   useSharedValue,
@@ -9,7 +8,6 @@ import Animated, {
   interpolate,
   useAnimatedGestureHandler,
   runOnJS,
-  FadeInLeft,
 } from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -24,7 +22,7 @@ const MAX_HEADER_HEIGHT = SCREEN_HEIGHT * 0.6;
 const MIN_HEADER_HEIGHT = 65;
 
 const TopHeaderBar = memo(({ title, profileUrl, theme }) => {
-  const navigation = useNavigation();
+  console.log("profileUrl from TopBar: ",profileUrl)
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
   const AnimatedTouchableOpacity =

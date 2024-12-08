@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { useAuth } from "../context/AuthContext";
-import { formatTimeWithoutSeconds , getRoomId} from "../Functions/Commons";
+import { formatTimeWithoutSeconds, getRoomId } from "../Functions/Commons";
 import { memo, useEffect, useState } from "react";
 import { db } from "../env/firebaseConfig";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
@@ -33,14 +33,15 @@ const ChatObject = memo(({ room, theme }) => {
   }, [user?.userId, room.otherParticipant.userId]);
 
   const handlePress = () => {
-    router.navigate({
+    console.log("Navigating with profileUrl:", room.otherParticipant.profileUrl);
+    router.push({
       pathname: "/chatRoom",
       params: {
         userId: room.otherParticipant.userId,
         username: room.otherParticipant.username,
         profileUrl: room.otherParticipant.profileUrl,
         deviceToken: room.otherParticipant.deviceToken,
-      }
+      },
     });
   };
 
@@ -65,7 +66,9 @@ const ChatObject = memo(({ room, theme }) => {
                 style={{ width: 50, height: 50, borderRadius: 30 }}
                 source={{ uri: room?.otherParticipant.profileUrl }}
                 transition={500}
-                onError={() => setImageFailed(true)}
+                onError={() => {
+                  setImageFailed(true);
+                }}
               />
             )}
           </TouchableOpacity>

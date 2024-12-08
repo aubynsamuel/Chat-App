@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { launchImageLibrary } from "react-native-image-picker";
-import { useNavigation } from "@react-navigation/native";
 import {
   getStorage,
   ref,
@@ -28,11 +27,9 @@ const EditProfileScreen = () => {
   const [username, setUsername] = useState(user.username || "");
   const [profileUrl, setProfileUrl] = useState(user.profileUrl || null);
   const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
 
-  // Handle image selection
   const selectImage = () => {
     const options = {
       mediaType: "photo",
@@ -53,7 +50,6 @@ const EditProfileScreen = () => {
     });
   };
 
-  // Handle profile update
   const handleUpdateProfile = async () => {
     setIsLoading(true);
 

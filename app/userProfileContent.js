@@ -7,7 +7,6 @@ import {
   Switch,
 } from "react-native";
 import React, { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "../styles/sreen_Styles";
@@ -18,7 +17,6 @@ import { router } from "expo-router";
 
 const UserProfileContent = ({ children }) => {
   const { user, logout, showToast } = useAuth();
-  const navigation = useNavigation();
   const profileUrl = user?.profileUrl;
   const [imageFailed, setImageFailed] = useState(false);
   const { selectedTheme, changeBackgroundPic } = useTheme();

@@ -11,7 +11,6 @@ import {
 import { getDocs, query, where, collection } from "firebase/firestore";
 import { db } from "../env/firebaseConfig";
 import { useAuth } from "../context/AuthContext";
-import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "../styles/sreen_Styles";
 import { useTheme } from "../context/ThemeContext";
@@ -20,7 +19,6 @@ import { router } from "expo-router";
 
 const SearchUsersScreen = () => {
   const { user } = useAuth();
-  const navigation = useNavigation();
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const { selectedTheme } = useTheme();

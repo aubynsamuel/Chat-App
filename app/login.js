@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigation } from "@react-navigation/native";
 import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -29,7 +28,6 @@ const LoginScreen = () => {
   );
   const styles = getStyles(selectedTheme);
 
-  // Handle forgot password
   const handleForgotPassword = async () => {
     if (!email.current) {
       showToast("Please enter your email address");
@@ -63,7 +61,6 @@ const LoginScreen = () => {
     setIsLoading(false);
   };
 
-  const navigation = useNavigation();
   return (
     <SafeAreaView
       style={{

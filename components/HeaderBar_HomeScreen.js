@@ -1,6 +1,5 @@
 import { memo, React, useState } from "react";
 import { Text, TouchableOpacity, View, Image } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../context/AuthContext";
 import {
   Menu,
@@ -13,7 +12,6 @@ import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
 
 const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
-  const navigation = useNavigation();
   const { user, logout } = useAuth();
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
@@ -22,7 +20,6 @@ const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
     logout();
     router.replace("login");
   };
-  // Fetch user profile picture when component mounts
 
   return (
     <View style={styles.hhHeaderContainer}>

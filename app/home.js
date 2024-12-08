@@ -1,4 +1,4 @@
-import { SafeAreaView, View, TouchableOpacity, Button } from "react-native";
+import { SafeAreaView, View, TouchableOpacity } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import TopHeaderBar from "../components/HeaderBar_HomeScreen";
 import { useEffect, useState } from "react";
@@ -13,7 +13,6 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { usersRef, db } from "../env/firebaseConfig";
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NotificationTokenManager from "../Functions/NotificationTokenManager";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -24,7 +23,6 @@ import { router } from "expo-router";
 // import {schedulePushNotification} from '../services/ExpoPushNotifications'
 
 function HomeScreen() {
-  const navigation = useNavigation();
   const { user } = useAuth();
   const [rooms, setRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

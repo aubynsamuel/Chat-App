@@ -6,7 +6,6 @@ import { deviceToken } from '../services/ExpoPushNotifications';
 const expoPushTokenRegex = /^ExponentPushToken\[[a-zA-Z0-9-_]+\]$/;
 
 const NotificationTokenManager = {
-  // Initialize and check for token changes
   async initializeAndUpdateToken(userId) {
     try {
       const newToken = deviceToken;
@@ -56,7 +55,6 @@ const NotificationTokenManager = {
     }
   },
 
-  // Retrieve the stored token from AsyncStorage if needed
   async getStoredToken() {
     try {
       const token = await AsyncStorage.getItem('deviceToken');

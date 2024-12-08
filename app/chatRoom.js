@@ -1,12 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  View,
-  Text,
-  Alert,
-  TextInput,
-  TouchableOpacity,
-  BackHandler,
-} from "react-native";
+import { View, Text, Alert, TextInput, TouchableOpacity } from "react-native";
 import {
   GiftedChat,
   InputToolbar,
@@ -37,19 +30,16 @@ import { useTheme } from "../context/ThemeContext";
 import ChatRoomBackground from "../components/ChatRoomBackground";
 import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import { StatusBar } from "expo-status-bar";
-import {
-  fetchCachedMessages,
-  cacheMessages,
-} from "../Functions/CacheMessages";
+import { fetchCachedMessages, cacheMessages } from "../Functions/CacheMessages";
 import createRoomIfItDoesNotExist from "../Functions/CreateRoomIfItDoesNotExist";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "../styles/sreen_Styles";
 import * as Clipboard from "expo-clipboard";
 import EmptyChatRoomList from "../components/EmptyChatRoomList";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 const ChatScreen = () => {
-  const { userId, username, profileUrl } = useLocalSearchParams(); 
+  const { userId, username } = useLocalSearchParams();
   const { user } = useAuth();
   const { selectedTheme, chatBackgroundPic } = useTheme();
   const [messages, setMessages] = useState([]);
@@ -59,20 +49,26 @@ const ChatScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState(null);
   const [editText, setEditText] = useState("");
+  const [profileUrl, setProfileUrl] = useState();
 
-  // const onHardwareBackPress = () => {
-  //   router.navigate("/intermediary");
-  //   // navigation.replace("Home");
-  //   return true;
-  // };
+  async function fetchOtherUsersProfileUrl(userId) {
+    try {
+      const userDocRef = doc(db, "users", userId);
 
-  // useEffect(() => {
-  //   const handleBackPress = BackHandler.addEventListener(
-  //     "hardwareBackPress",
-  //     onHardwareBackPress
-  //   );
-  //   return () => handleBackPress.remove();
-  // }, []);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        return userData.profileUrl;
+      } else {
+        console.log("User document does not exist.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching profile URL:", error);
+      return null;
+    }
+  }
 
   useEffect(() => {
     const roomRef = doc(db, "rooms", roomId);
@@ -126,6 +122,9 @@ const ChatScreen = () => {
       }
     };
     fetchOtherUserToken();
+    fetchOtherUsersProfileUrl(userId)
+      .then((profileUrl) => setProfileUrl(profileUrl))
+      .catch((error) => console.log(error));
   }, [userId]);
 
   const handleSend = useCallback(
@@ -232,7 +231,7 @@ const ChatScreen = () => {
     markMessagesAsRead();
   }, [roomId, user.userId, messages]);
 
-  const handlePress = useCallback(
+  const handleMessagePress = useCallback(
     (context, currentMessage) => {
       if (!currentMessage.text) return;
 
@@ -446,7 +445,7 @@ const ChatScreen = () => {
               size={30}
             />
           )}
-          onPress={handlePress}
+          onPress={handleMessagePress}
           renderAvatar={null}
           renderSend={(props) => (
             <Send

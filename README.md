@@ -1,12 +1,8 @@
-
 # 🔥 Flash Send (Real-Time Chat Application)
-
 
 Welcome to the **Real-Time Chat Application** built using **React Native** and **Firebase**. This app allows users to chat in real-time with messaging features such as message caching, user presence, and seamless chat history.
 
-
 ## 📱 Features
-
 
 - **Real-Time Messaging**: Send and receive messages instantly with the help of Firebase Firestore.
 - **User Authentication**: Secure login and sign-up system using Firebase Authentication.
@@ -17,20 +13,15 @@ Welcome to the **Real-Time Chat Application** built using **React Native** and *
 - **Status Indicators**: Display the last message sent, message timestamps, and user activity status.
 - **Push Notifications**: Receive notifications for new messages (optional).
 
-
 ## 🚀 Getting Started
 
-
 ### Prerequisites
-
 
 - **Node.js** (>= 12.x)
 - **React Native CLI** or **Expo CLI** (optional, if using Expo)
 - **Firebase Project** with Firestore and Authentication enabled
 
-
 ### Installation
-
 
 1. Clone the repository:
 
@@ -45,19 +36,15 @@ Welcome to the **Real-Time Chat Application** built using **React Native** and *
    npm install
    ```
 
-
 3. Set up Firebase:
 
    - Go to [Firebase Console](https://console.firebase.google.com/)
    - Create a Firebase project and enable **Firestore** and **Authentication**
    - Copy the Firebase config and paste it into `firebaseConfig.js` in the app’s root folder.
-  
-  
+
 ### Firebase Configuration
 
-
 Make sure to configure Firebase in `firebaseConfig.js`:
-
 
 ```js
 // firebaseConfig.js
@@ -82,25 +69,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage),
-})
+});
 export const storage = getStorage(app);
-
 
 export const db = getFirestore(app);
 export const usersRef = collection(db, "users");
-export const roomRef = collection(db, "rooms")
+export const roomRef = collection(db, "rooms");
 ```
-
 
 4. Run the app:
 
    For Expo
-   
+
    First create a development build
+
    ```bash
    npx eas build --profile development --platform android
    ```
+
    Then
+
    ```bash
    npx expo start
    ```
@@ -116,7 +104,6 @@ export const roomRef = collection(db, "rooms")
    ```bash
    npx react-native run-android
    ```
-
 
 ## 🛠️ App Structure
 
@@ -134,8 +121,8 @@ export const roomRef = collection(db, "rooms")
 - **Offline Access**: Messages are cached locally so that users can view previous messages even when offline.
 - **Profile Management**: Users can upload a profile picture and update their details.
 
-
 ## 📂 Project Layout
+
 ```
 
 /chat-app
@@ -150,12 +137,11 @@ export const roomRef = collection(db, "rooms")
 ├── /Services/                  # ExpoPushNotifications
 ├── AuthContext.js              # User authentication context
 ├── NotificationTokenManager.js # Ensures that a valid token is available for notifications
-├── ThemeContext.js             # Handles theme switching 
+├── ThemeContext.js             # Handles theme switching
 ├── App.js                      # Main app entry point
 └── package.json                # Project dependencies and scripts
 
 ```
-
 
 ## 🤝 Contributing
 

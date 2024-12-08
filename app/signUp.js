@@ -22,7 +22,6 @@ import { router } from "expo-router";
 
 
 const SignUpScreen = () => {
-  const navigation = useNavigation();
   const email = useRef("");
   const username = useRef("");
   const password = useRef("");
@@ -36,7 +35,6 @@ const SignUpScreen = () => {
   const [profileUrl, setProfileUrl] = useState(null);
   const styles = getStyles(selectedTheme);
 
-  // Function to handle image selection from the gallery
   const selectImage = () => {
     const options = {
       mediaType: "photo",

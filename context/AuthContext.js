@@ -11,10 +11,8 @@ import { deviceToken } from "../services/ExpoPushNotifications";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "@/components/ToastMessage";
 
-// Create Authentication Context
 const AuthContext = createContext();
 
-// Create Authentication Context hooks and exports
 export const useAuth = () => useContext(AuthContext);
 
 // Constants for storage keys
@@ -24,7 +22,6 @@ const STORAGE_KEYS = {
 };
 
 export let userDetails
-// Create Authentication Context Provider
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);

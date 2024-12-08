@@ -1,4 +1,3 @@
-// ThemeContext.js
 import { createContext, useContext, useEffect, useState } from "react";
 import greenTheme from "../Themes/Greenday";
 import darkTheme from "../Themes/DarkMode";
