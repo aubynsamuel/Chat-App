@@ -1,7 +1,7 @@
 import React from "react";
 import { render, act, fireEvent } from "@testing-library/react-native";
-import { showToast } from "./ToastMessage";
-import Toast from "./ToastMessage";
+import { showToast } from "../../components/ToastMessage";
+import Toast from "../../components/ToastMessage";
 
 // Mock timer functions
 jest.useFakeTimers();

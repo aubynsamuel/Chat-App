@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 import { launchImageLibrary } from "react-native-image-picker";
 import {
   getStorage,
@@ -17,8 +17,8 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../../styles/sreen_Styles";
-import { useTheme } from "../../context/ThemeContext";
+import getStyles from "../../../styles/sreen_Styles";
+import { useTheme } from "../../../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 
@@ -136,7 +136,7 @@ const EditProfileScreen = () => {
           <Image source={{ uri: profileUrl }} style={styles.epProfileImage} />
         ) : (
           <Image
-            source={require("../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+            source={require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
             style={styles.epProfileImage}
           />
         )}

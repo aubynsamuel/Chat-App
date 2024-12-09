@@ -12,7 +12,7 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "app/(stacknavigator)/_layout.js",
+    "app/(main)/_layout.jsgator)/_layout.js",
     "services/ExpoPushNotifications.js",
     "components/ThemeSelector.tsx",
     "app/profile.js",

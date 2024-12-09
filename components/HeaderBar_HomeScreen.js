@@ -79,7 +79,7 @@ const TopHeaderBar = memo(({ title, backButtonShown, theme }) => {
                 alignItems: "center",
               }}
               onSelect={() => {
-                router.navigate("/userProfile");
+                router.navigate("/profile");
               }}
             >
               <Text style={styles.hhMenuText}>Profile</Text>

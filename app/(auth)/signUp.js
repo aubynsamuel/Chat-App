@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useRef, useState } from "react";
-import { useNavigation } from "@react-navigation/native";
 import { TextInput } from "react-native-gesture-handler";
 import { useAuth } from "../../context/AuthContext";
 import LottieView from "lottie-react-native";
