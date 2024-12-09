@@ -10,8 +10,8 @@ import {
 } from "@gorhom/bottom-sheet";
 import UserProfileContent from "./userProfileContent";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../context/ThemeContext";
-import getStyles from "../styles/sreen_Styles";
+import { useTheme } from "../../context/ThemeContext";
+import getStyles from "../../styles/sreen_Styles";
 import { ScrollView } from "react-native-gesture-handler";
 
 const UserProfileScreen = () => {

@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import React, { useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import LottieView from "lottie-react-native";
 import { router } from "expo-router";
 
@@ -30,7 +30,7 @@ const Index = () => {
         }}
       >
         <LottieView
-          source={require("../myAssets/Lottie_Files/send.json")}
+          source={require("../../myAssets/Lottie_Files/send.json")}
           autoPlay
           loop={false}
           style={{

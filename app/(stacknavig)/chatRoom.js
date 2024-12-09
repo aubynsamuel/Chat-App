@@ -8,7 +8,7 @@ import {
   MessageText,
   Composer,
 } from "react-native-gifted-chat";
-import { db } from "../env/firebaseConfig";
+import { db } from "../../env/firebaseConfig";
 import {
   collection,
   query,
@@ -23,19 +23,19 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import { useAuth } from "../context/AuthContext";
-import { getCurrentTime, getRoomId } from "../Functions/Commons";
-import { sendNotification } from "../services/ExpoPushNotifications";
-import { useTheme } from "../context/ThemeContext";
-import ChatRoomBackground from "../components/ChatRoomBackground";
-import TopHeaderBar from "../components/HeaderBar_ChatScreen";
+import { useAuth } from "../../context/AuthContext";
+import { getCurrentTime, getRoomId } from "../../Functions/Commons";
+import { sendNotification } from "../../services/ExpoPushNotifications";
+import { useTheme } from "../../context/ThemeContext";
+import ChatRoomBackground from "../../components/ChatRoomBackground";
+import TopHeaderBar from "../../components/HeaderBar_ChatScreen";
 import { StatusBar } from "expo-status-bar";
-import { fetchCachedMessages, cacheMessages } from "../Functions/CacheMessages";
-import createRoomIfItDoesNotExist from "../Functions/CreateRoomIfItDoesNotExist";
+import { fetchCachedMessages, cacheMessages } from "../../Functions/CacheMessages";
+import createRoomIfItDoesNotExist from "../../Functions/CreateRoomIfItDoesNotExist";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../styles/sreen_Styles";
+import getStyles from "../../styles/sreen_Styles";
 import * as Clipboard from "expo-clipboard";
-import EmptyChatRoomList from "../components/EmptyChatRoomList";
+import EmptyChatRoomList from "../../components/EmptyChatRoomList";
 import { useLocalSearchParams } from "expo-router";
 
 const ChatScreen = () => {

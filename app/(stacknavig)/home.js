@@ -1,8 +1,8 @@
 import { SafeAreaView, View, TouchableOpacity } from "react-native";
-import { useAuth } from "../context/AuthContext";
-import TopHeaderBar from "../components/HeaderBar_HomeScreen";
+import { useAuth } from "../../context/AuthContext";
+import TopHeaderBar from "../../components/HeaderBar_HomeScreen";
 import { useEffect, useState } from "react";
-import ChatList from "../components/ChatList";
+import ChatList from "../../components/ChatList";
 import {
   query,
   where,
@@ -12,12 +12,12 @@ import {
   getDoc,
   onSnapshot,
 } from "firebase/firestore";
-import { usersRef, db } from "../env/firebaseConfig";
+import { usersRef, db } from "../../env/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import NotificationTokenManager from "../Functions/NotificationTokenManager";
+import NotificationTokenManager from "../../Functions/NotificationTokenManager";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../styles/sreen_Styles";
-import { useTheme } from "../context/ThemeContext";
+import getStyles from "../../styles/sreen_Styles";
+import { useTheme } from "../../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 // import {schedulePushNotification} from '../services/ExpoPushNotifications'
