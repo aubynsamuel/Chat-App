@@ -36,13 +36,13 @@ const RootLayout = () => {
         }}
       >
         <Stack.Screen name="index" />
-        <Stack.Screen name="signUp" />
         <Stack.Screen name="login" />
+        <Stack.Screen name="signUp" />
         <Stack.Screen name="home" />
+        <Stack.Screen name="chatRoom" options={{animation:"none"}}/>
         <Stack.Screen name="searchUsers" />
         <Stack.Screen name="userProfile" />
         <Stack.Screen name="editProfile" />
-        <Stack.Screen name="chatRoom"/>
       </Stack>
       <Toast />
     </SafeAreaProvider>

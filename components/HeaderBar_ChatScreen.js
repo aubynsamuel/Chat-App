@@ -22,7 +22,7 @@ const MAX_HEADER_HEIGHT = SCREEN_HEIGHT * 0.6;
 const MIN_HEADER_HEIGHT = 65;
 
 const TopHeaderBar = memo(({ title, profileUrl, theme }) => {
-  console.log("profileUrl from TopBar: ",profileUrl)
+  // console.log("profileUrl from TopBar: ",profileUrl)
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
   const AnimatedTouchableOpacity =

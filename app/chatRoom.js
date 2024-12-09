@@ -51,61 +51,7 @@ const ChatScreen = () => {
   const [editText, setEditText] = useState("");
   const [profileUrl, setProfileUrl] = useState();
 
-  async function fetchOtherUsersProfileUrl(userId) {
-    try {
-      const userDocRef = doc(db, "users", userId);
-
-      const userDoc = await getDoc(userDocRef);
-
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        return userData.profileUrl;
-      } else {
-        console.log("User document does not exist.");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching profile URL:", error);
-      return null;
-    }
-  }
-
   useEffect(() => {
-    const roomRef = doc(db, "rooms", roomId);
-    const messagesRef = collection(roomRef, "messages");
-    const q = query(messagesRef, orderBy("createdAt", "desc"));
-
-    const initializeChat = async () => {
-      const cachedMessages = await fetchCachedMessages(roomId);
-      if (cachedMessages && cachedMessages.length > 0) {
-        setMessages(cachedMessages);
-      }
-
-      await createRoomIfItDoesNotExist(roomId, user, userId);
-
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const fetchedMessages = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            _id: doc.id,
-            text: data.content,
-            createdAt: data.createdAt.toDate(),
-            user: {
-              _id: data.senderId,
-              name: data.senderName,
-            },
-            replyTo: data.replyTo,
-            read: data.read || false,
-            delivered: data.delivered || false,
-          };
-        });
-        setMessages(fetchedMessages);
-        cacheMessages(roomId, fetchedMessages);
-      });
-
-      return unsubscribe;
-    };
-
     const unsubscribe = initializeChat();
 
     return () => {
@@ -114,18 +60,96 @@ const ChatScreen = () => {
   }, [roomId, user, userId]);
 
   useEffect(() => {
-    const fetchOtherUserToken = async () => {
+    fetchOtherUsersProfileUrl();
+    fetchOtherUserToken();
+  }, [userId]);
+
+  useEffect(() => {
+    markMessagesAsRead();
+  }, [roomId, user.userId, messages]);
+
+  const initializeChat = async () => {
+    const roomRef = doc(db, "rooms", roomId);
+    const messagesRef = collection(roomRef, "messages");
+    const q = query(messagesRef, orderBy("createdAt", "desc"));
+
+    const cachedMessages = await fetchCachedMessages(roomId);
+    if (cachedMessages && cachedMessages.length > 0) {
+      setMessages(cachedMessages);
+    }
+
+    await createRoomIfItDoesNotExist(roomId, user, userId);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedMessages = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          _id: doc.id,
+          text: data.content,
+          createdAt: data.createdAt.toDate(),
+          user: {
+            _id: data.senderId,
+            name: data.senderName,
+          },
+          replyTo: data.replyTo,
+          read: data.read || false,
+          delivered: data.delivered || false,
+        };
+      });
+      setMessages(fetchedMessages);
+      cacheMessages(roomId, fetchedMessages);
+    });
+
+    return unsubscribe;
+  };
+
+  const markMessagesAsRead = async () => {
+    const roomRef = doc(db, "rooms", roomId);
+    const messagesRef = collection(roomRef, "messages");
+    const unreadMessagesQuery = query(
+      messagesRef,
+      where("senderId", "!=", user.userId),
+      where("read", "==", false)
+    );
+
+    const snapshot = await getDocs(unreadMessagesQuery);
+    const batch = writeBatch(db);
+
+    snapshot.forEach((doc) => {
+      batch.update(doc.ref, { read: true });
+    });
+
+    if (!snapshot.empty) {
+      await batch.commit();
+    }
+  };
+
+  const fetchOtherUsersProfileUrl = async () => {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setProfileUrl(userData.profileUrl);
+      } else {
+        console.log("User document does not exist.");
+      }
+    } catch (error) {
+      console.error("Error fetching profile URL:", error);
+    }
+  };
+
+  const fetchOtherUserToken = async () => {
+    try {
       const userRef = doc(db, "users", userId);
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         setOtherUserToken(userDoc.data().deviceToken);
       }
-    };
-    fetchOtherUserToken();
-    fetchOtherUsersProfileUrl(userId)
-      .then((profileUrl) => setProfileUrl(profileUrl))
-      .catch((error) => console.log(error));
-  }, [userId]);
+    } catch (error) {
+      console.error("Error fetching other user's token:", error);
+    }
+  };
 
   const handleSend = useCallback(
     async (newMessages = []) => {
@@ -205,31 +229,6 @@ const ChatScreen = () => {
       ]
     );
   };
-
-  useEffect(() => {
-    const markMessagesAsRead = async () => {
-      const roomRef = doc(db, "rooms", roomId);
-      const messagesRef = collection(roomRef, "messages");
-      const unreadMessagesQuery = query(
-        messagesRef,
-        where("senderId", "!=", user.userId),
-        where("read", "==", false)
-      );
-
-      const snapshot = await getDocs(unreadMessagesQuery);
-      const batch = writeBatch(db);
-
-      snapshot.forEach((doc) => {
-        batch.update(doc.ref, { read: true });
-      });
-
-      if (!snapshot.empty) {
-        await batch.commit();
-      }
-    };
-
-    markMessagesAsRead();
-  }, [roomId, user.userId, messages]);
 
   const handleMessagePress = useCallback(
     (context, currentMessage) => {

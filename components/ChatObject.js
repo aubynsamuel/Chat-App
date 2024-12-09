@@ -33,7 +33,7 @@ const ChatObject = memo(({ room, theme }) => {
   }, [user?.userId, room.otherParticipant.userId]);
 
   const handlePress = () => {
-    console.log("Navigating with profileUrl:", room.otherParticipant.profileUrl);
+    // console.log("Navigating with profileUrl:", room.otherParticipant.profileUrl);
     router.push({
       pathname: "/chatRoom",
       params: {
