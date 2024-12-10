@@ -13,6 +13,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../../../context/ThemeContext";
 import getStyles from "../../../styles/sreen_Styles";
 import { ScrollView } from "react-native-gesture-handler";
+import { StatusBar } from "expo-status-bar";
 
 const UserProfileScreen = () => {
   const { selectedTheme, changeTheme } = useTheme();
@@ -41,6 +42,7 @@ const UserProfileScreen = () => {
 
   return (
     <GestureHandlerRootView>
+      <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
       <BottomSheetModalProvider>
         <UserProfileContent>
           <TouchableOpacity

@@ -19,5 +19,5 @@
     "app/usapp/userProfileContent.jsp/chatRoom.js",
     "app/(stacknavigator)/chatRoom.js",
     "src/MessagesContext.js"
-  ]
+, "app/_layout.js"  ]
 }

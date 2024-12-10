@@ -9,7 +9,7 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../env/firebaseConfig";
 import { deviceToken } from "../services/ExpoPushNotifications";
 import storage from "../Functions/Storage";
-import { showToast as showToastMessage } from "@/components/ToastMessage";
+import { showToast as showToastMessage } from "au-react-native-toast";
 
 const AuthContext = createContext();
 
@@ -21,12 +21,12 @@ const STORAGE_KEYS = {
   AUTH_STATE: "auth_state",
 };
 
-export let userDetails
+export let userDetails;
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  userDetails = user
+  userDetails = user;
 
   const showToast = (message, containerStyles = null, textStyles = null) => {
     showToastMessage(message, 3000, true, containerStyles, textStyles);
@@ -46,7 +46,7 @@ export const AuthContextProvider = ({ children }) => {
       if (cachedUser) {
         setUser(JSON.parse(cachedUser));
         setIsAuthenticated(cachedAuthState === "true");
-        setIsLoading(false)
+        setIsLoading(false);
       }
 
       // Set up Firebase auth listener
@@ -244,7 +244,7 @@ export const AuthContextProvider = ({ children }) => {
         isLoading,
         updateProfile,
         resetPassword,
-        showToast, 
+        showToast,
       }}
     >
       {children}
