@@ -3,20 +3,20 @@ import greenTheme from "../Themes/Greenday";
 import darkTheme from "../Themes/DarkMode";
 import lightBlueTheme from "../Themes/SkyLander";
 import purpleTheme from "../Themes/Purple";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import storage from "@/Functions/Storage";
 
 const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
 
 const themes = [greenTheme, lightBlueTheme, darkTheme, purpleTheme];
 
-  export const ThemeContextProvider = ({ children }) => {
+export const ThemeContextProvider = ({ children }) => {
   const [selectedTheme, setSelectedTheme] = useState(themes[1]);
   const [chatBackgroundPic, setChatBackgroundPic] = useState();
 
-  const changeBackgroundPic = async (chatBackground) => {
+  const changeBackgroundPic = (chatBackground) => {
     try {
-      await AsyncStorage.setItem("backgroundPicture", chatBackground);
+      storage.set("backgroundPicture", chatBackground);
       setChatBackgroundPic(chatBackground);
       console.log("Background picture cached successfully");
     } catch (error) {
@@ -26,43 +26,40 @@ const themes = [greenTheme, lightBlueTheme, darkTheme, purpleTheme];
   };
 
   useEffect(() => {
-    const loadBackgroundImage = async () => {
-      try {
-        const backgroundPicture = await AsyncStorage.getItem("backgroundPicture");
-        if (backgroundPicture) {
-          setChatBackgroundPic(backgroundPicture);
-          console.log("Background picture loaded successfully");
-        }
-      } catch (error) {
-        console.error("Error loading background picture:", error);
+    try {
+      const backgroundPicture = storage.getString("backgroundPicture");
+      if (backgroundPicture) {
+        setChatBackgroundPic(backgroundPicture);
+        console.log("Background picture loaded successfully");
       }
-    };
-    loadBackgroundImage();
+    } catch (error) {
+      console.error("Error loading background picture:", error);
+    }
   }, []);
 
   useEffect(() => {
-    const loadTheme = async () => {
-      // Moved async logic into a function
-      try {
-        const theme = await AsyncStorage.getItem("selectedTheme");
-        if (theme) {
-          setSelectedTheme(themes[JSON.parse(theme)]);
-          console.log("Theme fetched and updated ", theme);
-        } else {
-          setSelectedTheme(themes[1]);
-          console.log("No theme found, using default");
-        }
-      } catch (error) {
-        console.error("Error loading theme from AsyncStorage:", error);
+    try {
+      const themeIndex = storage.getString("selectedTheme");
+      if (themeIndex !== undefined) {
+        setSelectedTheme(themes[JSON.parse(themeIndex)]);
+        console.log("Theme fetched and updated", themeIndex);
+      } else {
+        setSelectedTheme(themes[1]);
+        console.log("No theme found, using default");
       }
-    };
-    loadTheme();
+    } catch (error) {
+      console.error("Error loading theme from MMKV:", error);
+    }
   }, []);
 
-  const changeTheme = async (theme) => {
-    setSelectedTheme(themes[theme]);
-    await AsyncStorage.setItem("selectedTheme", JSON.stringify(theme));
-    console.log("Theme cache successfully updated ", theme);
+  const changeTheme = (theme) => {
+    try {
+      storage.set("selectedTheme", JSON.stringify(theme));
+      setSelectedTheme(themes[theme]);
+      console.log("Theme cache successfully updated", theme);
+    } catch (error) {
+      console.error("Error saving theme to MMKV:", error);
+    }
   };
 
   return (

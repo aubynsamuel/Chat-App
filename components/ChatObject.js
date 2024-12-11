@@ -8,13 +8,13 @@ import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
 
 const ChatObject = memo(({ room, theme }) => {
-  const { user } = useAuth();
+  const { user, addToUnread, removeFromUnread } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
+  const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
 
   useEffect(() => {
-    const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
     const docRef = doc(db, "rooms", roomId);
     const messagesRef = collection(docRef, "messages");
 
@@ -31,6 +31,15 @@ const ChatObject = memo(({ room, theme }) => {
 
     return unsubscribe;
   }, [user?.userId, room.otherParticipant.userId]);
+
+  useEffect(()=>{
+    if(unreadCount > 0 ){
+      addToUnread(roomId)
+    }
+    else{
+      removeFromUnread(roomId)
+    }
+  }, [unreadCount])
 
   const handlePress = () => {
     // console.log("Navigating with profileUrl:", room.otherParticipant.profileUrl);

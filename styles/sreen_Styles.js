@@ -205,8 +205,8 @@ export default getStyles = (theme) => {
 
     // Home Screen
     hsContainer: {
-      padding: 10,
-      paddingBottom: 10,
+      paddingHorizontal: 10,
+      // paddingBottom: 10,
       backgroundColor: theme === darkTheme ? theme.background : null,
       flex: 1,
     },

@@ -27,15 +27,15 @@ const RootLayout = () => {
 const App = () => {
   return (
     <GestureHandlerRootView>
-      <AuthContextProvider>
-        <ExpoPushNotifications>
-          <ThemeContextProvider>
+      <ThemeContextProvider>
+        <AuthContextProvider>
+          <ExpoPushNotifications>
             <MenuProvider>
               <RootLayout />
             </MenuProvider>
-          </ThemeContextProvider>
-        </ExpoPushNotifications>
-      </AuthContextProvider>
+          </ExpoPushNotifications>
+        </AuthContextProvider>
+      </ThemeContextProvider>
     </GestureHandlerRootView>
   );
 };

@@ -26,10 +26,28 @@ export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
+  // const [noOfUnreadChats, setNoOfUnreadChats] = useState(0);
+  const [unreadChats, setUnreadChats] = useState([]);
   userDetails = user;
 
   const showToast = (message, containerStyles = null, textStyles = null) => {
     showToastMessage(message, 3000, true, containerStyles, textStyles);
+  };
+
+  const addToUnread = (roomId) => {
+    if (unreadChats.includes(roomId)) {
+      return;
+    }
+    setUnreadChats(prev => [...prev, roomId]);
+    console.log("Unread Chats List Updated");
+  };
+
+  const removeFromUnread = (roomId) => {
+    if (!unreadChats.includes(roomId)) {
+      return;
+    }
+    setUnreadChats(prev => prev.filter(m => m !== roomId));
+    console.log("Unread Chats List Updated")
   };
 
   // Initialize auth state from storage
@@ -245,6 +263,9 @@ export const AuthContextProvider = ({ children }) => {
         updateProfile,
         resetPassword,
         showToast,
+        addToUnread,
+        removeFromUnread,
+        unreadChats,
       }}
     >
       {children}

@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 import { View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -14,6 +15,7 @@ import Animated, {
 
 const TabLayout = () => {
   const { selectedTheme } = useTheme();
+  const { unreadChats } = useAuth();
 
   // Shared value to track the current tab index
   const activeTabIndex = useSharedValue(0);
@@ -113,12 +115,12 @@ const TabLayout = () => {
           fontWeight: "bold",
           color: selectedTheme.text.primary,
         },
-        tabBarBadge: 2,
       }}
     >
       <Tabs.Screen
         name="(homeStack)"
         options={{
+          tabBarBadge: unreadChats.length > 0 ? unreadChats.length : null,
           title: "Chats",
           tabBarIcon: ({ focused }) => (
             <TabIcon focused={focused} size={25} name={"chat"} />
@@ -146,6 +148,5 @@ const TabLayout = () => {
     </Tabs>
   );
 };
-
 
 export default TabLayout;

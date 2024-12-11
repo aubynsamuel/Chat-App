@@ -68,7 +68,7 @@ export default getStyles = (theme) => {
       fontWeight: "500",
       marginHorizontal: 10,
       color: theme.text.primary,
-      marginRight:53
+      marginRight: 53,
     },
     hcHeaderBarIcon: {
       marginHorizontal: 10,
@@ -81,7 +81,7 @@ export default getStyles = (theme) => {
       height: 45,
       width: 45,
       borderRadius: 30,
-      position: 'absolute',
+      position: "absolute",
       right: 10,
       zIndex: 2,
     },
@@ -105,7 +105,8 @@ export default getStyles = (theme) => {
       padding: 10,
       backgroundColor: theme.screenHeaderBarColor,
       elevation: 10,
-      height: 65,
+      height: 85,
+      paddingTop: 24,
       justifyContent: "space-between",
     },
     hhHeaderTitle: {
@@ -136,7 +137,7 @@ export default getStyles = (theme) => {
       maxWidth: "70%",
       paddingHorizontal: 5,
       paddingVertical: 3,
-      elevation: 2
+      elevation: 2,
     },
     otherMessageContainer: {
       backgroundColor: theme.message.other.background,
@@ -146,7 +147,7 @@ export default getStyles = (theme) => {
       maxWidth: "70%",
       paddingHorizontal: 5,
       paddingVertical: 3,
-      elevation: 2
+      elevation: 2,
     },
     userMessage: {
       fontSize: 16,
