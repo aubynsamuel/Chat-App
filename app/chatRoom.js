@@ -52,17 +52,13 @@ const ChatScreen = () => {
   const [profileUrl, setProfileUrl] = useState();
 
   useEffect(() => {
+    fetchOtherUsersProfileUrl();
+    fetchOtherUserToken();
     const unsubscribe = initializeChat();
-
     return () => {
       if (unsubscribe) unsubscribe;
     };
   }, [roomId, user, userId]);
-
-  useEffect(() => {
-    fetchOtherUsersProfileUrl();
-    fetchOtherUserToken();
-  }, [userId]);
 
   useEffect(() => {
     markMessagesAsRead();
