@@ -39,7 +39,7 @@ export const AuthContextProvider = ({ children }) => {
       return;
     }
     setUnreadChats(prev => [...prev, roomId]);
-    console.log("Unread Chats List Updated");
+    // console.log("Unread Chats List Updated");
   };
 
   const removeFromUnread = (roomId) => {
@@ -47,7 +47,7 @@ export const AuthContextProvider = ({ children }) => {
       return;
     }
     setUnreadChats(prev => prev.filter(m => m !== roomId));
-    console.log("Unread Chats List Updated")
+    // console.log("Unread Chats List Updated")
   };
 
   // Initialize auth state from storage

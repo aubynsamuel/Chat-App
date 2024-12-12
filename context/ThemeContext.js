@@ -30,7 +30,7 @@ export const ThemeContextProvider = ({ children }) => {
       const backgroundPicture = storage.getString("backgroundPicture");
       if (backgroundPicture) {
         setChatBackgroundPic(backgroundPicture);
-        console.log("Background picture loaded successfully");
+        // console.log("Background picture loaded successfully");
       }
     } catch (error) {
       console.error("Error loading background picture:", error);
@@ -42,13 +42,13 @@ export const ThemeContextProvider = ({ children }) => {
       const themeIndex = storage.getString("selectedTheme");
       if (themeIndex !== undefined) {
         setSelectedTheme(themes[JSON.parse(themeIndex)]);
-        console.log("Theme fetched and updated", themeIndex);
+        // console.log("Theme fetched and updated", themeIndex);
       } else {
         setSelectedTheme(themes[1]);
-        console.log("No theme found, using default");
+        // console.log("No theme found, using default");
       }
     } catch (error) {
-      console.error("Error loading theme from MMKV:", error);
+      // console.error("Error loading theme from MMKV:", error);
     }
   }, []);
 

@@ -49,7 +49,6 @@ const NotificationTokenManager = {
 
       await AsyncStorage.setItem('deviceToken', token);
       console.log('FCM token updated and cached successfully.');
-      console.log('User token updated.');
     } catch (error) {
       console.error('Error updating user token:', error);
     }

@@ -23,6 +23,6 @@ export default createRoomIfItDoesNotExist = async (roomId, user, userId) => {
       { merge: true }
     );
   } else {
-    console.log("Room already exists");
+    // console.log("Room already exists");
   }
 };

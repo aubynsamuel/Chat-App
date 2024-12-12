@@ -26,7 +26,6 @@ const ChatObject = memo(({ room, theme }) => {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setUnreadCount(snapshot.docs.length);
-      console.log(unreadCount);
     });
 
     return unsubscribe;
