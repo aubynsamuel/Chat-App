@@ -8,8 +8,7 @@ import {
   Image,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import TopHeaderBar from "../../components/HeaderBar_HomeScreen";
-import { useTheme } from "../../context/ThemeContext";
+import { useTheme, HeaderBarHomeScreen } from "../../imports";
 
 const CallsScreen = () => {
   const { selectedTheme } = useTheme();
@@ -19,7 +18,7 @@ const CallsScreen = () => {
       id: "1",
       name: "Alice Johnson",
       avatar: "https://randomuser.me/api/portraits/women/1.jpg",
-      type: "missed", // missed, incoming, outgoing
+      type: "missed",
       timestamp: "10:45 AM",
     },
     {
@@ -67,7 +66,7 @@ const CallsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TopHeaderBar
+      <HeaderBarHomeScreen
         title="Calls"
         backButtonShown={false}
         theme={selectedTheme}

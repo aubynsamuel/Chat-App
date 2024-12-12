@@ -7,13 +7,11 @@ import {
   Switch,
 } from "react-native";
 import React, { useState } from "react";
-import { useAuth } from "../../../context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../../../styles/sreen_Styles";
-import { useTheme } from "../../../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { launchImageLibrary } from "react-native-image-picker";
 import { router } from "expo-router";
+import { useTheme, getStyles, useAuth } from "../../../imports";
 
 const UserProfileContent = ({ children }) => {
   const { user, logout, showToast } = useAuth();
@@ -33,7 +31,7 @@ const UserProfileContent = ({ children }) => {
       mediaType: "photo",
       quality: 2,
     };
-    
+
     try {
       const response = await new Promise((resolve) => {
         launchImageLibrary(options, resolve);

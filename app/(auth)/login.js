@@ -6,15 +6,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useRef, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../../styles/sreen_Styles";
-import { useTheme } from "../../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-
+import { useTheme, useAuth, getStyles } from "../../imports";
 
 const LoginScreen = () => {
   const { login, resetPassword, showToast } = useAuth();
@@ -70,10 +67,7 @@ const LoginScreen = () => {
           selectedTheme === darkTheme ? selectedTheme.background : null,
       }}
     >
-      <StatusBar
-        style={`${selectedTheme.Statusbar.style}`}
-        animated={true}
-      />
+      <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
       <LottieView
         source={require("../../myAssets/Lottie_Files/Online Chat.json")}
         autoPlay

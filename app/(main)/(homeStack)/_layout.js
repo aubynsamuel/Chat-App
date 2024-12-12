@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useTheme } from "../../../context/ThemeContext";
+import { useTheme } from "../../../imports";
 
 const HomeLayout = () => {
   const { selectedTheme } = useTheme();

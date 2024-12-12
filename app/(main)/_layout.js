@@ -1,8 +1,6 @@
 import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../../context/ThemeContext";
-import { useAuth } from "../../context/AuthContext";
 import { View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -12,18 +10,16 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from "react-native-reanimated";
+import { useAuth, useTheme } from "../../imports";
 
 const TabLayout = () => {
   const { selectedTheme } = useTheme();
   const { unreadChats } = useAuth();
 
-  // Shared value to track the current tab index
   const activeTabIndex = useSharedValue(0);
 
-  // Separate shared value for smooth animation
   const animationProgress = useSharedValue(0);
 
-  // Mapping of tab names to their indices
   const TAB_INDICES = {
     chat: 0,
     call: 1,
@@ -31,12 +27,9 @@ const TabLayout = () => {
   };
 
   const TabIcon = ({ name, focused, size = 28 }) => {
-    // Determine the index for this specific tab
     const tabIndex = TAB_INDICES[name];
 
-    // Animated style for the oval background
     const animatedOvalStyle = useAnimatedStyle(() => {
-      // Calculate the translation based on the animation progress
       const translateX = interpolate(
         animationProgress.value,
         [
@@ -64,10 +57,8 @@ const TabLayout = () => {
       };
     }, [focused, tabIndex]);
 
-    // Effect to update active tab index when focused
     useEffect(() => {
       if (focused) {
-        // Smoothly animate to the new tab index
         animationProgress.value = withTiming(tabIndex, { duration: 300 });
         activeTabIndex.value = tabIndex;
       }

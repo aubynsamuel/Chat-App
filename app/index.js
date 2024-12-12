@@ -1,26 +1,25 @@
 import { View } from "react-native";
 import React, { useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 import LottieView from "lottie-react-native";
 import { router } from "expo-router";
+import { useAuth, useTheme } from "../imports";
 
 const Index = () => {
   const { isLoading, isAuthenticated } = useAuth();
   const { selectedTheme } = useTheme();
 
   useEffect(() => {
-    if (!isLoading) { // Only redirect when loading is finished
+    if (!isLoading) {
       if (isAuthenticated) {
-        router.replace("/home"); // Redirect to home if authenticated
+        router.replace("/home");
       } else {
-        router.replace("/login"); // Redirect to login if not authenticated
+        router.replace("/login");
       }
     }
-  }, [isLoading, isAuthenticated]); // Add dependencies
+  }, [isLoading, isAuthenticated]);
 
   if (isLoading) {
-    return ( // Loading indicator remains the same
+    return (
       <View
         style={{
           flex: 1,
@@ -44,9 +43,7 @@ const Index = () => {
     );
   }
 
-  // Return null while loading is in progress, preventing any premature rendering of other components
   return null;
 };
 
 export default Index;
-

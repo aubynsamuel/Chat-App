@@ -8,7 +8,6 @@ import {
   MessageText,
   Composer,
 } from "react-native-gifted-chat";
-import { db } from "../env/firebaseConfig";
 import {
   collection,
   query,
@@ -23,20 +22,25 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import { useAuth } from "../context/AuthContext";
-import { getCurrentTime, getRoomId } from "../Functions/Commons";
-import { sendNotification } from "../services/ExpoPushNotifications";
-import { useTheme } from "../context/ThemeContext";
-import ChatRoomBackground from "../components/ChatRoomBackground";
-import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import { StatusBar } from "expo-status-bar";
-import { fetchCachedMessages, cacheMessages } from "../Functions/CacheMessages";
-import createRoomIfItDoesNotExist from "../Functions/CreateRoomIfItDoesNotExist";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../styles/sreen_Styles";
 import * as Clipboard from "expo-clipboard";
-import EmptyChatRoomList from "../components/EmptyChatRoomList";
 import { useLocalSearchParams } from "expo-router";
+import {
+  db,
+  useAuth,
+  getCurrentTime,
+  getRoomId,
+  sendNotification,
+  useTheme,
+  ChatRoomBackground,
+  HeaderBarChatScreen,
+  fetchCachedMessages,
+  cacheMessages,
+  createRoomIfItDoesNotExist,
+  getStyles,
+  EmptyChatRoomList,
+} from "../imports";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
@@ -358,7 +362,7 @@ const ChatScreen = () => {
         animated={true}
       />
       <View style={{ position: "absolute", zIndex: 5, width: "100%" }}>
-        <TopHeaderBar
+        <HeaderBarChatScreen
           theme={selectedTheme}
           title={username}
           profileUrl={profileUrl}

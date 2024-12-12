@@ -1,11 +1,13 @@
 import React from "react";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { AuthContextProvider } from "../context/AuthContext";
-import ExpoPushNotifications from "../services/ExpoPushNotifications";
-import { ThemeContextProvider } from "../context/ThemeContext";
 import { MenuProvider } from "react-native-popup-menu";
 import { Toast } from "au-react-native-toast";
+import {
+  AuthContextProvider,
+  ExpoPushNotifications,
+  ThemeContextProvider,
+} from "../imports";
 
 const RootLayout = () => {
   return (

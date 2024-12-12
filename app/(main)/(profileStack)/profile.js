@@ -8,12 +8,11 @@ import {
   TouchableOpacity,
   BottomSheetBackdrop,
 } from "@gorhom/bottom-sheet";
-import UserProfileContent from "./userProfileContent";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../../../context/ThemeContext";
-import getStyles from "../../../styles/sreen_Styles";
 import { ScrollView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
+import UserProfileContent from "./userProfileContent";
+import { useTheme, getStyles } from "../../../imports";
 
 const UserProfileScreen = () => {
   const { selectedTheme, changeTheme } = useTheme();

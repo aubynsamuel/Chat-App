@@ -9,13 +9,10 @@ import {
   Image,
 } from "react-native";
 import { getDocs, query, where, collection } from "firebase/firestore";
-import { db } from "../../../env/firebaseConfig";
-import { useAuth } from "../../../context/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../../../styles/sreen_Styles";
-import { useTheme } from "../../../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
+import { useTheme, useAuth, db, getStyles } from "../../../imports";
 
 const SearchUsersScreen = () => {
   const { user } = useAuth();

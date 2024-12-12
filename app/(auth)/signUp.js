@@ -8,16 +8,14 @@ import {
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
-import { useAuth } from "../../context/AuthContext";
 import LottieView from "lottie-react-native";
 import { launchImageLibrary } from "react-native-image-picker";
-import { storage } from "../../env/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../../styles/sreen_Styles";
-import { useTheme } from "../../context/ThemeContext";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
+import {  useTheme, useAuth, getStyles, storage } from "../../imports";
+
 
 
 const SignUpScreen = () => {
