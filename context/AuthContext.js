@@ -6,10 +6,10 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../env/firebaseConfig";
-import { deviceToken } from "../services/ExpoPushNotifications";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "au-react-native-toast";
+import { auth, db } from "../env/firebaseConfig";
+import { deviceToken } from "../services/ExpoPushNotifications";
 
 const AuthContext = createContext();
 

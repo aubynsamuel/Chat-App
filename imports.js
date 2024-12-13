@@ -1,5 +1,5 @@
 // Utility functions
-export { getCurrentTime, getRoomId } from "./Functions/Commons";
+export { getCurrentTime, getRoomId, formatTimeWithoutSeconds } from "./Functions/Commons";
 export { fetchCachedMessages, cacheMessages } from "./Functions/CacheMessages";
 export { default as createRoomIfItDoesNotExist } from "./Functions/CreateRoomIfItDoesNotExist";
 

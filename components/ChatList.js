@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import ChatObject from "./ChatObject";
 import getStyles from "../styles/Component_Styles";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../imports";
 
 const ChatList = memo(({ rooms, isLoading, onRefresh, theme }) => {
   const styles = getStyles(theme);

@@ -1,11 +1,14 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useAuth } from "../context/AuthContext";
-import { formatTimeWithoutSeconds, getRoomId } from "../Functions/Commons";
 import { memo, useEffect, useState } from "react";
-import { db } from "../env/firebaseConfig";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
-import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
+import getStyles from "../styles/Component_Styles";
+import {
+  formatTimeWithoutSeconds,
+  getRoomId,
+  useAuth,
+  db,
+} from "../imports";
 
 const ChatObject = memo(({ room, theme }) => {
   const { user, addToUnread, removeFromUnread } = useAuth();

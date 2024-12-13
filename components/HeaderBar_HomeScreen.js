@@ -1,6 +1,5 @@
 import { memo, React, useState } from "react";
 import { Text, TouchableOpacity, View, Image } from "react-native";
-import { useAuth } from "../context/AuthContext";
 import {
   Menu,
   MenuOptions,
@@ -8,8 +7,9 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { MaterialIcons } from "@expo/vector-icons";
-import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
+import getStyles from "../styles/Component_Styles";
+import { useAuth } from "../imports";
 
 const TopHeaderBar = memo(
   ({ title, theme, backButtonShown, profilePicShown = true }) => {

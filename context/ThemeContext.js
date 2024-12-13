@@ -3,7 +3,7 @@ import greenTheme from "../Themes/Greenday";
 import darkTheme from "../Themes/DarkMode";
 import lightBlueTheme from "../Themes/SkyLander";
 import purpleTheme from "../Themes/Purple";
-import storage from "@/Functions/Storage";
+import storage from "../Functions/Storage";
 
 const ThemeContext = createContext();
 export const useTheme = () => useContext(ThemeContext);
