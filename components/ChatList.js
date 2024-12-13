@@ -54,10 +54,24 @@ const ChatList = memo(({ rooms, isLoading, onRefresh, theme }) => {
       ListHeaderComponent={() => (
         <View style={headerStyles.container}>
           <TouchableOpacity onPress={() => setFilter("all")}>
-            <Text style={headerStyles.text}>All</Text>
+            <Text
+              style={[
+                headerStyles.text,
+                { backgroundColor: filter === "all" ? "#000" : "#0007" },
+              ]}
+            >
+              All
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setFilter("unread")}>
-            <Text style={headerStyles.text}>Unread</Text>
+            <Text
+              style={[
+                headerStyles.text,
+                { backgroundColor: filter === "unread" ? "#000" : "#0007" },
+              ]}
+            >
+              Unread
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -92,8 +106,7 @@ const headerStyles = StyleSheet.create({
     paddingBottom: 9,
   },
   text: {
-    backgroundColor: "black",
-    borderRadius: 5,
+    borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 2,
     fontSize: 13,
