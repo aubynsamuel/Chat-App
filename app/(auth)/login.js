@@ -11,7 +11,7 @@ import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { useTheme, useAuth, getStyles } from "../../imports";
+import { useTheme, useAuth, getStyles, OnlineChat } from "../../imports";
 
 const LoginScreen = () => {
   const { login, resetPassword, showToast } = useAuth();
@@ -69,7 +69,7 @@ const LoginScreen = () => {
     >
       <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
       <LottieView
-        source={require("../../myAssets/Lottie_Files/Online Chat.json")}
+        source={OnlineChat}
         autoPlay
         loop={true}
         style={{

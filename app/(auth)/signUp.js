@@ -14,7 +14,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import {  useTheme, useAuth, getStyles, storage } from "../../imports";
+import {  useTheme, useAuth, getStyles, storage , SignUp} from "../../imports";
 
 
 
@@ -140,7 +140,7 @@ const SignUpScreen = () => {
       />
 
       <LottieView
-        source={require("../../myAssets/Lottie_Files/Sign Up.json")}
+        source={SignUp}
         autoPlay
         loop={true}
         style={{ flex: 0.8, left: 10 }}

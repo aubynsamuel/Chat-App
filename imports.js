@@ -20,8 +20,19 @@ export { default as EmptyChatRoomList } from "./components/EmptyChatRoomList";
 export { default as ChatList } from "./components/ChatList";
 
 // Services
-export { sendNotification } from "./services/ExpoPushNotifications";
+export { sendNotification, schedulePushNotification } from "./services/ExpoPushNotifications";
 export { default as ExpoPushNotifications } from "./services/ExpoPushNotifications";
 
 // Styles
 export { default as getStyles } from "./styles/sreen_Styles";
+
+// Assets
+import Send from "./myAssets/Lottie_Files/send.json";
+import OnlineChat from "./myAssets/Lottie_Files/Online Chat.json";
+import SignUp from "./myAssets/Lottie_Files/Sign Up.json";
+import EmptyChatRoom from "./myAssets/Lottie_Files/Animation - 1730912642416.json";
+export { Send, OnlineChat, SignUp, EmptyChatRoom };
+
+// Images
+// import DefaultAvatar from "./myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp";
+// import DefaultChatBackground from "./myAssets/Images/default-chat-background.webp";

@@ -1,12 +1,13 @@
 import { View, Text, StyleSheet } from "react-native";
 import React from "react";
 import LottieView from "lottie-react-native";
+import { EmptyChatRoom } from "../imports";
 
 const EmptyChatRoomList = () => {
   return (
     <View style={{ flex: 1, }}>
       <LottieView
-        source={require("../myAssets/Lottie_Files/Animation - 1730912642416.json")}
+        source={EmptyChatRoom}
         autoPlay
         loop={true}
         style={styles.lottieImage}

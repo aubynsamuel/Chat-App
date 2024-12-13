@@ -142,46 +142,6 @@ function HomeScreen() {
         backButtonShown={false}
         theme={selectedTheme}
       />
-      {/* <ScrollView snapToOffsets={[400]} contentOffset={{y:100, x:20}}> */}
-      {/* <View
-          style={{
-            flexDirection: "row",
-            gap: 5,
-            marginHorizontal: 15,
-            paddingTop: 9,
-          }}
-        >
-          <Text
-            style={{
-              backgroundColor: "black",
-              borderRadius: 5,
-              paddingHorizontal: 10,
-              paddingVertical: 2,
-              fontSize: 13,
-              fontWeight: "300",
-              color: "white",
-              fontWeight: "500",
-            }}
-          >
-            All
-          </Text>
-          <Text
-            style={{
-              backgroundColor: "black",
-              borderRadius: 5,
-              paddingHorizontal: 10,
-              paddingVertical: 2,
-              fontSize: 13,
-              fontWeight: "300",
-              color: "white",
-              fontWeight: "500",
-            }}
-          >
-            Unread
-          </Text>
-        </View> */}
-      {/* </ScrollView> */}
-
       <View style={styles.hsContainer}>
         <ChatList
           rooms={rooms}

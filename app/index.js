@@ -2,7 +2,7 @@ import { View } from "react-native";
 import React, { useEffect } from "react";
 import LottieView from "lottie-react-native";
 import { router } from "expo-router";
-import { useAuth, useTheme } from "../imports";
+import { useAuth, useTheme, Send } from "../imports";
 
 const Index = () => {
   const { isLoading, isAuthenticated } = useAuth();
@@ -29,13 +29,13 @@ const Index = () => {
         }}
       >
         <LottieView
-          source={require("../myAssets/Lottie_Files/send.json")}
+          source={Send}
           autoPlay
           loop={false}
           style={{
             flex: 0.8,
-            width: 90 * 6.5,
-            height: 90 * 6.5,
+            width: 90 * 5,
+            height: 90 * 5,
             alignSelf: "center",
           }}
         />

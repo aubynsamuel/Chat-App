@@ -31,14 +31,13 @@ const ChatObject = memo(({ room, theme }) => {
     return unsubscribe;
   }, [user?.userId, room.otherParticipant.userId]);
 
-  useEffect(()=>{
-    if(unreadCount > 0 ){
-      addToUnread(roomId)
+  useEffect(() => {
+    if (unreadCount > 0) {
+      addToUnread(roomId);
+    } else {
+      removeFromUnread(roomId);
     }
-    else{
-      removeFromUnread(roomId)
-    }
-  }, [unreadCount])
+  }, [unreadCount]);
 
   const handlePress = () => {
     // console.log("Navigating with profileUrl:", room.otherParticipant.profileUrl);

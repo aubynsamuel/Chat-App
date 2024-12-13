@@ -38,7 +38,7 @@ export const AuthContextProvider = ({ children }) => {
     if (unreadChats.includes(roomId)) {
       return;
     }
-    setUnreadChats(prev => [...prev, roomId]);
+    setUnreadChats((prev) => [...prev, roomId]);
     // console.log("Unread Chats List Updated");
   };
 
@@ -46,7 +46,7 @@ export const AuthContextProvider = ({ children }) => {
     if (!unreadChats.includes(roomId)) {
       return;
     }
-    setUnreadChats(prev => prev.filter(m => m !== roomId));
+    setUnreadChats((prev) => prev.filter((m) => m !== roomId));
     // console.log("Unread Chats List Updated")
   };
 
