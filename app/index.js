@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import LottieView from "lottie-react-native";
 import { router } from "expo-router";
 import { useAuth, useTheme, Send } from "../imports";
+import { StatusBar } from "expo-status-bar";
 
 const Index = () => {
   const { isLoading, isAuthenticated } = useAuth();
@@ -28,6 +29,16 @@ const Index = () => {
           backgroundColor: selectedTheme.background,
         }}
       >
+        <StatusBar
+          style={`${
+            selectedTheme === purpleTheme
+              ? "light"
+              : selectedTheme.Statusbar.style
+          }`}
+          backgroundColor={selectedTheme.background}
+          animated={true}
+        />
+        
         <LottieView
           source={Send}
           autoPlay

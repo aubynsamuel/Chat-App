@@ -7,9 +7,11 @@ import {
   AuthContextProvider,
   ExpoPushNotifications,
   ThemeContextProvider,
+  useTheme,
 } from "../imports";
 
 const RootLayout = () => {
+  const { selectedTheme } = useTheme();
   return (
     <>
       <Stack
@@ -17,9 +19,21 @@ const RootLayout = () => {
           headerShown: false,
         }}
       >
-        <Stack.Screen name="(main)" />
+        <Stack.Screen
+          name="index"
+          options={{
+            navigationBarColor: selectedTheme.background,
+          }}
+        />
         <Stack.Screen name="(auth)" />
-        <Stack.Screen name="chatRoom" options={{ animation: "none" }} />
+        <Stack.Screen name="(main)" />
+        <Stack.Screen
+          name="chatRoom"
+          options={{
+            animation: "none",
+            navigationBarColor: selectedTheme.background,
+          }}
+        />
       </Stack>
       <Toast />
     </>
