@@ -2,8 +2,8 @@ import { View } from "react-native";
 import React, { useEffect } from "react";
 import LottieView from "lottie-react-native";
 import { router } from "expo-router";
-import { useAuth, useTheme, Send } from "../imports";
 import { StatusBar } from "expo-status-bar";
+import { useAuth, useTheme, Send } from "../imports";
 
 const Index = () => {
   const { isLoading, isAuthenticated } = useAuth();

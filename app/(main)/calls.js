@@ -8,7 +8,8 @@ import {
   Image,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme, HeaderBarHomeScreen } from "../../imports";
+import { useTheme } from "../../imports";
+import TopHeaderBar from "../../components/HeaderBar_HomeScreen";
 
 const CallsScreen = () => {
   const { selectedTheme } = useTheme();
@@ -66,7 +67,7 @@ const CallsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <HeaderBarHomeScreen
+      <TopHeaderBar
         title="Calls"
         backButtonShown={false}
         theme={selectedTheme}

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../env/firebaseConfig';
 import { doc, updateDoc } from 'firebase/firestore';
-import { deviceToken } from '../services/ExpoPushNotifications';
+import { deviceToken } from '../services/RegisterForPushNotifications';
 
 const expoPushTokenRegex = /^ExponentPushToken\[[a-zA-Z0-9-_]+\]$/;
 

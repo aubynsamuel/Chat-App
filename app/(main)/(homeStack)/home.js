@@ -19,10 +19,10 @@ import {
   useAuth,
   db,
   usersRef,
-  HeaderBarHomeScreen,
   getStyles,
-  ChatList,
 } from "../../../imports";
+import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
+import ChatList from "../../../components/ChatList";
 
 function HomeScreen() {
   const { user } = useAuth();
@@ -137,7 +137,7 @@ function HomeScreen() {
         animated={true}
       />
 
-      <HeaderBarHomeScreen
+      <TopHeaderBar
         title={"Chats"}
         backButtonShown={false}
         theme={selectedTheme}

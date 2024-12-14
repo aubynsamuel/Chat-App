@@ -9,7 +9,9 @@ import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "au-react-native-toast";
 import { auth, db } from "../env/firebaseConfig";
-import { deviceToken } from "../services/ExpoPushNotifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+export let userDetails
 
 const AuthContext = createContext();
 
@@ -21,14 +23,19 @@ const STORAGE_KEYS = {
   AUTH_STATE: "auth_state",
 };
 
-export let userDetails;
 export const AuthContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
-  // const [noOfUnreadChats, setNoOfUnreadChats] = useState(0);
   const [unreadChats, setUnreadChats] = useState([]);
-  userDetails = user;
+  const [deviceToken, setDeviceToken] = useState("");
+  userDetails = user
+  // console.log("User details: ",userDetails)
+  const getDeviceToken = async () => {
+    const cachedToken = await AsyncStorage.getItem("deviceToken");
+    setDeviceToken(cachedToken);
+    // console.log("DeviceToken from AsyncStorage: ", cachedToken);
+  };
 
   const showToast = (message, containerStyles = null, textStyles = null) => {
     showToastMessage(message, 3000, true, containerStyles, textStyles);
@@ -53,6 +60,7 @@ export const AuthContextProvider = ({ children }) => {
   // Initialize auth state from storage
   useEffect(() => {
     initializeAuthState();
+    getDeviceToken();
   }, []);
 
   const initializeAuthState = async () => {
@@ -266,6 +274,7 @@ export const AuthContextProvider = ({ children }) => {
         addToUnread,
         removeFromUnread,
         unreadChats,
+        setDeviceToken,
       }}
     >
       {children}

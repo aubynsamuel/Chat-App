@@ -117,37 +117,43 @@ export default getStyles = (theme) => {
       color: theme.text.primary,
     },
 
-
-    // news styles for editing 
+    // news styles for editing
     editContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 10,
-      backgroundColor: theme.background, // Match the background color of the chat
+      flexDirection: "row",
+      alignItems: "center",
+      paddingRight: 10,
+      // backgroundColor: theme.background, // Match the background color of the chat
       // borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: theme.border,       // Add a subtle border (optional)
+      borderTopColor: theme.border, // Add a subtle border (optional)
+      width: "93%",
+      borderRadius:10,
+      bottom:4,
+      // flex:1
+
     },
     editInput: {
-      flex: 1,                                  // Take up remaining space
-      height: 40,                                // Set a fixed height or adjust as needed
-      borderColor: theme.border,        // Match the border color
+      // marginRight: 10,
+      flex: 1, // Take up remaining space
+      height: 40, // Set a fixed height or adjust as needed
+      // borderColor: theme.border, // Match the border color
       // borderWidth: StyleSheet.hairlineWidth,
       // borderRadius: 20,                           // Rounded corners
       paddingHorizontal: 10,
-      marginRight: 10,
       color: theme.text.primary, // Set text color based on the theme
     },
     editButton: {
       backgroundColor: theme.surface, // Use your secondary color or choose a suitable one
-      borderRadius: 10,
+      borderRadius: 40,
       paddingHorizontal: 15,
-      marginHorizontal:2,
+      marginHorizontal: 2,
       paddingVertical: 4,
-    
     },
     editButtonText: {
       color: theme.primary, // Text color that contrasts with the button background
-      fontWeight: 'bold',
+      fontWeight: "bold",
+      width: 300,
+      width: 18,
+      textAlign: "center",
     },
 
     // Edit Profile Screen

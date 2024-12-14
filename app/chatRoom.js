@@ -1,5 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { View, Text, Alert, TextInput, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import {
   GiftedChat,
   InputToolbar,
@@ -31,16 +38,16 @@ import {
   useAuth,
   getCurrentTime,
   getRoomId,
-  sendNotification,
   useTheme,
-  ChatRoomBackground,
-  HeaderBarChatScreen,
   fetchCachedMessages,
   cacheMessages,
   createRoomIfItDoesNotExist,
   getStyles,
-  EmptyChatRoomList,
 } from "../imports";
+import TopHeaderBar from "../components/HeaderBar_ChatScreen";
+import EmptyChatRoomList from "../components/EmptyChatRoomList";
+import ChatRoomBackground from "../components/ChatRoomBackground";
+import { sendNotification } from "../services/NotificationActions";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
@@ -51,6 +58,7 @@ const ChatScreen = () => {
   const roomId = getRoomId(user?.userId, userId);
   const styles = getStyles(selectedTheme);
   const [isEditing, setIsEditing] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   const [editMessage, setEditMessage] = useState(null);
   const [editText, setEditText] = useState("");
   const [profileUrl, setProfileUrl] = useState();
@@ -362,7 +370,7 @@ const ChatScreen = () => {
         animated={true}
       />
       <View style={{ position: "absolute", zIndex: 5, width: "100%" }}>
-        <HeaderBarChatScreen
+        <TopHeaderBar
           theme={selectedTheme}
           title={username}
           profileUrl={profileUrl}
@@ -371,8 +379,7 @@ const ChatScreen = () => {
       <View style={styles.crContainer}>
         <GiftedChat
           messagesContainerStyle={styles.crMessages}
-          keyboardShouldPersistTaps="never"
-          minComposerHeight={55}
+          keyboardShouldPersistTaps="always"
           alwaysShowSend={true}
           renderComposer={(props) =>
             isEditing ? (
@@ -382,19 +389,24 @@ const ChatScreen = () => {
                   onChangeText={setEditText}
                   style={styles.editInput}
                   autoFocus
+                  multiline={true}
+                  numberOfLines={5}
                 />
                 <TouchableOpacity
                   onPress={handleEditSave}
                   style={styles.editButton}
                 >
-                  <Text style={styles.editButtonText}>Save</Text>
+                  <Text style={styles.editButtonText}>✓</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setIsEditing(false)}
                   style={styles.editButton}
                 >
-                  {/* {" "} */}
-                  <Text style={styles.editButtonText}>Cancel</Text>
+                  <MaterialIcons
+                    name="close"
+                    size={20}
+                    style={styles.editButtonText}
+                  />
                 </TouchableOpacity>
               </View>
             ) : (
@@ -425,10 +437,119 @@ const ChatScreen = () => {
           }}
           renderBubble={renderBubble} // Use the custom renderBubble function
           renderInputToolbar={(props) => (
-            <InputToolbar
+            <View>
+              {isReplying && (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    width: "100%",
+                    justifyContent: "space-between",
+                    backgroundColor: selectedTheme.primary,
+                    alignItems: "center",
+                    paddingHorizontal: 15,
+                    paddingTop: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 10,
+                    }}
+                  >
+                    <TouchableOpacity style={{ alignSelf: "center" }}>
+                      <MaterialIcons name="reply" size={28} color="black" />
+                    </TouchableOpacity>
+                    <Text
+                      style={{
+                        fontSize: 35,
+                        alignSelf: "flex-start",
+                        bottom: 5,
+                      }}
+                    >
+                      |
+                    </Text>
+                    <View style={{ height: 50, gap: 3 }}>
+                      <Text style={{ fontSize: 10, fontWeight: "bold" }}>
+                        Replying To Name
+                      </Text>
+                      <Text>Replying Message</Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    style={{ alignSelf: "center" }}
+                    onPress={() => setIsReplying(false)}
+                  >
+                    <MaterialIcons
+                      name="close"
+                      size={24}
+                      color="black"
+                      style={{
+                        marginRight: 5,
+                      }}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              <View
+                style={{
+                  backgroundColor: isReplying ? selectedTheme.primary : null,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  // paddingTop: -5,
+                  gap: 5,
+                }}
+              >
+                <InputToolbar
+                  {...props}
+                  containerStyle={{
+                    // backgroundColor: selectedTheme.background,
+                    width: isEditing || isReplying ? "96%" : "85%",
+                    marginBottom: 10,
+                    alignSelf: "flex-start",
+                    borderRadius: 30,
+                    height: 40,
+                    marginLeft: 5,
+                  }}
+                />
+                {!isEditing && !isReplying && (
+                  <MaterialIcons
+                    name="mic"
+                    size={30}
+                    color="black"
+                    style={{
+                      backgroundColor: "white",
+                      borderRadius: 40,
+                      padding: 5,
+                      alignSelf: "flex-start",
+                      marginRight: 5,
+                    }}
+                  />
+                )}
+              </View>
+            </View>
+          )}
+          renderActions={(props) => (
+            <View
               {...props}
-              containerStyle={{ backgroundColor: selectedTheme.background }}
-            />
+              style={{
+                flexDirection: "row",
+              }}
+            >
+              <TouchableOpacity
+                // onPress={() => handleDelete(props.currentMessage)}
+                style={{ bottom: 10 }}
+              >
+                <MaterialIcons
+                  name="attachment"
+                  color={selectedTheme.text.primary}
+                  size={27}
+                  style={{ transform: [{ rotate: "120deg" }], marginLeft: 7 }}
+                />
+              </TouchableOpacity>
+            </View>
           )}
           renderChatEmpty={() => (
             <View style={{ transform: [{ rotate: "180deg" }], bottom: -300 }}>
@@ -458,11 +579,25 @@ const ChatScreen = () => {
                 marginHorizontal: 4,
               }}
             >
+              {/* <View
+                style={{
+                  flexDirection: "row",
+                  gap: 10,
+                  marginRight: 15,
+                }}
+              >
+                <MaterialIcons
+                  name="camera-alt"
+                  color={selectedTheme.text.primary}
+                  size={25}
+                /> */}
               <MaterialIcons
                 name="send"
                 color={selectedTheme.text.primary}
                 size={25}
+                style={{ transform: [{ rotate: "-40deg" }], bottom: 4 }}
               />
+              {/* </View> */}
             </Send>
           )}
         />
@@ -471,4 +606,5 @@ const ChatScreen = () => {
   );
 };
 
+const styles = StyleSheet.create({});
 export default ChatScreen;

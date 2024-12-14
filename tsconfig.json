@@ -12,12 +12,7 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "app/(main)/_layout.jsgator)/_layout.js",
     "services/ExpoPushNotifications.js",
-    "components/ThemeSelector.tsx",
     "app/profile.js",
-    "app/usapp/userProfileContent.jsp/chatRoom.js",
-    "app/(stacknavigator)/chatRoom.js",
-    "src/MessagesContext.js"
-, "app/_layout.js"  ]
+ "app/_layout.js", "app/chatRoom.js"  ]
 }
