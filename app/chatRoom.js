@@ -43,11 +43,15 @@ import {
   cacheMessages,
   createRoomIfItDoesNotExist,
   getStyles,
+  storage,
 } from "../imports";
 import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import EmptyChatRoomList from "../components/EmptyChatRoomList";
 import ChatRoomBackground from "../components/ChatRoomBackground";
 import { sendNotification } from "../services/NotificationActions";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import * as ImagePicker from "expo-image-picker";
+import AccessoryBar from "@/components/AccessoryBar";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
@@ -94,6 +98,7 @@ const ChatScreen = () => {
         return {
           _id: doc.id,
           text: data.content,
+          image: data.type === "image" ? data.image : null,
           createdAt: data.createdAt.toDate(),
           user: {
             _id: data.senderId,
@@ -101,6 +106,7 @@ const ChatScreen = () => {
           },
           replyTo: data.replyTo,
           read: data.read || false,
+          type: data.type || "text",
           delivered: data.delivered || false,
         };
       });
@@ -109,6 +115,90 @@ const ChatScreen = () => {
     });
 
     return unsubscribe;
+  };
+
+  const openPicker = async (SelectType) => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: [SelectType],
+      allowsEditing: true,
+      quality: 1,
+    });
+    if (!result.canceled) {
+      const downloadURL = await uploadMediaFile(
+        result.assets[0],
+        user.username
+      );
+
+      try {
+        const newMessage = {
+          _id: Math.random().toString(36).substring(7),
+          text: "", // TODO: use as image caption
+          image: downloadURL,
+          createdAt: new Date(),
+          user: {
+            _id: user.userId,
+            name: user.username,
+          },
+          type: "image",
+        };
+
+        setMessages((prevMessages) =>
+          GiftedChat.append(prevMessages, [newMessage])
+        );
+
+        const roomRef = doc(db, "rooms", roomId);
+        const messagesRef = collection(roomRef, "messages");
+
+        await setDoc(doc(messagesRef), {
+          image: downloadURL,
+          content: "",
+          senderId: user.userId,
+          senderName: user.username,
+          createdAt: getCurrentTime(),
+          type: "image",
+          read: false,
+          delivered: true,
+        });
+
+        await setDoc(
+          roomRef,
+          {
+            lastMessage: "📷",
+            lastMessageTimestamp: getCurrentTime(),
+            lastMessageSenderId: user.userId,
+          },
+          { merge: true }
+        );
+
+        if (otherUserToken) {
+          sendNotification(
+            otherUserToken,
+            `New message from ${user.username}`,
+            `${user.username} sent you an image`,
+            roomId
+          );
+        }
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
+    }
+  };
+
+  const uploadMediaFile = async (media, username) => {
+    let downloadURL;
+    try {
+      if (media) {
+        const response = await fetch(media.uri);
+        const blob = await response.blob();
+        const storageRef = ref(storage, `chatMedia/${username}.jpg`);
+        await uploadBytes(storageRef, blob);
+        downloadURL = await getDownloadURL(storageRef);
+      }
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading media:", error);
+      return null;
+    }
   };
 
   const markMessagesAsRead = async () => {
@@ -178,6 +268,7 @@ const ChatScreen = () => {
           replyTo: newMessage.replyTo || null,
           read: false,
           delivered: true,
+          type: newMessage.type || "text",
         };
 
         await setDoc(doc(messagesRef), messageData);
@@ -310,7 +401,6 @@ const ChatScreen = () => {
 
   const renderBubble = (props) => {
     const { currentMessage } = props;
-
     let ticks = null;
     if (currentMessage.user._id === user.userId) {
       // Only for user's messages
@@ -356,6 +446,29 @@ const ChatScreen = () => {
       />
     );
   };
+
+  const onSendFromUser = useCallback(
+    (messages = []) => {
+      const createdAt = new Date();
+      const messagesToUpload = messages.map((message) => ({
+        ...message,
+        user,
+        createdAt,
+        _id: Math.round(Math.random() * 1000000),
+      }));
+
+      handleSend(messagesToUpload);
+    },
+    [handleSend]
+  );
+
+  const renderAccessory = useCallback(() => {
+    return (
+      <AccessoryBar
+        onSend={onSendFromUser}
+      />
+    );
+  }, [onSendFromUser]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -412,12 +525,23 @@ const ChatScreen = () => {
             ) : (
               <Composer
                 {...props}
-                textInputStyle={{ color: selectedTheme.text.primary }}
+                //     bottom: 30,
+                textInputStyle={{
+                  color: selectedTheme.text.primary,
+                  width: isEditing || isReplying ? "96%" : "85%",
+                  margin: 0,
+                  // alignSelf: "flex-start",
+                  borderRadius: 10,
+                  height: 44,
+                  // backgroundColor: "red",
+                  // marginLeft: 5,
+                  // bottom: 30,
+                }}
               />
             )
           }
           messages={messages}
-          onSend={(newMessages) => handleSend(newMessages)}
+          handleSend={(newMessages) => handleSend(newMessages)}
           user={{
             _id: user.userId,
             name: user.username,
@@ -437,100 +561,103 @@ const ChatScreen = () => {
           }}
           renderBubble={renderBubble} // Use the custom renderBubble function
           renderInputToolbar={(props) => (
-            <View>
-              {isReplying && (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "space-between",
-                    backgroundColor: selectedTheme.primary,
-                    alignItems: "center",
-                    paddingHorizontal: 15,
-                    paddingTop: 10,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      gap: 10,
-                    }}
-                  >
-                    <TouchableOpacity style={{ alignSelf: "center" }}>
-                      <MaterialIcons name="reply" size={28} color="black" />
-                    </TouchableOpacity>
-                    <Text
-                      style={{
-                        fontSize: 35,
-                        alignSelf: "flex-start",
-                        bottom: 5,
-                      }}
-                    >
-                      |
-                    </Text>
-                    <View style={{ height: 50, gap: 3 }}>
-                      <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                        Replying To Name
-                      </Text>
-                      <Text>Replying Message</Text>
-                    </View>
-                  </View>
+            //   <View>
+            //     {isReplying && (
+            //       <View
+            //         style={{
+            //           flexDirection: "row",
+            //           width: "100%",
+            //           justifyContent: "space-between",
+            //           backgroundColor: selectedTheme.primary,
+            //           alignItems: "center",
+            //           paddingHorizontal: 15,
+            //           paddingTop: 10,
+            //         }}
+            //       >
+            //         <View
+            //           style={{
+            //             flexDirection: "row",
+            //             gap: 10,
+            //           }}
+            //         >
+            //           <TouchableOpacity style={{ alignSelf: "center" }}>
+            //             <MaterialIcons name="reply" size={28} color="black" />
+            //           </TouchableOpacity>
+            //           <Text
+            //             style={{
+            //               fontSize: 35,
+            //               alignSelf: "flex-start",
+            //               bottom: 5,
+            //             }}
+            //           >
+            //             |
+            //           </Text>
+            //           <View style={{ height: 50, gap: 3 }}>
+            //             <Text style={{ fontSize: 10, fontWeight: "bold" }}>
+            //               Replying To Name
+            //             </Text>
+            //             <Text>Replying Message</Text>
+            //           </View>
+            //         </View>
 
-                  <TouchableOpacity
-                    style={{ alignSelf: "center" }}
-                    onPress={() => setIsReplying(false)}
-                  >
-                    <MaterialIcons
-                      name="close"
-                      size={24}
-                      color="black"
-                      style={{
-                        marginRight: 5,
-                      }}
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
+            //         <TouchableOpacity
+            //           style={{ alignSelf: "center" }}
+            //           onPress={() => setIsReplying(false)}
+            //         >
+            //           <MaterialIcons
+            //             name="close"
+            //             size={24}
+            //             color="black"
+            //             style={{
+            //               marginRight: 5,
+            //             }}
+            //           />
+            //         </TouchableOpacity>
+            //       </View>
+            //     )}
 
-              <View
-                style={{
-                  backgroundColor: isReplying ? selectedTheme.primary : null,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  // paddingTop: -5,
-                  gap: 5,
-                }}
-              >
-                <InputToolbar
-                  {...props}
-                  containerStyle={{
-                    // backgroundColor: selectedTheme.background,
-                    width: isEditing || isReplying ? "96%" : "85%",
-                    marginBottom: 10,
-                    alignSelf: "flex-start",
-                    borderRadius: 30,
-                    height: 40,
-                    marginLeft: 5,
-                  }}
-                />
-                {!isEditing && !isReplying && (
-                  <MaterialIcons
-                    name="mic"
-                    size={30}
-                    color="black"
-                    style={{
-                      backgroundColor: "white",
-                      borderRadius: 40,
-                      padding: 5,
-                      alignSelf: "flex-start",
-                      marginRight: 5,
-                    }}
-                  />
-                )}
-              </View>
-            </View>
+            //     <View
+            //       style={{
+            //         backgroundColor: isReplying ? selectedTheme.primary : null,
+            //         flexDirection: "row",
+            //         alignItems: "center",
+            //         justifyContent: "center",
+            //         // paddingTop: -5,
+            //         gap: 5,
+            //       }}
+            //     >
+            <InputToolbar
+              {...props}
+              containerStyle={{
+                // backgroundColor: "transparent",
+                // width: isEditing || isReplying ? "96%" : "85%",
+                // marginBottom: 10,
+                // alignSelf: "flex-start",
+                // borderRadius: 30,
+                paddingTop:1,
+                // height: 40,
+                // marginLeft: 5,
+                // bottom: 30,
+              }}
+            />
+            //        {!isEditing && !isReplying && (
+            //         <MaterialIcons
+            //           name="mic"
+            //           size={30}
+            //           color="black"
+            //           style={{
+            //             backgroundColor: "white",
+            //             borderRadius: 40,
+            //             padding: 5,
+            //             alignSelf: "flex-start",
+            //             marginRight: 5,
+            //           }}
+            //         />
+            //       )}
+            //     </View>
+            //   </View>
           )}
+          renderAccessory={renderAccessory}
           renderActions={(props) => (
             <View
               {...props}
@@ -539,7 +666,7 @@ const ChatScreen = () => {
               }}
             >
               <TouchableOpacity
-                // onPress={() => handleDelete(props.currentMessage)}
+                onPress={() => openPicker("images")}
                 style={{ bottom: 10 }}
               >
                 <MaterialIcons
@@ -579,25 +706,12 @@ const ChatScreen = () => {
                 marginHorizontal: 4,
               }}
             >
-              {/* <View
-                style={{
-                  flexDirection: "row",
-                  gap: 10,
-                  marginRight: 15,
-                }}
-              >
-                <MaterialIcons
-                  name="camera-alt"
-                  color={selectedTheme.text.primary}
-                  size={25}
-                /> */}
               <MaterialIcons
                 name="send"
                 color={selectedTheme.text.primary}
                 size={25}
                 style={{ transform: [{ rotate: "-40deg" }], bottom: 4 }}
               />
-              {/* </View> */}
             </Send>
           )}
         />
