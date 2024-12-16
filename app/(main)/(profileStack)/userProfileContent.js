@@ -9,7 +9,7 @@ import {
 import React, { useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useTheme, getStyles, useAuth } from "../../../imports";
 
@@ -26,15 +26,26 @@ const UserProfileContent = ({ children }) => {
     router.replace("login");
   };
 
-  const selectImage = async () => {
-    const options = {
-      mediaType: "photo",
-      quality: 2,
-    };
+  //  const selectImage = async () => {
+  //     try {
+  //       const result = await ImagePicker.launchImageLibraryAsync({
+  //         mediaTypes: ["images"],
+  //         allowsEditing: true,
+  //         quality: 1,
+  //       });
+  //       const selectedImage = result.assets[0];
+  //       setProfileUrl(selectedImage.uri);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
 
+  const selectImage = async () => {
     try {
-      const response = await new Promise((resolve) => {
-        launchImageLibrary(options, resolve);
+      const response = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        quality: 1,
       });
 
       if (response.didCancel) {

@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { launchImageLibrary } from "react-native-image-picker";
+import * as ImagePicker from "expo-image-picker";
 import {
   getStorage,
   ref,
@@ -28,24 +28,18 @@ const EditProfileScreen = () => {
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
 
-  const selectImage = () => {
-    const options = {
-      mediaType: "photo",
-      maxWidth: 300,
-      maxHeight: 300,
-      quality: 2,
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.errorMessage) {
-        console.log("ImagePicker Error: ", response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const selectedImage = response.assets[0].uri;
-        setProfileUrl(selectedImage);
-      }
-    });
+  const selectImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        quality: 1,
+      });
+      const selectedImage = result.assets[0];
+      setProfileUrl(selectedImage.uri);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleUpdateProfile = async () => {
