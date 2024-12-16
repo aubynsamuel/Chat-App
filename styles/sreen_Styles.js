@@ -127,7 +127,7 @@ export default getStyles = (theme) => {
       borderTopColor: theme.border, // Add a subtle border (optional)
       width: "93%",
       borderRadius:10,
-      bottom:4,
+      // bottom:2,
       // flex:1
 
     },

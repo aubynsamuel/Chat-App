@@ -17,6 +17,7 @@
     },
     "notification": {"androidMode": "collapse", "androidCollapsedTitle": "New Messages"},
     "android": {
+      "config": {"googleMaps": {"apiKey": ""}},
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

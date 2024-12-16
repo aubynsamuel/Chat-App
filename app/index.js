@@ -45,8 +45,8 @@ const Index = () => {
           loop={false}
           style={{
             flex: 0.8,
-            width: 90 * 5,
-            height: 90 * 5,
+            width: 90 * 7,
+            height: 90 * 7,
             alignSelf: "center",
           }}
         />

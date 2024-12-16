@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   Send,
   MessageText,
   Composer,
+  MessageImage,
 } from "react-native-gifted-chat";
 import {
   collection,
@@ -51,7 +52,9 @@ import ChatRoomBackground from "../components/ChatRoomBackground";
 import { sendNotification } from "../services/NotificationActions";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
-import AccessoryBar from "@/components/AccessoryBar";
+import AccessoryBar from "../components/AccessoryBar";
+import CustomView from "../components/CustomView";
+import RenderMessageImage from "../components/render-message-image";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
@@ -66,6 +69,7 @@ const ChatScreen = () => {
   const [editMessage, setEditMessage] = useState(null);
   const [editText, setEditText] = useState("");
   const [profileUrl, setProfileUrl] = useState();
+  const [showActions, setShowActionButtons] = useState(true);
 
   useEffect(() => {
     fetchOtherUsersProfileUrl();
@@ -108,6 +112,12 @@ const ChatScreen = () => {
           read: data.read || false,
           type: data.type || "text",
           delivered: data.delivered || false,
+          location: data.location
+            ? {
+                latitude: data.location.latitude,
+                longitude: data.location.longitude,
+              }
+            : null,
         };
       });
       setMessages(fetchedMessages);
@@ -123,16 +133,17 @@ const ChatScreen = () => {
       allowsEditing: true,
       quality: 1,
     });
+
     if (!result.canceled) {
       const downloadURL = await uploadMediaFile(
         result.assets[0],
         user.username
       );
 
-      try {
+      if (downloadURL) {
         const newMessage = {
           _id: Math.random().toString(36).substring(7),
-          text: "", // TODO: use as image caption
+          text: "", // Optional: can be used for image caption
           image: downloadURL,
           createdAt: new Date(),
           user: {
@@ -140,46 +151,10 @@ const ChatScreen = () => {
             name: user.username,
           },
           type: "image",
+          delivered: true,
         };
 
-        setMessages((prevMessages) =>
-          GiftedChat.append(prevMessages, [newMessage])
-        );
-
-        const roomRef = doc(db, "rooms", roomId);
-        const messagesRef = collection(roomRef, "messages");
-
-        await setDoc(doc(messagesRef), {
-          image: downloadURL,
-          content: "",
-          senderId: user.userId,
-          senderName: user.username,
-          createdAt: getCurrentTime(),
-          type: "image",
-          read: false,
-          delivered: true,
-        });
-
-        await setDoc(
-          roomRef,
-          {
-            lastMessage: "📷",
-            lastMessageTimestamp: getCurrentTime(),
-            lastMessageSenderId: user.userId,
-          },
-          { merge: true }
-        );
-
-        if (otherUserToken) {
-          sendNotification(
-            otherUserToken,
-            `New message from ${user.username}`,
-            `${user.username} sent you an image`,
-            roomId
-          );
-        }
-      } catch (error) {
-        console.error("Failed to send message:", error);
+        handleSend([newMessage]);
       }
     }
   };
@@ -252,42 +227,55 @@ const ChatScreen = () => {
   const handleSend = useCallback(
     async (newMessages = []) => {
       const newMessage = newMessages[0];
+
+      // Prepare message for Firestore
+      const messageData = {
+        content: newMessage.text || "",
+        senderId: user.userId,
+        senderName: user.username,
+        createdAt: getCurrentTime(),
+        replyTo: newMessage.replyTo || null,
+        read: false,
+        delivered: true,
+        type: newMessage.type || (newMessage.image ? "image" : "text"),
+        image: newMessage.image || null,
+        location: newMessage.location
+          ? {
+              latitude: newMessage.location.latitude,
+              longitude: newMessage.location.longitude,
+            }
+          : null,
+      };
+
+      // Update local messages state
       setMessages((prevMessages) =>
         GiftedChat.append(prevMessages, newMessages)
       );
 
-      const roomRef = doc(db, "rooms", roomId);
-      const messagesRef = collection(roomRef, "messages");
-
       try {
-        const messageData = {
-          content: newMessage.text,
-          senderId: user.userId,
-          senderName: user.username,
-          createdAt: getCurrentTime(),
-          replyTo: newMessage.replyTo || null,
-          read: false,
-          delivered: true,
-          type: newMessage.type || "text",
-        };
+        const roomRef = doc(db, "rooms", roomId);
+        const messagesRef = collection(roomRef, "messages");
 
+        // Add message to Firestore
         await setDoc(doc(messagesRef), messageData);
 
+        // Update room last message
         await setDoc(
           roomRef,
           {
-            lastMessage: newMessage.text,
+            lastMessage: newMessage.text || "📷",
             lastMessageTimestamp: getCurrentTime(),
             lastMessageSenderId: user.userId,
           },
           { merge: true }
         );
 
+        // Send notification if other user token exists
         if (otherUserToken) {
           sendNotification(
             otherUserToken,
             `New message from ${user.username}`,
-            newMessage.text,
+            newMessage.text || (newMessage.image ? "Sent an image" : ""),
             roomId
           );
         }
@@ -360,6 +348,7 @@ const ChatScreen = () => {
                 setIsEditing(true);
                 setEditMessage(currentMessage);
                 setEditText(currentMessage.text);
+                setShowActionButtons(false);
               }
               break;
             case 2:
@@ -401,6 +390,7 @@ const ChatScreen = () => {
 
   const renderBubble = (props) => {
     const { currentMessage } = props;
+
     let ticks = null;
     if (currentMessage.user._id === user.userId) {
       // Only for user's messages
@@ -447,28 +437,20 @@ const ChatScreen = () => {
     );
   };
 
-  const onSendFromUser = useCallback(
-    (messages = []) => {
-      const createdAt = new Date();
-      const messagesToUpload = messages.map((message) => ({
-        ...message,
-        user,
-        createdAt,
-        _id: Math.round(Math.random() * 1000000),
-      }));
-
-      handleSend(messagesToUpload);
-    },
-    [handleSend]
+  const renderAccessory = useCallback(
+    () => (
+      <AccessoryBar
+        onSend={handleSend}
+        user={user}
+        uploadMediaFile={uploadMediaFile}
+      />
+    ),
+    []
   );
 
-  const renderAccessory = useCallback(() => {
-    return (
-      <AccessoryBar
-        onSend={onSendFromUser}
-      />
-    );
-  }, [onSendFromUser]);
+  const renderCustomView = useCallback((props) => {
+    return <CustomView {...props} />;
+  }, []);
 
   return (
     <View style={{ flex: 1 }}>
@@ -491,9 +473,16 @@ const ChatScreen = () => {
       </View>
       <View style={styles.crContainer}>
         <GiftedChat
+          onInputTextChanged={() => {
+            setShowActionButtons(false);
+            setTimeout(() => {
+              setShowActionButtons(true);
+            }, 5000);
+          }}
           messagesContainerStyle={styles.crMessages}
           keyboardShouldPersistTaps="always"
-          alwaysShowSend={true}
+          alwaysShowSend={false}
+          renderCustomView={renderCustomView}
           renderComposer={(props) =>
             isEditing ? (
               <View style={styles.editContainer}>
@@ -506,13 +495,20 @@ const ChatScreen = () => {
                   numberOfLines={5}
                 />
                 <TouchableOpacity
-                  onPress={handleEditSave}
+                  onPress={() => {
+                    setIsEditing(false);
+                    setShowActionButtons(true);
+                    handleEditSave();
+                  }}
                   style={styles.editButton}
                 >
                   <Text style={styles.editButtonText}>✓</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={() => setIsEditing(false)}
+                  onPress={() => {
+                    setIsEditing(false);
+                    setShowActionButtons(true);
+                  }}
                   style={styles.editButton}
                 >
                   <MaterialIcons
@@ -525,159 +521,158 @@ const ChatScreen = () => {
             ) : (
               <Composer
                 {...props}
-                //     bottom: 30,
                 textInputStyle={{
                   color: selectedTheme.text.primary,
-                  width: isEditing || isReplying ? "96%" : "85%",
-                  margin: 0,
-                  // alignSelf: "flex-start",
+                  width:
+                    isEditing || isReplying || !showActions ? "96%" : "85%",
+                  justifyContent: "center",
                   borderRadius: 10,
-                  height: 44,
-                  // backgroundColor: "red",
-                  // marginLeft: 5,
-                  // bottom: 30,
+                  marginLeft: showActions ? 25 : 5,
+                  // bottom: 2,
                 }}
               />
             )
           }
           messages={messages}
-          handleSend={(newMessages) => handleSend(newMessages)}
+          onSend={(newMessages) => {
+            handleSend(newMessages);
+            setShowActionButtons(true);
+          }}
           user={{
             _id: user.userId,
             name: user.username,
           }}
-          renderMessageText={(props) => (
-            <MessageText
-              {...props}
-              textStyle={{
-                left: { color: selectedTheme.message.other.text },
-                right: { color: selectedTheme.message.user.text },
-              }}
-            />
+          renderMessageText={(props) => {
+            return (
+              <MessageText
+                {...props}
+                textStyle={{
+                  left: { color: selectedTheme.message.other.text },
+                  right: { color: selectedTheme.message.user.text },
+                }}
+              />
+            );
+          }}
+          renderInputToolbar={(props) => (
+            <View>
+              {isReplying && (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    width: "100%",
+                    justifyContent: "space-between",
+                    backgroundColor: selectedTheme.primary,
+                    alignItems: "center",
+                    paddingHorizontal: 15,
+                    paddingTop: 5,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      gap: 10,
+                    }}
+                  >
+                    <TouchableOpacity style={{ alignSelf: "center" }}>
+                      <MaterialIcons name="reply" size={28} color="black" />
+                    </TouchableOpacity>
+                    <Text
+                      style={{
+                        fontSize: 35,
+                        alignSelf: "flex-start",
+                        bottom: 5,
+                      }}
+                    >
+                      |
+                    </Text>
+                    <View style={{ height: 50, gap: 3 }}>
+                      <Text style={{ fontSize: 10, fontWeight: "bold" }}>
+                        Replying To Name
+                      </Text>
+                      <Text>Replying Message</Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
+                    style={{ alignSelf: "center" }}
+                    onPress={() => setIsReplying(false)}
+                  >
+                    <MaterialIcons
+                      name="close"
+                      size={24}
+                      color="black"
+                      style={{
+                        marginRight: 5,
+                      }}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              <View
+                style={{
+                  backgroundColor: isReplying ? selectedTheme.primary : null,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 5,
+                }}
+              >
+                <InputToolbar
+                  {...props}
+                  containerStyle={{
+                    width:
+                      isEditing || isReplying || !showActions ? "96%" : "85%",
+                    alignSelf: "flex-start",
+                    borderRadius: 30,
+                    marginBottom: 8,
+                    marginTop: 0,
+                  }}
+                />
+                {!isEditing && !isReplying && showActions && (
+                  <MaterialIcons
+                    name="mic"
+                    size={30}
+                    color="black"
+                    style={{
+                      backgroundColor: "white",
+                      borderRadius: 40,
+                      padding: 5,
+                      alignSelf: "flex-end",
+                      marginRight: 5,
+                      bottom: 10,
+                    }}
+                  />
+                )}
+              </View>
+            </View>
           )}
           timeTextStyle={{
             left: { color: selectedTheme.message.other.time },
             right: { color: selectedTheme.message.user.time },
           }}
-          renderBubble={renderBubble} // Use the custom renderBubble function
-          renderInputToolbar={(props) => (
-            //   <View>
-            //     {isReplying && (
-            //       <View
-            //         style={{
-            //           flexDirection: "row",
-            //           width: "100%",
-            //           justifyContent: "space-between",
-            //           backgroundColor: selectedTheme.primary,
-            //           alignItems: "center",
-            //           paddingHorizontal: 15,
-            //           paddingTop: 10,
-            //         }}
-            //       >
-            //         <View
-            //           style={{
-            //             flexDirection: "row",
-            //             gap: 10,
-            //           }}
-            //         >
-            //           <TouchableOpacity style={{ alignSelf: "center" }}>
-            //             <MaterialIcons name="reply" size={28} color="black" />
-            //           </TouchableOpacity>
-            //           <Text
-            //             style={{
-            //               fontSize: 35,
-            //               alignSelf: "flex-start",
-            //               bottom: 5,
-            //             }}
-            //           >
-            //             |
-            //           </Text>
-            //           <View style={{ height: 50, gap: 3 }}>
-            //             <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-            //               Replying To Name
-            //             </Text>
-            //             <Text>Replying Message</Text>
-            //           </View>
-            //         </View>
-
-            //         <TouchableOpacity
-            //           style={{ alignSelf: "center" }}
-            //           onPress={() => setIsReplying(false)}
-            //         >
-            //           <MaterialIcons
-            //             name="close"
-            //             size={24}
-            //             color="black"
-            //             style={{
-            //               marginRight: 5,
-            //             }}
-            //           />
-            //         </TouchableOpacity>
-            //       </View>
-            //     )}
-
-            //     <View
-            //       style={{
-            //         backgroundColor: isReplying ? selectedTheme.primary : null,
-            //         flexDirection: "row",
-            //         alignItems: "center",
-            //         justifyContent: "center",
-            //         // paddingTop: -5,
-            //         gap: 5,
-            //       }}
-            //     >
-            <InputToolbar
-              {...props}
-              containerStyle={{
-                // backgroundColor: "transparent",
-                // width: isEditing || isReplying ? "96%" : "85%",
-                // marginBottom: 10,
-                // alignSelf: "flex-start",
-                // borderRadius: 30,
-                paddingTop:1,
-                // height: 40,
-                // marginLeft: 5,
-                // bottom: 30,
-              }}
-            />
-            //        {!isEditing && !isReplying && (
-            //         <MaterialIcons
-            //           name="mic"
-            //           size={30}
-            //           color="black"
-            //           style={{
-            //             backgroundColor: "white",
-            //             borderRadius: 40,
-            //             padding: 5,
-            //             alignSelf: "flex-start",
-            //             marginRight: 5,
-            //           }}
-            //         />
-            //       )}
-            //     </View>
-            //   </View>
-          )}
-          renderAccessory={renderAccessory}
-          renderActions={(props) => (
-            <View
-              {...props}
-              style={{
-                flexDirection: "row",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => openPicker("images")}
-                style={{ bottom: 10 }}
-              >
-                <MaterialIcons
-                  name="attachment"
-                  color={selectedTheme.text.primary}
-                  size={27}
-                  style={{ transform: [{ rotate: "120deg" }], marginLeft: 7 }}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
+          renderBubble={renderBubble}
+          renderActions={() =>
+            showActions ? (
+              <AccessoryBar
+                onSend={handleSend}
+                user={user}
+                uploadMediaFile={uploadMediaFile}
+              />
+            ) : (
+              <MaterialIcons
+                name="arrow-back-ios"
+                size={25}
+                color="black"
+                onPress={() => setShowActionButtons(true)}
+                style={{
+                  alignSelf: "center",
+                  marginLeft: 8,
+                  transform: [{ rotate: "180deg" }],
+                }}
+              />
+            )
+          }
           renderChatEmpty={() => (
             <View style={{ transform: [{ rotate: "180deg" }], bottom: -300 }}>
               <EmptyChatRoomList />
@@ -690,6 +685,16 @@ const ChatScreen = () => {
               name="double-arrow"
               color={"#000"}
               size={30}
+            />
+          )}
+          renderMessageImage={(props) => (
+            <RenderMessageImage
+            imageStyle={{
+              width:200,
+              height: 150,
+              resizeMode: "cover",
+            }}
+            {...props}
             />
           )}
           onPress={handleMessagePress}

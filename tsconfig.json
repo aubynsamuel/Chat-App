@@ -7,12 +7,5 @@
       "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "services/ExpoPushNotifications.js",
-    "app/profile.js",
- "app/_layout.js", "app/chatRoom.js"  ]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "components/CustomView.js", "components/AccessoryBar.js", "components/mediaUtils.js"]
 }

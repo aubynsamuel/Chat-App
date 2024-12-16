@@ -4,9 +4,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import React, { useRef, useState } from "react";
-import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";

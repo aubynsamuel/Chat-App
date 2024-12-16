@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -18,6 +18,7 @@ const SearchUsersScreen = () => {
   const { user } = useAuth();
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const inputRef = useRef();
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
 
@@ -47,6 +48,10 @@ const SearchUsersScreen = () => {
       console.error("Error searching users:", error);
     }
   };
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, []);
 
   const handleUserPress = (selectedUser) => {
     router.navigate({
@@ -89,6 +94,7 @@ const SearchUsersScreen = () => {
           onPress={() => router.navigate("..")}
         />
         <TextInput
+          ref={inputRef}
           style={styles.searchInput}
           placeholder="Search users..."
           placeholderTextColor={
