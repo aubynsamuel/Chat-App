@@ -14,7 +14,6 @@ import {
   Send,
   MessageText,
   Composer,
-  MessageImage,
 } from "react-native-gifted-chat";
 import {
   collection,
@@ -54,7 +53,8 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import AccessoryBar from "../components/AccessoryBar";
 import CustomView from "../components/CustomView";
-import RenderMessageImage from "../components/render-message-image";
+import RenderMessageImage from "../components/renderMessageImage";
+import Animated, { FadeInRight } from "react-native-reanimated";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
@@ -437,17 +437,6 @@ const ChatScreen = () => {
     );
   };
 
-  const renderAccessory = useCallback(
-    () => (
-      <AccessoryBar
-        onSend={handleSend}
-        user={user}
-        uploadMediaFile={uploadMediaFile}
-      />
-    ),
-    []
-  );
-
   const renderCustomView = useCallback((props) => {
     return <CustomView {...props} />;
   }, []);
@@ -473,11 +462,12 @@ const ChatScreen = () => {
       </View>
       <View style={styles.crContainer}>
         <GiftedChat
-          onInputTextChanged={() => {
-            setShowActionButtons(false);
-            setTimeout(() => {
+          onInputTextChanged={(text) => {
+            if (text.length > 0) {
+              setShowActionButtons(false);
+            } else {
               setShowActionButtons(true);
-            }, 5000);
+            }
           }}
           messagesContainerStyle={styles.crMessages}
           keyboardShouldPersistTaps="always"
@@ -555,6 +545,7 @@ const ChatScreen = () => {
           }}
           renderInputToolbar={(props) => (
             <View>
+              {/* Reply to message UI */}
               {isReplying && (
                 <View
                   style={{
@@ -609,6 +600,7 @@ const ChatScreen = () => {
                 </View>
               )}
 
+              {/* Input toolbar and microphone */}
               <View
                 style={{
                   backgroundColor: isReplying ? selectedTheme.primary : null,
@@ -630,19 +622,25 @@ const ChatScreen = () => {
                   }}
                 />
                 {!isEditing && !isReplying && showActions && (
-                  <MaterialIcons
-                    name="mic"
-                    size={30}
-                    color="black"
-                    style={{
-                      backgroundColor: "white",
-                      borderRadius: 40,
-                      padding: 5,
-                      alignSelf: "flex-end",
-                      marginRight: 5,
-                      bottom: 10,
-                    }}
-                  />
+                  <Animated.View
+                    entering={FadeInRight.duration(500)}
+                    // exiting={FadeInLeft.duration(500)}
+                    style={{ alignSelf: "flex-end" }}
+                  >
+                    <MaterialIcons
+                      name="mic"
+                      size={30}
+                      color="black"
+                      style={{
+                        backgroundColor: "white",
+                        borderRadius: 40,
+                        padding: 5,
+                        alignSelf: "flex-end",
+                        marginRight: 5,
+                        bottom: 10,
+                      }}
+                    />
+                  </Animated.View>
                 )}
               </View>
             </View>
@@ -659,19 +657,24 @@ const ChatScreen = () => {
                 user={user}
                 uploadMediaFile={uploadMediaFile}
               />
-            ) : (
-              <MaterialIcons
-                name="arrow-back-ios"
-                size={25}
-                color="black"
-                onPress={() => setShowActionButtons(true)}
-                style={{
-                  alignSelf: "center",
-                  marginLeft: 8,
-                  transform: [{ rotate: "180deg" }],
-                }}
-              />
-            )
+            ) : !isEditing ? (
+              <Animated.View
+                entering={FadeInRight.duration(250)}
+                // exiting={FadeInLeft.duration(500)}
+                style={{ alignSelf: "center" }}
+              >
+                <MaterialIcons
+                  name="arrow-back-ios"
+                  size={25}
+                  color="black"
+                  onPress={() => setShowActionButtons(true)}
+                  style={{
+                    marginLeft: 8,
+                    transform: [{ rotate: "180deg" }],
+                  }}
+                />
+              </Animated.View>
+            ) : null
           }
           renderChatEmpty={() => (
             <View style={{ transform: [{ rotate: "180deg" }], bottom: -300 }}>
@@ -689,12 +692,12 @@ const ChatScreen = () => {
           )}
           renderMessageImage={(props) => (
             <RenderMessageImage
-            imageStyle={{
-              width:200,
-              height: 150,
-              resizeMode: "cover",
-            }}
-            {...props}
+              imageStyle={{
+                width: 200,
+                height: 150,
+                resizeMode: "cover",
+              }}
+              {...props}
             />
           )}
           onPress={handleMessagePress}

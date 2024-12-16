@@ -4,19 +4,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const RenderMessageImage = ({
   currentMessage,
-  containerStyle,
   imageStyle,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-// containerStyle={
-//   width: "100%",
-//   height: "100%",
-//   justifyContent: "center",
-//   alignItems: "center",
-//   borderRadius: 10,
-//   overflow: "hidden",
-// }
-
   if (!currentMessage.image) return null;
 
   return (

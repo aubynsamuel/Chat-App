@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
+import Animated, { FadeInLeft, FadeInRight } from "react-native-reanimated";
 
 import {
   getLocationAsync,
@@ -10,7 +11,11 @@ import {
 
 export default AccessoryBar = ({ onSend, uploadMediaFile, user }) => {
   return (
-    <View style={styles.container}>
+    <Animated.View
+      style={styles.container}
+      entering={FadeInLeft.duration(500)}
+      // exiting={FadeInRight.duration(500)}
+    >
       <Button
         onPress={() => pickImageAsync(onSend, user, uploadMediaFile)}
         name="camera-alt"
@@ -23,7 +28,7 @@ export default AccessoryBar = ({ onSend, uploadMediaFile, user }) => {
         onPress={() => getLocationAsync(onSend, user)}
         name="add-location-alt"
       />
-    </View>
+    </Animated.View>
   );
 };
 
@@ -42,9 +47,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "center",
     // borderTopWidth: StyleSheet.hairlineWidth,
-    bottom:2,
-    gap:3,
-    marginHorizontal:8,
+    bottom: 2,
+    gap: 3,
+    marginHorizontal: 8,
     borderTopColor: "rgba(0,0,0,0.3)",
   },
 });
