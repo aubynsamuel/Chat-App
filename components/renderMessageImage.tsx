@@ -9,6 +9,7 @@ import {
   ImageStyle,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { StatusBar } from "expo-status-bar";
 
 // Define interfaces for type safety
 interface Message {
@@ -21,9 +22,9 @@ interface RenderMessageImageProps {
   imageStyle?: ImageStyle;
 }
 
-const RenderMessageImage: React.FC<RenderMessageImageProps> = ({ 
-  currentMessage, 
-  imageStyle 
+const RenderMessageImage: React.FC<RenderMessageImageProps> = ({
+  currentMessage,
+  imageStyle,
 }) => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -47,6 +48,9 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = ({
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
+        {modalVisible ? (
+          <StatusBar style="dark" backgroundColor="black" />
+        ) : null}
         <View style={styles.modalContainer}>
           <TouchableOpacity
             style={styles.closeButton}

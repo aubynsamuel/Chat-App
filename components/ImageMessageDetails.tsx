@@ -10,17 +10,12 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../imports";
+import { StatusBar } from "expo-status-bar";
 
 // Define types for the message and upload file
 interface MediaFile {
   uri: string;
 }
-
-interface User {
-  userId: string;
-  username: string;
-}
-
 interface Message {
   _id: string;
   text: string;
@@ -37,13 +32,16 @@ interface Message {
 interface ImageMessageDetailsProps {
   handleSend: (messages: Message[]) => void;
   image: string;
-  uploadMediaFile: (media: MediaFile, username: string) => Promise<string | null>;
+  uploadMediaFile: (
+    media: MediaFile,
+    username: string
+  ) => Promise<string | null>;
 }
 
-const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({ 
-  handleSend, 
-  image, 
-  uploadMediaFile
+const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
+  handleSend,
+  image,
+  uploadMediaFile,
 }) => {
   const [caption, setCaption] = useState<string>("");
   const { user, imageModalVisibility, setImageModalVisibility } = useAuth();
@@ -51,14 +49,17 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
   const sendImageMessage = async () => {
     try {
       console.log("Sending image message", image);
-      
+
       // Validate image and user
       if (!image || !user) {
         return;
       }
 
-      const downloadURL = await uploadMediaFile({ uri: image }, user.username);
-      
+      const downloadURL = await uploadMediaFile(
+        { uri: image },
+        user.username as string
+      );
+
       if (!downloadURL) {
         return;
       }
@@ -72,7 +73,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
         createdAt: new Date(),
         user: {
           _id: user.userId,
-          name: user.username,
+          name: user.username as string,
         },
         type: "image",
         delivered: true,
@@ -81,7 +82,6 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
       // Send message and close modal
       handleSend([newMessage]);
       setImageModalVisibility(false);
-
     } catch (error) {
       console.error("Error sending image message:", error);
     }
@@ -93,6 +93,10 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
       transparent={true}
       onRequestClose={() => setImageModalVisibility(false)}
     >
+      {imageModalVisibility ? (
+        <StatusBar style="dark" backgroundColor="black" />
+      ) : null}
+
       <View style={styles.modalContainer}>
         <TouchableOpacity
           style={styles.closeButton}
@@ -122,7 +126,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
             style={styles.sendButton}
             onPress={sendImageMessage}
           >
-            <MaterialIcons name="send" size={28} color={"white"}/>
+            <MaterialIcons name="send" size={28} color={"white"} />
             {/* <Text>Send</Text> */}
           </TouchableOpacity>
         </View>
@@ -157,10 +161,10 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   captionContainer: {
-    width: "80%",
+    width: "90%",
     borderWidth: 1,
     borderColor: "gray",
-    // borderRadius: 10,
+    borderRadius: 10,
     paddingHorizontal: 10,
     justifyContent: "center",
   },
