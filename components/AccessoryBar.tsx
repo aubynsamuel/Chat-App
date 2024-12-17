@@ -8,6 +8,7 @@ import {
   pickImageAsync,
   takePictureAsync,
 } from "./mediaUtils";
+import { Alert } from "react-native";
 
 // Define interfaces for type safety
 interface User {
@@ -30,6 +31,7 @@ interface AccessoryBarProps {
   ) => Promise<string | null>;
   user: User;
   openPicker: (type: string) => void;
+  recipient: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -48,7 +50,30 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
   uploadMediaFile,
   user,
   openPicker,
+  recipient,
 }) => {
+  const confirmAndShareLocation = (
+    onSend: (messages: any[]) => void,
+    user: User,
+    name: string
+  ) => {
+    Alert.alert(
+      "Share Location",
+      `You are about to share your location with ${name}. Do you want to continue?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Continue",
+          onPress: () => getLocationAsync(onSend, user),
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   return (
     <Animated.View style={styles.container} entering={FadeInLeft.duration(250)}>
       <Button
@@ -61,7 +86,7 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
         name="camera-alt"
       /> */}
       <Button
-        onPress={() => getLocationAsync(onSend, user)}
+        onPress={() => confirmAndShareLocation(onSend, user, recipient)} // Pass the recipient's name
         name="add-location-alt"
       />
     </Animated.View>
