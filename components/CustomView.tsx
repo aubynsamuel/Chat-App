@@ -4,16 +4,33 @@ import {
   Platform,
   StyleSheet,
   TouchableOpacity,
+  ViewStyle,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
-const CustomView = ({
+// Define interfaces for type safety
+interface Location {
+  latitude: number;
+  longitude: number;
+}
+
+interface Message {
+  location?: Location;
+}
+
+interface CustomViewProps {
+  currentMessage: Message;
+  containerStyle?: ViewStyle;
+  mapViewStyle?: ViewStyle;
+}
+
+const CustomView: React.FC<CustomViewProps> = ({
   currentMessage,
   containerStyle,
   mapViewStyle,
 }) => {
   const openMapAsync = useCallback(async () => {
-    const { location = {} } = currentMessage;
+    const { location = {} as Location } = currentMessage;
 
     const url = Platform.select({
       ios: `http://maps.apple.com/?ll=${location.latitude},${location.longitude}`,
@@ -26,7 +43,7 @@ const CustomView = ({
 
       alert("Opening the map is not supported.");
     } catch (e) {
-      alert(e);
+      alert(String(e));
     }
   }, [currentMessage]);
 

@@ -2,14 +2,47 @@ import * as Location from "expo-location";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 
-export async function getLocationAsync(onSend, user) {
+// Define interfaces for type safety
+interface User {
+  userId: string;
+  username: string;
+}
+
+interface Message {
+  _id: string;
+  text?: string | null;
+  image?: string;
+  createdAt: Date;
+  user: {
+    _id: string;
+    name: string;
+  };
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  type: string;
+  received: boolean;
+}
+
+interface MediaFile {
+  uri: string;
+}
+
+type OnSendFunction = (messages: Message[]) => void;
+type UploadMediaFileFunction = (media: MediaFile, username: string) => Promise<string | null>;
+
+export async function getLocationAsync(
+  onSend: OnSendFunction, 
+  user: User
+): Promise<void> {
   const response = await Location.requestForegroundPermissionsAsync();
   if (!response.granted) return;
 
-  const location = await Location.getCurrentPositionAsync();
+  const location = await Location.getCurrentPositionAsync({});
   if (!location) return;
 
-  const locationMessage = {
+  const locationMessage: Message = {
     _id: Math.random().toString(36).substring(7),
     text: `Lat:${location.coords.latitude.toFixed(4)}\nLong:${location.coords.longitude.toFixed(4)}`,
     createdAt: new Date(),
@@ -28,14 +61,18 @@ export async function getLocationAsync(onSend, user) {
   onSend([locationMessage]);
 }
 
-export async function pickImageAsync(onSend, user, uploadMediaFile) {
+export async function pickImageAsync(
+  onSend: OnSendFunction, 
+  user: User, 
+  uploadMediaFile: UploadMediaFileFunction
+): Promise<void> {
   const response = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (!response.granted) return;
 
   const result = await ImagePicker.launchImageLibraryAsync({
     allowsEditing: true,
     quality: 1,
-    mediaTypes: ["images"],
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
   });
 
   if (result.canceled) return;
@@ -50,7 +87,7 @@ export async function pickImageAsync(onSend, user, uploadMediaFile) {
     );
 
     if (downloadURL) {
-      const imageMessage = {
+      const imageMessage: Message = {
         _id: Math.random().toString(36).substring(7),
         text: null, // TODO: will be used for image caption
         image: downloadURL,
@@ -71,7 +108,11 @@ export async function pickImageAsync(onSend, user, uploadMediaFile) {
   }
 }
 
-export async function takePictureAsync(onSend, user, uploadMediaFile) {
+export async function takePictureAsync(
+  onSend: OnSendFunction, 
+  user: User, 
+  uploadMediaFile: UploadMediaFileFunction
+): Promise<void> {
   const response = await ImagePicker.requestCameraPermissionsAsync();
   if (!response.granted) return;
 
@@ -92,7 +133,7 @@ export async function takePictureAsync(onSend, user, uploadMediaFile) {
     );
 
     if (downloadURL) {
-      const imageMessage = {
+      const imageMessage: Message = {
         _id: Math.random().toString(36).substring(7),
         text: "", // TODO: will be used for image caption
         image: downloadURL,

@@ -11,7 +11,7 @@ import { showToast as showToastMessage } from "au-react-native-toast";
 import { auth, db } from "../env/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export let userDetails
+export let userDetails;
 
 const AuthContext = createContext();
 
@@ -29,12 +29,12 @@ export const AuthContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [unreadChats, setUnreadChats] = useState([]);
   const [deviceToken, setDeviceToken] = useState("");
-  userDetails = user
-  // console.log("User details: ",userDetails)
+  const [imageModalVisibility, setImageModalVisibility] = useState(false);
+
+  userDetails = user;
   const getDeviceToken = async () => {
     const cachedToken = await AsyncStorage.getItem("deviceToken");
     setDeviceToken(cachedToken);
-    // console.log("DeviceToken from AsyncStorage: ", cachedToken);
   };
 
   const showToast = (message, containerStyles = null, textStyles = null) => {
@@ -275,6 +275,8 @@ export const AuthContextProvider = ({ children }) => {
         removeFromUnread,
         unreadChats,
         setDeviceToken,
+        imageModalVisibility,
+        setImageModalVisibility,
       }}
     >
       {children}

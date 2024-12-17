@@ -1,12 +1,32 @@
 import React, { useState } from "react";
-import { Image, View, TouchableOpacity, Modal, StyleSheet } from "react-native";
+import {
+  Image,
+  View,
+  TouchableOpacity,
+  Modal,
+  StyleSheet,
+  Text,
+  ImageStyle,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const RenderMessageImage = ({
-  currentMessage,
-  imageStyle,
+// Define interfaces for type safety
+interface Message {
+  image?: string;
+  text?: string;
+}
+
+interface RenderMessageImageProps {
+  currentMessage: Message;
+  imageStyle?: ImageStyle;
+}
+
+const RenderMessageImage: React.FC<RenderMessageImageProps> = ({ 
+  currentMessage, 
+  imageStyle 
 }) => {
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+
   if (!currentMessage.image) return null;
 
   return (
@@ -40,6 +60,9 @@ const RenderMessageImage = ({
             style={styles.fullScreenImage}
             resizeMode="contain"
           />
+          {currentMessage.text && (
+            <Text style={{ color: "white" }}>{currentMessage.text}</Text>
+          )}
         </View>
       </Modal>
     </>
@@ -48,24 +71,24 @@ const RenderMessageImage = ({
 
 const styles = StyleSheet.create({
   image: {
-    width: 150,
-    height: 100,
+    width: 210,
+    height: 250,
     borderRadius: 13,
     resizeMode: "cover",
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.9)",
+    backgroundColor: "rgba(0,0,0,0.95)",
     justifyContent: "center",
     alignItems: "center",
   },
   fullScreenImage: {
     width: "100%",
-    height: "100%",
+    height: "85%",
   },
   closeButton: {
     position: "absolute",
-    top: 50,
+    top: 10,
     right: 20,
     zIndex: 10,
   },

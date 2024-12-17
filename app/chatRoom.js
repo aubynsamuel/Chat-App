@@ -55,10 +55,11 @@ import AccessoryBar from "../components/AccessoryBar";
 import CustomView from "../components/CustomView";
 import RenderMessageImage from "../components/renderMessageImage";
 import Animated, { FadeInRight } from "react-native-reanimated";
+import ImageMessageDetails from "../components/ImageMessageDetails";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
-  const { user } = useAuth();
+  const { user, setImageModalVisibility, imageModalVisibility } = useAuth();
   const { selectedTheme, chatBackgroundPic } = useTheme();
   const [messages, setMessages] = useState([]);
   const [otherUserToken, setOtherUserToken] = useState("");
@@ -70,6 +71,7 @@ const ChatScreen = () => {
   const [editText, setEditText] = useState("");
   const [profileUrl, setProfileUrl] = useState();
   const [showActions, setShowActionButtons] = useState(true);
+  const [imageUrl, setImageUrl] = useState();
 
   useEffect(() => {
     fetchOtherUsersProfileUrl();
@@ -134,29 +136,12 @@ const ChatScreen = () => {
       quality: 1,
     });
 
-    if (!result.canceled) {
-      const downloadURL = await uploadMediaFile(
-        result.assets[0],
-        user.username
-      );
+    setImageUrl(result.assets[0].uri);
+    setImageModalVisibility(true);
 
-      if (downloadURL) {
-        const newMessage = {
-          _id: Math.random().toString(36).substring(7),
-          text: "", // Optional: can be used for image caption
-          image: downloadURL,
-          createdAt: new Date(),
-          user: {
-            _id: user.userId,
-            name: user.username,
-          },
-          type: "image",
-          delivered: true,
-        };
-
-        handleSend([newMessage]);
-      }
-    }
+    // if (!result.canceled) {
+    //   handleImageMessage(result.assets[0]);
+    // }
   };
 
   const uploadMediaFile = async (media, username) => {
@@ -428,9 +413,13 @@ const ChatScreen = () => {
         wrapperStyle={{
           left: {
             backgroundColor: selectedTheme.message.other.background,
+            marginLeft: 5,
+            marginBottom: 3,
           },
           right: {
             backgroundColor: selectedTheme.message.user.background,
+            marginRight: 5,
+            marginBottom: 3,
           },
         }}
       />
@@ -518,7 +507,6 @@ const ChatScreen = () => {
                   justifyContent: "center",
                   borderRadius: 10,
                   marginLeft: showActions ? 25 : 5,
-                  // bottom: 2,
                 }}
               />
             )
@@ -623,8 +611,7 @@ const ChatScreen = () => {
                 />
                 {!isEditing && !isReplying && showActions && (
                   <Animated.View
-                    entering={FadeInRight.duration(500)}
-                    // exiting={FadeInLeft.duration(500)}
+                    entering={FadeInRight.duration(250)}
                     style={{ alignSelf: "flex-end" }}
                   >
                     <MaterialIcons
@@ -654,13 +641,13 @@ const ChatScreen = () => {
             showActions ? (
               <AccessoryBar
                 onSend={handleSend}
+                openPicker={openPicker}
                 user={user}
                 uploadMediaFile={uploadMediaFile}
               />
             ) : !isEditing ? (
               <Animated.View
                 entering={FadeInRight.duration(250)}
-                // exiting={FadeInLeft.duration(500)}
                 style={{ alignSelf: "center" }}
               >
                 <MaterialIcons
@@ -693,9 +680,10 @@ const ChatScreen = () => {
           renderMessageImage={(props) => (
             <RenderMessageImage
               imageStyle={{
-                width: 200,
-                height: 150,
-                resizeMode: "cover",
+                borderTopLeftRadius:
+                  props.currentMessage.user._id === user.userId ? 13 : 0,
+                borderTopRightRadius:
+                  props.currentMessage.user._id === user.userId ? 0 : 13,
               }}
               {...props}
             />
@@ -723,10 +711,16 @@ const ChatScreen = () => {
             </Send>
           )}
         />
+        {imageModalVisibility && (
+          <ImageMessageDetails
+            handleSend={handleSend}
+            image={imageUrl}
+            uploadMediaFile={uploadMediaFile}
+          />
+        )}
       </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({});
 export default ChatScreen;
