@@ -1,21 +1,56 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
+  User,
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  Auth,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, DocumentReference, Firestore } from "firebase/firestore";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "au-react-native-toast";
 import { auth, db } from "../env/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export let userDetails;
+export let userDetails: User | null;
 
-const AuthContext = createContext();
+// Define interfaces for type safety
+interface UserData {
+  userId: string;
+  username?: string;
+  email: string;
+  profileUrl?: string;
+  deviceToken?: string;
+}
 
-export const useAuth = () => useContext(AuthContext);
+interface AuthContextType {
+  login: (email: string, password: string) => Promise<{ success: boolean; data?: User; msg?: string }>;
+  logout: () => Promise<void>;
+  signUp: (email: string, password: string) => Promise<{ success: boolean; data?: User; msg?: string }>;
+  user: User & UserData | null;
+  isAuthenticated: boolean | undefined;
+  isLoading: boolean;
+  updateProfile: (userData: Partial<UserData>) => Promise<{ success: boolean; msg?: string }>;
+  resetPassword: (email: string) => Promise<{ success: boolean; msg?: string }>;
+  showToast: (message: string, containerStyles?: any, textStyles?: any) => void;
+  addToUnread: (roomId: string) => void;
+  removeFromUnread: (roomId: string) => void;
+  unreadChats: string[];
+  setDeviceToken: React.Dispatch<React.SetStateAction<string>>;
+  imageModalVisibility: boolean;
+  setImageModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthContextProvider');
+  }
+  return context;
+};
 
 // Constants for storage keys
 const STORAGE_KEYS = {
@@ -23,38 +58,41 @@ const STORAGE_KEYS = {
   AUTH_STATE: "auth_state",
 };
 
-export const AuthContextProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-  const [unreadChats, setUnreadChats] = useState([]);
-  const [deviceToken, setDeviceToken] = useState("");
-  const [imageModalVisibility, setImageModalVisibility] = useState(false);
+interface AuthContextProviderProps {
+  children: React.ReactNode;
+}
+
+export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
+  const [user, setUser] = useState<(User & UserData) | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [unreadChats, setUnreadChats] = useState<string[]>([]);
+  const [deviceToken, setDeviceToken] = useState<string>("");
+  const [imageModalVisibility, setImageModalVisibility] = useState<boolean>(false);
 
   userDetails = user;
+
   const getDeviceToken = async () => {
     const cachedToken = await AsyncStorage.getItem("deviceToken");
-    setDeviceToken(cachedToken);
+    setDeviceToken(cachedToken || "");
   };
 
-  const showToast = (message, containerStyles = null, textStyles = null) => {
+  const showToast = (message: string, containerStyles: any = null, textStyles: any = null) => {
     showToastMessage(message, 3000, true, containerStyles, textStyles);
   };
 
-  const addToUnread = (roomId) => {
+  const addToUnread = (roomId: string) => {
     if (unreadChats.includes(roomId)) {
       return;
     }
     setUnreadChats((prev) => [...prev, roomId]);
-    // console.log("Unread Chats List Updated");
   };
 
-  const removeFromUnread = (roomId) => {
+  const removeFromUnread = (roomId: string) => {
     if (!unreadChats.includes(roomId)) {
       return;
     }
     setUnreadChats((prev) => prev.filter((m) => m !== roomId));
-    // console.log("Unread Chats List Updated")
   };
 
   // Initialize auth state from storage
@@ -92,13 +130,13 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const handleUserAuthenticated = async (firebaseUser) => {
+  const handleUserAuthenticated = async (firebaseUser: User) => {
     try {
       const userData = await updateUserData(firebaseUser.uid);
       const enhancedUser = {
         ...firebaseUser,
         ...userData,
-      };
+      } as User & UserData;
 
       setUser(enhancedUser);
       setIsAuthenticated(true);
@@ -113,11 +151,11 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const resetPassword = async (email) => {
+  const resetPassword = async (email: string) => {
     try {
       await sendPasswordResetEmail(auth, email);
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       let msg = error.message;
       if (msg.includes("(auth/invalid-email)")) msg = "Invalid Email";
       if (msg.includes("(auth/invalid-credential)"))
@@ -141,18 +179,19 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const updateUserData = async (userId) => {
+  const updateUserData = async (userId: string): Promise<UserData | null> => {
     try {
       const docRef = doc(db, "users", userId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        const data = docSnap.data();
+        const data = docSnap.data() as UserData;
         return {
           username: data.username,
           userId: data.userId,
           profileUrl: data.profileUrl,
           deviceToken: data.deviceToken,
+          email: data.email,
         };
       }
       return null;
@@ -161,20 +200,23 @@ export const AuthContextProvider = ({ children }) => {
       // If offline, try to get data from storage
       const cachedUser = storage.getString(STORAGE_KEYS.USER);
       if (cachedUser) {
-        const userData = JSON.parse(cachedUser);
+        const userData = JSON.parse(cachedUser) as User & UserData;
         return {
           username: userData.username,
           userId: userData.userId,
           profileUrl: userData.profileUrl,
           deviceToken: userData.deviceToken,
+          email: userData.email,
         };
       }
       return null;
     }
   };
 
-  const updateProfile = async (userData) => {
+  const updateProfile = async (userData: Partial<UserData>) => {
     try {
+      if (!user) throw new Error("No user logged in");
+      
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
         username: userData.username,
@@ -185,17 +227,17 @@ export const AuthContextProvider = ({ children }) => {
       setUser({ ...user, ...userData });
 
       return { success: true };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
       return { success: false, msg: error.message };
     }
   };
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string) => {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       return { success: true, data: response?.user };
-    } catch (error) {
+    } catch (error: any) {
       let msg = error.message;
       if (msg.includes("(auth/invalid-email)")) msg = "Invalid Email";
       if (msg.includes("(auth/invalid-credential)"))
@@ -216,23 +258,20 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
-  const signUp = async (email, username, password, profileUrl) => {
+  const signUp = async (email: string, password: string) => {
     try {
       const response = await createUserWithEmailAndPassword(
         auth,
         email,
         password,
-        profileUrl
       );
       console.log(`User ${response.user.email} has been created successfully.`);
 
-      // update user data in Firestore
+      // create user data in Firestore
       const docRef = doc(db, "users", response.user.uid);
-      const userData = {
-        username,
+      const userData: UserData = {
         userId: response.user.uid,
         email,
-        profileUrl,
         deviceToken: deviceToken,
       };
 
@@ -248,7 +287,7 @@ export const AuthContextProvider = ({ children }) => {
       );
 
       return { success: true, data: response?.user };
-    } catch (error) {
+    } catch (error: any) {
       let msg = error.message;
       if (msg.includes("(auth/invalid-email)")) msg = "Invalid Email";
       if (msg.includes("(auth/network-request-failed)"))
