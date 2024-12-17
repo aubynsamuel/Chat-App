@@ -5,12 +5,13 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
-import * as ImagePicker from "expo-image-picker";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// import * as ImagePicker from "expo-image-picker";
+// import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
@@ -18,7 +19,7 @@ import { useTheme, useAuth, getStyles, storage, SignUp } from "../../imports";
 
 const SignUpScreen = () => {
   const email = useRef("");
-  const username = useRef("");
+  // const username = useRef("");
   const password = useRef("");
   const { signUp, showToast } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -27,22 +28,23 @@ const SignUpScreen = () => {
   const [color, setColor] = useState(
     selectedTheme === darkTheme ? "white" : "black"
   );
-  const [profileUrl, setProfileUrl] = useState(null);
+  // const [profileUrl, setProfileUrl] = useState();
+
   const styles = getStyles(selectedTheme);
 
-  const selectImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        quality: 1,
-      });
-      const selectedImage = result.assets[0];
-      setProfileUrl(selectedImage.uri);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const selectImage = async () => {
+  //   try {
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ["images"],
+  //       allowsEditing: true,
+  //       quality: 1,
+  //     });
+  //     const selectedImage = result.assets[0].uri;
+  //     setProfileUrl(selectedImage);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   // Email regex to validate the email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,7 +54,7 @@ const SignUpScreen = () => {
 
   const handleSignUpPressed = async () => {
     setIsLoading(true);
-    if (!email.current || !username.current || !password.current) {
+    if (!email.current || !password.current) {
       showToast("Please fill all the required fields.");
       setIsLoading(false);
       return;
@@ -76,36 +78,34 @@ const SignUpScreen = () => {
     }
 
     try {
-      let downloadURL = null;
+      // let downloadURL = null;
 
-      // Upload the profile picture if selected
-      if (profileUrl) {
-        const response = await fetch(profileUrl); // Fetch the local file
-        const blob = await response.blob(); // Convert to Blob for Firebase
+      // // Upload the profile picture if selected
+      // if (profileUrl) {
+      //   const response = await fetch(profileUrl); // Fetch the local file
+      //   const blob = await response.blob(); // Convert to Blob for Firebase
 
-        // Create a reference in Firebase Storage
-        const storageRef = ref(
-          storage,
-          `profilePictures/${username.current}.jpg`
-        );
+      //   // Create a reference in Firebase Storage
+      //   const storageRef = ref(
+      //     storage,
+      //     `profilePictures/${username.current}.jpg`
+      //   );
 
-        // Upload the blob
-        await uploadBytes(storageRef, blob);
+      //   // Upload the blob
+      //   await uploadBytes(storageRef, blob);
 
-        // Get the download URL
-        downloadURL = await getDownloadURL(storageRef);
-      }
+      //   // Get the download URL
+      //   downloadURL = await getDownloadURL(storageRef);
+      // }
 
       // Use the downloadURL in your signUp function
       let response = await signUp(
         email.current,
-        username.current,
         password.current,
-        downloadURL
       );
 
       if (response.success) {
-        router.replace("/home");
+        router.replace("/setUserDetails");
       } else {
         showToast(response.msg || "An unexpected error occurred.");
       }
@@ -151,7 +151,7 @@ const SignUpScreen = () => {
         </View>
 
         {/* Username field */}
-        <View style={styles.suInputField}>
+        {/* <View style={styles.suInputField}>
           <MaterialIcons name="person" color={styles.IconColor} size={25} />
           <TextInput
             placeholder="Username*"
@@ -159,7 +159,7 @@ const SignUpScreen = () => {
             placeholderTextColor={"grey"}
             onChangeText={(value) => (username.current = value)}
           />
-        </View>
+        </View> */}
 
         {/* Password */}
         <View style={styles.suInputField}>
@@ -192,8 +192,8 @@ const SignUpScreen = () => {
 
         {/* Profile Picture */}
 
-        <View style={styles.suInputField}>
-          {/* <MaterialIcons name="image" color="black" size={25} /> */}
+        {/* <MaterialIcons name="image" color="black" size={25} /> */}
+        {/*<View style={styles.suInputField}>
           <TouchableOpacity
             onPress={() => {
               selectImage();
@@ -205,12 +205,20 @@ const SignUpScreen = () => {
               {profileUrl ? "Change profile pic" : "Select a profile picture"}
             </Text>
           </TouchableOpacity>
-        </View>
+        </View>*/}
 
         {/* Uncomment to display image after selection */}
         {/* Display selected image (if any) */}
         {/* {profileUrl && (
-          <Image source={{uri: profileUrl}} style={styles.profileImage} />
+          <Image
+            source={{ uri: profileUrl }}
+            style={{
+              width: 100,
+              height: 100,
+              alignSelf: "center",
+              borderRadius: 100,
+            }}
+          />
         )} */}
 
         <TouchableOpacity

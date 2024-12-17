@@ -14,6 +14,7 @@ const AuthLayout = () => {
     >
       <Stack.Screen name="login" />
       <Stack.Screen name="signUp" />
+      <Stack.Screen name="setUserDetails" />
     </Stack>
   );
 };
