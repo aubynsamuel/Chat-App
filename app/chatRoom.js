@@ -1,12 +1,5 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  Alert,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import { View, Text, Alert, TextInput, TouchableOpacity } from "react-native";
 import {
   GiftedChat,
   InputToolbar,
@@ -640,6 +633,7 @@ const ChatScreen = () => {
           renderActions={() =>
             showActions ? (
               <AccessoryBar
+                recipient={username}
                 onSend={handleSend}
                 openPicker={openPicker}
                 user={user}
