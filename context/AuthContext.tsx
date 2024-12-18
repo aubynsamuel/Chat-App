@@ -40,6 +40,8 @@ interface AuthContextType {
   setDeviceToken: React.Dispatch<React.SetStateAction<string>>;
   imageModalVisibility: boolean;
   setImageModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setProfileUrlLink: React.Dispatch<React.SetStateAction<string>>;
+  profileUrl: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,6 +71,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
   const [unreadChats, setUnreadChats] = useState<string[]>([]);
   const [deviceToken, setDeviceToken] = useState<string>("");
   const [imageModalVisibility, setImageModalVisibility] = useState<boolean>(false);
+  const [profileUrl, setProfileUrlLink] = useState<string>("");
 
   userDetails = user;
 
@@ -316,6 +319,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
         setDeviceToken,
         imageModalVisibility,
         setImageModalVisibility,
+        setProfileUrlLink,
+        profileUrl,
       }}
     >
       {children}

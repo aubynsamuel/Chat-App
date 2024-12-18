@@ -16,6 +16,8 @@
     "components/AccessoryBar.js",
     "components/mediaUtils.tsx",
     "Functions/Storage.js",
-    "app/chatRoom.js"
+    "app/chatRoom.js",
+    "components/InputToolBar.js",
+    "components/RenderMessageImage.tsx"
   ]
 }

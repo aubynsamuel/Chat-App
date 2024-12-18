@@ -75,7 +75,7 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
   };
 
   return (
-    <Animated.View style={styles.container} entering={FadeInLeft.duration(250)}>
+    <Animated.View style={styles.container} entering={FadeInLeft.duration(150)}>
       <Button
         onPress={() => openPicker("images")}
         // onPress={() => pickImageAsync(onSend, user, uploadMediaFile)}

@@ -15,9 +15,15 @@
     "ios": {
       "supportsTablet": true
     },
-    "notification": {"androidMode": "collapse", "androidCollapsedTitle": "New Messages"},
+    "notification": {
+      "androidMode": "collapse",
+      "androidCollapsedTitle": "New Messages"
+    },
     "android": {
-      "config": {"googleMaps": {"apiKey": ""}},
+      "permissions": ["CAMERA", "RECORD_AUDIO"],
+      "config": {
+        "googleMaps": { "apiKey": "" }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -32,7 +38,13 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow expo-av to access your microphone."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

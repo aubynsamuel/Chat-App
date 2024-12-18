@@ -155,6 +155,20 @@ export default getStyles = (theme) => {
       width: 18,
       textAlign: "center",
     },
+    playbackControls: {
+      backgroundColor: "lightgrey",
+      borderRadius: 10,
+      elevation: 2,
+      padding: 6,
+      width: "50%",
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    playbackTime: {
+      fontSize: 14,
+      color: "#333",
+    },
 
     // Edit Profile Screen
     epContainer: {

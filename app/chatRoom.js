@@ -1,8 +1,7 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { View, Text, Alert, TextInput, TouchableOpacity } from "react-native";
 import {
   GiftedChat,
-  InputToolbar,
   Bubble,
   Send,
   MessageText,
@@ -46,13 +45,17 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import AccessoryBar from "../components/AccessoryBar";
 import CustomView from "../components/CustomView";
-import RenderMessageImage from "../components/renderMessageImage";
+import RenderMessageImage from "../components/RenderMessageImage";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import ImageMessageDetails from "../components/ImageMessageDetails";
+import InputToolBar from "../components/RenderInputToolBar";
+import { Audio } from "expo-av";
+import AudioPlayerComponent from "../components/RenderAudioMessage";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
-  const { user, setImageModalVisibility, imageModalVisibility } = useAuth();
+  const { user, setImageModalVisibility, imageModalVisibility, profileUrl } =
+    useAuth();
   const { selectedTheme, chatBackgroundPic } = useTheme();
   const [messages, setMessages] = useState([]);
   const [otherUserToken, setOtherUserToken] = useState("");
@@ -62,12 +65,16 @@ const ChatScreen = () => {
   const [isReplying, setIsReplying] = useState(false);
   const [editMessage, setEditMessage] = useState(null);
   const [editText, setEditText] = useState("");
-  const [profileUrl, setProfileUrl] = useState();
   const [showActions, setShowActionButtons] = useState(true);
   const [imageUrl, setImageUrl] = useState();
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackStatus, setPlaybackStatus] = useState({
+    duration: 0,
+    position: 0,
+  });
+
   useEffect(() => {
-    fetchOtherUsersProfileUrl();
     fetchOtherUserToken();
     const unsubscribe = initializeChat();
     return () => {
@@ -98,6 +105,7 @@ const ChatScreen = () => {
           _id: doc.id,
           text: data.content,
           image: data.type === "image" ? data.image : null,
+          audio: data.type === "audio" ? data.audio : null,
           createdAt: data.createdAt.toDate(),
           user: {
             _id: data.senderId,
@@ -131,10 +139,6 @@ const ChatScreen = () => {
 
     setImageUrl(result.assets[0].uri);
     setImageModalVisibility(true);
-
-    // if (!result.canceled) {
-    //   handleImageMessage(result.assets[0]);
-    // }
   };
 
   const uploadMediaFile = async (media, username) => {
@@ -175,21 +179,6 @@ const ChatScreen = () => {
     }
   };
 
-  const fetchOtherUsersProfileUrl = async () => {
-    try {
-      const userDocRef = doc(db, "users", userId);
-      const userDoc = await getDoc(userDocRef);
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        setProfileUrl(userData.profileUrl);
-      } else {
-        console.log("User document does not exist.");
-      }
-    } catch (error) {
-      console.error("Error fetching profile URL:", error);
-    }
-  };
-
   const fetchOtherUserToken = async () => {
     try {
       const userRef = doc(db, "users", userId);
@@ -217,6 +206,7 @@ const ChatScreen = () => {
         delivered: true,
         type: newMessage.type || (newMessage.image ? "image" : "text"),
         image: newMessage.image || null,
+        audio: newMessage.audio || null,
         location: newMessage.location
           ? {
               latitude: newMessage.location.latitude,
@@ -423,6 +413,22 @@ const ChatScreen = () => {
     return <CustomView {...props} />;
   }, []);
 
+  const renderMessageAudio = (props) => {
+    const { currentMessage } = props;
+
+    // Only render if it's an audio message
+    if (currentMessage.type === "audio" && currentMessage.audio) {
+      return (
+        <AudioPlayerComponent
+          currentMessage={currentMessage}
+          selectedTheme={selectedTheme}
+        />
+      );
+    }
+
+    return null;
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <ChatRoomBackground source={chatBackgroundPic} />
@@ -525,106 +531,18 @@ const ChatScreen = () => {
             );
           }}
           renderInputToolbar={(props) => (
-            <View>
-              {/* Reply to message UI */}
-              {isReplying && (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    width: "100%",
-                    justifyContent: "space-between",
-                    backgroundColor: selectedTheme.primary,
-                    alignItems: "center",
-                    paddingHorizontal: 15,
-                    paddingTop: 5,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      gap: 10,
-                    }}
-                  >
-                    <TouchableOpacity style={{ alignSelf: "center" }}>
-                      <MaterialIcons name="reply" size={28} color="black" />
-                    </TouchableOpacity>
-                    <Text
-                      style={{
-                        fontSize: 35,
-                        alignSelf: "flex-start",
-                        bottom: 5,
-                      }}
-                    >
-                      |
-                    </Text>
-                    <View style={{ height: 50, gap: 3 }}>
-                      <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                        Replying To Name
-                      </Text>
-                      <Text>Replying Message</Text>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity
-                    style={{ alignSelf: "center" }}
-                    onPress={() => setIsReplying(false)}
-                  >
-                    <MaterialIcons
-                      name="close"
-                      size={24}
-                      color="black"
-                      style={{
-                        marginRight: 5,
-                      }}
-                    />
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Input toolbar and microphone */}
-              <View
-                style={{
-                  backgroundColor: isReplying ? selectedTheme.primary : null,
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 5,
-                }}
-              >
-                <InputToolbar
-                  {...props}
-                  containerStyle={{
-                    width:
-                      isEditing || isReplying || !showActions ? "96%" : "85%",
-                    alignSelf: "flex-start",
-                    borderRadius: 30,
-                    marginBottom: 8,
-                    marginTop: 0,
-                  }}
-                />
-                {!isEditing && !isReplying && showActions && (
-                  <Animated.View
-                    entering={FadeInRight.duration(250)}
-                    style={{ alignSelf: "flex-end" }}
-                  >
-                    <MaterialIcons
-                      name="mic"
-                      size={30}
-                      color="black"
-                      style={{
-                        backgroundColor: "white",
-                        borderRadius: 40,
-                        padding: 5,
-                        alignSelf: "flex-end",
-                        marginRight: 5,
-                        bottom: 10,
-                      }}
-                    />
-                  </Animated.View>
-                )}
-              </View>
-            </View>
+            <InputToolBar
+              isReplying={isReplying}
+              setIsReplying={setIsReplying}
+              selectedTheme={selectedTheme}
+              showActions={showActions}
+              isEditing={isEditing}
+              props={props}
+              handleSend={handleSend}
+              user={user}
+            />
           )}
+          renderMessageAudio={renderMessageAudio}
           timeTextStyle={{
             left: { color: selectedTheme.message.other.time },
             right: { color: selectedTheme.message.user.time },
@@ -641,7 +559,7 @@ const ChatScreen = () => {
               />
             ) : !isEditing ? (
               <Animated.View
-                entering={FadeInRight.duration(250)}
+                entering={FadeInRight.duration(100)}
                 style={{ alignSelf: "center" }}
               >
                 <MaterialIcons

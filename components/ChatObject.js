@@ -11,7 +11,7 @@ import {
 } from "../imports";
 
 const ChatObject = memo(({ room, theme }) => {
-  const { user, addToUnread, removeFromUnread } = useAuth();
+  const { user, addToUnread, removeFromUnread, setProfileUrlLink } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
@@ -43,6 +43,7 @@ const ChatObject = memo(({ room, theme }) => {
   }, [unreadCount]);
 
   const handlePress = () => {
+    setProfileUrlLink(room.otherParticipant.profileUrl);
     // console.log("Navigating with profileUrl:", room.otherParticipant.profileUrl);
     router.push({
       pathname: "/chatRoom",
