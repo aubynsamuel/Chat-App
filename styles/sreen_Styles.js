@@ -126,10 +126,9 @@ export default getStyles = (theme) => {
       // borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: theme.border, // Add a subtle border (optional)
       width: "93%",
-      borderRadius:10,
+      borderRadius: 10,
       // bottom:2,
       // flex:1
-
     },
     editInput: {
       // marginRight: 10,

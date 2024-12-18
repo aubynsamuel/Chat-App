@@ -65,7 +65,9 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = ({
             resizeMode="contain"
           />
           {currentMessage.text && (
-            <Text style={{ color: "white" }}>{currentMessage.text}</Text>
+            <Text style={{ color: "white", fontSize: 18 }}>
+              {currentMessage.text}
+            </Text>
           )}
         </View>
       </Modal>

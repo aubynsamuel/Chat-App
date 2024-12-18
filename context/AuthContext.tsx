@@ -7,7 +7,14 @@ import {
   sendPasswordResetEmail,
   Auth,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc, DocumentReference, Firestore } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  DocumentReference,
+  Firestore,
+} from "firebase/firestore";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "au-react-native-toast";
 import { auth, db } from "../env/firebaseConfig";
@@ -25,13 +32,21 @@ interface UserData {
 }
 
 interface AuthContextType {
-  login: (email: string, password: string) => Promise<{ success: boolean; data?: User; msg?: string }>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; data?: User; msg?: string }>;
   logout: () => Promise<void>;
-  signUp: (email: string, password: string) => Promise<{ success: boolean; data?: User; msg?: string }>;
-  user: User & UserData | null;
+  signUp: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; data?: User; msg?: string }>;
+  user: (User & UserData) | null;
   isAuthenticated: boolean | undefined;
   isLoading: boolean;
-  updateProfile: (userData: Partial<UserData>) => Promise<{ success: boolean; msg?: string }>;
+  updateProfile: (
+    userData: Partial<UserData>
+  ) => Promise<{ success: boolean; msg?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; msg?: string }>;
   showToast: (message: string, containerStyles?: any, textStyles?: any) => void;
   addToUnread: (roomId: string) => void;
@@ -42,6 +57,8 @@ interface AuthContextType {
   setImageModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   setProfileUrlLink: React.Dispatch<React.SetStateAction<string>>;
   profileUrl: string;
+  loadingIndicator: boolean;
+  setLoadingIndicator: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -49,7 +66,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthContextProvider');
+    throw new Error("useAuth must be used within an AuthContextProvider");
   }
   return context;
 };
@@ -64,14 +81,20 @@ interface AuthContextProviderProps {
   children: React.ReactNode;
 }
 
-export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ children }) => {
+export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
+  children,
+}) => {
   const [user, setUser] = useState<(User & UserData) | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(
+    undefined
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [unreadChats, setUnreadChats] = useState<string[]>([]);
   const [deviceToken, setDeviceToken] = useState<string>("");
-  const [imageModalVisibility, setImageModalVisibility] = useState<boolean>(false);
+  const [imageModalVisibility, setImageModalVisibility] =
+    useState<boolean>(false);
   const [profileUrl, setProfileUrlLink] = useState<string>("");
+  const [loadingIndicator, setLoadingIndicator] = useState<boolean>(false);
 
   userDetails = user;
 
@@ -80,7 +103,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
     setDeviceToken(cachedToken || "");
   };
 
-  const showToast = (message: string, containerStyles: any = null, textStyles: any = null) => {
+  const showToast = (
+    message: string,
+    containerStyles: any = null,
+    textStyles: any = null
+  ) => {
     showToastMessage(message, 3000, true, containerStyles, textStyles);
   };
 
@@ -219,7 +246,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
   const updateProfile = async (userData: Partial<UserData>) => {
     try {
       if (!user) throw new Error("No user logged in");
-      
+
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
         username: userData.username,
@@ -266,7 +293,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
       const response = await createUserWithEmailAndPassword(
         auth,
         email,
-        password,
+        password
       );
       console.log(`User ${response.user.email} has been created successfully.`);
 
@@ -321,6 +348,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({ childr
         setImageModalVisibility,
         setProfileUrlLink,
         profileUrl,
+        loadingIndicator,
+        setLoadingIndicator,
       }}
     >
       {children}

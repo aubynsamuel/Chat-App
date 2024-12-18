@@ -49,13 +49,17 @@ import RenderMessageImage from "../components/RenderMessageImage";
 import Animated, { FadeInRight } from "react-native-reanimated";
 import ImageMessageDetails from "../components/ImageMessageDetails";
 import InputToolBar from "../components/RenderInputToolBar";
-import { Audio } from "expo-av";
 import AudioPlayerComponent from "../components/RenderAudioMessage";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
-  const { user, setImageModalVisibility, imageModalVisibility, profileUrl } =
-    useAuth();
+  const {
+    user,
+    setImageModalVisibility,
+    imageModalVisibility,
+    profileUrl,
+    setLoadingIndicator,
+  } = useAuth();
   const { selectedTheme, chatBackgroundPic } = useTheme();
   const [messages, setMessages] = useState([]);
   const [otherUserToken, setOtherUserToken] = useState("");
@@ -67,12 +71,7 @@ const ChatScreen = () => {
   const [editText, setEditText] = useState("");
   const [showActions, setShowActionButtons] = useState(true);
   const [imageUrl, setImageUrl] = useState();
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playbackStatus, setPlaybackStatus] = useState({
-    duration: 0,
-    position: 0,
-  });
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchOtherUserToken();
@@ -204,7 +203,7 @@ const ChatScreen = () => {
         replyTo: newMessage.replyTo || null,
         read: false,
         delivered: true,
-        type: newMessage.type || (newMessage.image ? "image" : "text"),
+        type: newMessage.type || "text",
         image: newMessage.image || null,
         audio: newMessage.audio || null,
         location: newMessage.location
@@ -231,7 +230,7 @@ const ChatScreen = () => {
         await setDoc(
           roomRef,
           {
-            lastMessage: newMessage.text || "📷",
+            lastMessage: messageBody(newMessage),
             lastMessageTimestamp: getCurrentTime(),
             lastMessageSenderId: user.userId,
           },
@@ -242,8 +241,8 @@ const ChatScreen = () => {
         if (otherUserToken) {
           sendNotification(
             otherUserToken,
-            `New message from ${user.username}`,
-            newMessage.text || (newMessage.image ? "Sent an image" : ""),
+            `${user.username}`,
+            messageBody(newMessage),
             roomId
           );
         }
@@ -253,6 +252,18 @@ const ChatScreen = () => {
     },
     [roomId, user, otherUserToken]
   );
+
+  const messageBody = (newMessage) => {
+    if (newMessage.type === "image") {
+      return "📷 Sent an image";
+    } else if (newMessage.type === "audio") {
+      return "🔉 Sent an audio";
+    } else if (newMessage.type === "location") {
+      return "🌍 Shared a location";
+    } else {
+      return newMessage.text;
+    }
+  };
 
   const handleDelete = async (message) => {
     Alert.alert(
@@ -556,6 +567,7 @@ const ChatScreen = () => {
                 openPicker={openPicker}
                 user={user}
                 uploadMediaFile={uploadMediaFile}
+                setLoadingIndicator={setLoadingIndicator}
               />
             ) : !isEditing ? (
               <Animated.View
@@ -582,12 +594,36 @@ const ChatScreen = () => {
           )}
           scrollToBottom={true}
           scrollToBottomComponent={() => (
-            <MaterialIcons
-              style={styles.crScrollToEndButton}
-              name="double-arrow"
-              color={"#000"}
-              size={30}
-            />
+            <View>
+              {unreadCount > 0 ? (
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    color: "red",
+                    bottom: 13,
+                    textAlign: "center",
+                    zIndex: 2,
+                    backgroundColor: selectedTheme.primary,
+                    borderRadius: 50,
+                    marginTop: 10,
+                    width: 40,
+                    height: 25,
+                  }}
+                >
+                  {unreadCount}
+                </Text>
+              ) : null}
+              <MaterialIcons
+                style={[
+                  styles.crScrollToEndButton,
+                  { bottom: unreadCount > 0 ? 10 : null },
+                ]}
+                name="double-arrow"
+                color={"#000"}
+                size={30}
+              />
+            </View>
           )}
           renderMessageImage={(props) => (
             <RenderMessageImage

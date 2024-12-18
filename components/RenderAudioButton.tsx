@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
-import { storage } from "@/imports";
+import { storage } from "../imports";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 // Define types for user and message

@@ -30,21 +30,39 @@ interface MediaFile {
 }
 
 type OnSendFunction = (messages: Message[]) => void;
-type UploadMediaFileFunction = (media: MediaFile, username: string) => Promise<string | null>;
+type UploadMediaFileFunction = (
+  media: MediaFile,
+  username: string
+) => Promise<string | null>;
 
 export async function getLocationAsync(
-  onSend: OnSendFunction, 
-  user: User
+  onSend: OnSendFunction,
+  user: User,
+  setLoadingIndicator: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<void> {
+  setLoadingIndicator(true);
   const response = await Location.requestForegroundPermissionsAsync();
-  if (!response.granted) return;
+  if (!response.granted) {
+    Alert.alert(
+      "Permission denied",
+      "Location permission denied, You have to enable location to send location messages"
+    );
+    setLoadingIndicator(false);
+    return;
+  }
 
   const location = await Location.getCurrentPositionAsync({});
-  if (!location) return;
+  if (!location) {
+    Alert.alert("Error", "Location is not available");
+    setLoadingIndicator(false);
+    return;
+  }
 
   const locationMessage: Message = {
     _id: Math.random().toString(36).substring(7),
-    text: `Lat:${location.coords.latitude.toFixed(4)}\nLong:${location.coords.longitude.toFixed(4)}`,
+    text: `Lat:${location.coords.latitude.toFixed(
+      4
+    )}\nLong:${location.coords.longitude.toFixed(4)}`,
     createdAt: new Date(),
     user: {
       _id: user.userId,
@@ -58,12 +76,13 @@ export async function getLocationAsync(
     received: true,
   };
 
+  setLoadingIndicator(false);
   onSend([locationMessage]);
 }
 
 export async function pickImageAsync(
-  onSend: OnSendFunction, 
-  user: User, 
+  onSend: OnSendFunction,
+  user: User,
   uploadMediaFile: UploadMediaFileFunction
 ): Promise<void> {
   const response = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -109,8 +128,8 @@ export async function pickImageAsync(
 }
 
 export async function takePictureAsync(
-  onSend: OnSendFunction, 
-  user: User, 
+  onSend: OnSendFunction,
+  user: User,
   uploadMediaFile: UploadMediaFileFunction
 ): Promise<void> {
   const response = await ImagePicker.requestCameraPermissionsAsync();

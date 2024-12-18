@@ -8,9 +8,9 @@ import {
   Image,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "../../imports";
-import TopHeaderBar from "../../components/HeaderBar_HomeScreen";
-
+import { useTheme } from "../imports";
+import TopHeaderBar from "./HeaderBar_HomeScreen";
+// TODO: Implement and add to app/main
 const CallsScreen = () => {
   const { selectedTheme } = useTheme();
 

@@ -126,7 +126,6 @@ function HomeScreen() {
           selectedTheme === darkTheme ? selectedTheme.background : null,
       }}
     >
-      {/* <Button title="Message Actions" onPress={()=>schedulePushNotification("Hey", "What up", "ReplyTo", "RoomId")}></Button> */}
       <StatusBar
         style={`${
           selectedTheme === purpleTheme

@@ -7,9 +7,11 @@ import {
   StyleSheet,
   TextInput,
   Text,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useAuth } from "../imports";
+import { useAuth, useTheme } from "../imports";
 import { StatusBar } from "expo-status-bar";
 
 // Define types for the message and upload file
@@ -45,13 +47,20 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
 }) => {
   const [caption, setCaption] = useState<string>("");
   const { user, imageModalVisibility, setImageModalVisibility } = useAuth();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const sendImageMessage = async () => {
+    setIsLoading(true);
     try {
       console.log("Sending image message", image);
 
       // Validate image and user
       if (!image || !user) {
+        Alert.alert(
+          "Error sending image",
+          "An error occurred when sending message, Please try again"
+        );
+        setIsLoading(false);
         return;
       }
 
@@ -61,10 +70,13 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
       );
 
       if (!downloadURL) {
+        setIsLoading(false);
+        Alert.alert(
+          "Error sending image",
+          "An error occurred when sending message, Please try again"
+        );
         return;
       }
-
-      console.log("File Uploaded", downloadURL);
 
       const newMessage: Message = {
         _id: Math.random().toString(36).substring(7),
@@ -81,6 +93,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
 
       // Send message and close modal
       handleSend([newMessage]);
+      setIsLoading(false);
       setImageModalVisibility(false);
     } catch (error) {
       console.error("Error sending image message:", error);
@@ -104,12 +117,20 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
         >
           <MaterialIcons name="close" size={30} color="white" />
         </TouchableOpacity>
-
-        <Image
-          source={{ uri: image }}
-          style={styles.fullScreenImage}
-          resizeMode="contain"
-        />
+        <>
+          {isLoading && (
+            <ActivityIndicator
+              size={"large"}
+              color={"white"}
+              style={styles.loadingSpinnerContainer}
+            />
+          )}
+          <Image
+            source={{ uri: image }}
+            style={styles.fullScreenImage}
+            resizeMode="contain"
+          />
+        </>
 
         <View style={styles.captionAndSend}>
           <View style={styles.captionContainer}>
@@ -180,6 +201,10 @@ const styles = StyleSheet.create({
     padding: 10,
     justifyContent: "center",
     alignItems: "center",
+  },
+  loadingSpinnerContainer: {
+    position: "absolute",
+    zIndex: 10,
   },
 });
 

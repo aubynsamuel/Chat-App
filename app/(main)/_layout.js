@@ -118,7 +118,7 @@ const TabLayout = () => {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="calls"
         options={{
           title: "Calls",
@@ -126,7 +126,7 @@ const TabLayout = () => {
             <TabIcon focused={focused} name={"call"} />
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="(profileStack)"
         options={{

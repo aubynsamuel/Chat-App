@@ -19,5 +19,5 @@
     "app/chatRoom.js",
     "components/InputToolBar.js",
     "components/RenderMessageImage.tsx"
-  ]
+, "components/ChatList.js"  ]
 }

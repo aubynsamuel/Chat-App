@@ -1,6 +1,12 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React from "react";
-import { StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from "react-native";
 import Animated, { FadeInLeft } from "react-native-reanimated";
 
 import {
@@ -9,6 +15,8 @@ import {
   takePictureAsync,
 } from "./mediaUtils";
 import { Alert } from "react-native";
+import { Text } from "react-native";
+import { useAuth } from "../imports";
 
 // Define interfaces for type safety
 interface User {
@@ -52,6 +60,7 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
   openPicker,
   recipient,
 }) => {
+  const { setLoadingIndicator } = useAuth();
   const confirmAndShareLocation = (
     onSend: (messages: any[]) => void,
     user: User,
@@ -67,7 +76,7 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
         },
         {
           text: "Continue",
-          onPress: () => getLocationAsync(onSend, user),
+          onPress: () => getLocationAsync(onSend, user, setLoadingIndicator),
         },
       ],
       { cancelable: true }
