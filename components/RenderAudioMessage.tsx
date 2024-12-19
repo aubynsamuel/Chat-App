@@ -1,15 +1,18 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { View, Text, Alert, StyleSheet } from "react-native";
-import { Audio } from "expo-av";
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Audio, ResizeMode } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Image } from "react-native";
+import { Theme } from "../context/ThemeContext";
 
-// Audio Player Component for Messages
-const AudioPlayerComponent = ({ 
-  currentMessage, 
-  selectedTheme 
-}: { 
-  currentMessage: any, 
-  selectedTheme: any 
+const AudioPlayerComponent = ({
+  currentAudio,
+  selectedTheme,
+  profileUrl,
+}: {
+  currentAudio: any;
+  selectedTheme: Theme;
+  profileUrl: string;
 }) => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -17,20 +20,18 @@ const AudioPlayerComponent = ({
     duration: 0,
     position: 0,
   });
+  const [isFinished, setIsFinished] = useState(false);
 
-  const playbackTimer = useRef<NodeJS.Timeout | null>(null);
-
+  // Remove the playbackTimer as we'll rely solely on the native status updates
   useEffect(() => {
     return () => {
       // Cleanup sound when component unmounts
       if (sound) {
+        console.log("Cleaning up audio resources...");
         sound.unloadAsync();
       }
-      if (playbackTimer.current) {
-        clearInterval(playbackTimer.current);
-      }
     };
-  }, [sound]);
+  }, []);
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -41,113 +42,99 @@ const AudioPlayerComponent = ({
 
   const playAudio = async () => {
     try {
-      // If no audio URL, return
-      if (!currentMessage.audio) {
-        Alert.alert("No Audio", "Audio message is not available");
+      console.log("PlayAudio called. Current state:", { isPlaying, isFinished });
+
+      if (!currentAudio) {
+        console.warn("No audio URL provided");
         return;
       }
 
-      // If already playing, pause
       if (isPlaying && sound) {
+        console.log("Pausing audio...");
         await sound.pauseAsync();
         setIsPlaying(false);
-        if (playbackTimer.current) {
-          clearInterval(playbackTimer.current);
-        }
         return;
       }
 
-      // If sound exists, resume
-      if (sound) {
+      if (!isFinished && sound) {
+        console.log("Resuming audio...");
         await sound.playAsync();
         setIsPlaying(true);
-        startPlaybackTimer();
         return;
       }
 
-      // Create and play new sound
+      console.log("Creating new sound instance...");
       const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: currentMessage.audio },
-        { shouldPlay: true }
-      );
-
-      newSound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          if (status.didJustFinish) {
-            setIsPlaying(false);
-            setPlaybackStatus({ 
-              duration: status.durationMillis || 0, 
-              position: 0 
-            });
-            if (playbackTimer.current) {
-              clearInterval(playbackTimer.current);
-            }
-          }
-        }
-      });
-
-      setSound(newSound);
-      setIsPlaying(true);
-      startPlaybackTimer();
-    } catch (error) {
-      console.error("Error playing audio:", error);
-      Alert.alert("Playback Error", "Could not play the audio message");
-    }
-  };
-
-  const startPlaybackTimer = () => {
-    if (playbackTimer.current) {
-      clearInterval(playbackTimer.current);
-    }
-
-    playbackTimer.current = setInterval(async () => {
-      if (sound) {
-        try {
-          const status = await sound.getStatusAsync();
+        { uri: currentAudio },
+        { shouldPlay: true },
+        // Add progress update callback directly in the creation options
+        (status) => {
           if (status.isLoaded) {
+            // Update position and duration
             setPlaybackStatus({
               duration: status.durationMillis || 0,
               position: status.positionMillis || 0,
             });
+
+            if (status.didJustFinish) {
+              console.log("Audio playback finished");
+              setIsPlaying(false);
+              setIsFinished(true);
+              setPlaybackStatus({
+                duration: status.durationMillis || 0,
+                position: 0,  // Set to 0 duration when finished
+              });
+            }
           }
-        } catch (error) {
-          console.error("Error updating playback status:", error);
         }
-      }
-    }, 500);
+      );
+
+      setSound(newSound);
+      setIsPlaying(true);
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
   };
 
   return (
     <View style={styles.audioContainer}>
-      <MaterialIcons
-        name={isPlaying ? "pause" : "play-arrow"}
-        size={24}
-        onPress={playAudio}
-        color={selectedTheme.text.primary}
-      />
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <Image
+          source={{ uri: profileUrl }}
+          resizeMode="cover"
+          style={{ height: 40, width: 40, borderRadius: 100 }}
+        />
+        <MaterialIcons
+          name={isPlaying ? "pause" : "play-arrow"}
+          size={35}
+          onPress={playAudio}
+          color={selectedTheme.text.primary}
+        />
+      </View>
       <View style={styles.audioTextContainer}>
-        <Text style={[styles.audioTimeText, { color: selectedTheme.text.primary }]}>
-          {formatTime(playbackStatus.position)} / {formatTime(playbackStatus.duration)}
+        <Text
+          style={[styles.audioTimeText, { color: selectedTheme.text.primary }]}
+        >
+          {formatTime(playbackStatus.position)} /{" "}
+          {formatTime(playbackStatus.duration)}
         </Text>
       </View>
     </View>
   );
 };
 
-// Styles for Audio Player
 const styles = StyleSheet.create({
   audioContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    justifyContent: 'space-between',
-    width: 110
-},
-audioTextContainer: {
-    marginLeft: 10,
-    
-},
-audioTimeText: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+    gap: 15,
+  },
+  audioTextContainer: {
+    marginHorizontal: 5,
+  },
+  audioTimeText: {
     fontSize: 12,
   },
 });

@@ -431,8 +431,9 @@ const ChatScreen = () => {
     if (currentMessage.type === "audio" && currentMessage.audio) {
       return (
         <AudioPlayerComponent
-          currentMessage={currentMessage}
+          currentAudio={currentMessage.audio}
           selectedTheme={selectedTheme}
+          profileUrl={profileUrl}
         />
       );
     }

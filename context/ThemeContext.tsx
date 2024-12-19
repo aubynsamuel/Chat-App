@@ -12,7 +12,7 @@ import purpleTheme from "../Themes/Purple";
 import storage from "../Functions/Storage";
 
 // Define a type for the theme structure
-interface Theme {
+export interface Theme {
   primary: string;
   secondary: string;
   background: string;

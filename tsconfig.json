@@ -18,6 +18,8 @@
     "Functions/Storage.js",
     "app/chatRoom.js",
     "components/InputToolBar.js",
-    "components/RenderMessageImage.tsx"
-, "components/ChatList.js"  ]
+    "components/RenderMessageImage.tsx",
+    "components/ChatList.js",
+    "components/RenderAudioMessage.tsx"
+  ]
 }
