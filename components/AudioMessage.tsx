@@ -1,18 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { Audio, ResizeMode } from "expo-av";
+import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "react-native";
 import { Theme } from "../context/ThemeContext";
 
-const AudioPlayerComponent = ({
+const AudioPlayerComponent = memo(({
   currentAudio,
   selectedTheme,
   profileUrl,
+  playBackDuration,
 }: {
   currentAudio: any;
   selectedTheme: Theme;
   profileUrl: string;
+  playBackDuration: string;
 }) => {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -42,7 +44,10 @@ const AudioPlayerComponent = ({
 
   const playAudio = async () => {
     try {
-      console.log("PlayAudio called. Current state:", { isPlaying, isFinished });
+      console.log("PlayAudio called. Current state:", {
+        isPlaying,
+        isFinished,
+      });
 
       if (!currentAudio) {
         console.warn("No audio URL provided");
@@ -82,7 +87,7 @@ const AudioPlayerComponent = ({
               setIsFinished(true);
               setPlaybackStatus({
                 duration: status.durationMillis || 0,
-                position: 0,  // Set to 0 duration when finished
+                position: 0, // Set to 0 duration when finished
               });
             }
           }
@@ -116,12 +121,14 @@ const AudioPlayerComponent = ({
           style={[styles.audioTimeText, { color: selectedTheme.text.primary }]}
         >
           {formatTime(playbackStatus.position)} /{" "}
-          {formatTime(playbackStatus.duration)}
+          {playBackDuration === undefined || null
+            ? formatTime(playbackStatus.duration)
+            : playBackDuration}
         </Text>
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   audioContainer: {

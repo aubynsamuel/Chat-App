@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { memo, useCallback } from "react";
 import * as Linking from "expo-linking";
 import {
   Platform,
@@ -24,7 +24,7 @@ interface CustomViewProps {
   mapViewStyle?: ViewStyle;
 }
 
-const CustomView: React.FC<CustomViewProps> = ({
+const CustomView: React.FC<CustomViewProps> = memo(({
   currentMessage,
   containerStyle,
   mapViewStyle,
@@ -83,7 +83,7 @@ const CustomView: React.FC<CustomViewProps> = ({
   }
 
   return null;
-};
+});
 
 export default CustomView;
 

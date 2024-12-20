@@ -1,24 +1,19 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import React from "react";
+import React, { memo } from "react";
 import {
-  ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   View,
-  ViewStyle,
 } from "react-native";
-import Animated, { FadeInLeft } from "react-native-reanimated";
-
 import {
   getLocationAsync,
-  pickImageAsync,
-  takePictureAsync,
-} from "./mediaUtils";
+} from "../Functions/MediaUtils";
 import { Alert } from "react-native";
-import { Text } from "react-native";
 import { useAuth } from "../imports";
 
+
 // Define interfaces for type safety
+
 interface User {
   userId: string;
   username: string;
@@ -31,18 +26,20 @@ interface ButtonProps {
   name: string;
 }
 
-interface AccessoryBarProps {
+interface ActionButtonsProps {
   onSend: (messages: any[]) => void;
   uploadMediaFile: (
-    media: { uri: string },
+    media: {
+      uri: string | URL | Request;
+    },
     username: string
-  ) => Promise<string | null>;
+  ) => Promise<string | null | undefined>;
   user: User;
-  openPicker: (type: string) => void;
-  recipient: string;
+  openPicker: (SelectType: any) => Promise<void>;
+  recipient: string | null;
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Button: React.FC<ButtonProps> = memo(({
   onPress,
   size = 27,
   color = "rgba(0,0,0,0.9)",
@@ -51,9 +48,9 @@ const Button: React.FC<ButtonProps> = ({
   <TouchableOpacity onPress={onPress}>
     <MaterialIcons size={size} color={color} name={name as any} />
   </TouchableOpacity>
-);
+));
 
-const AccessoryBar: React.FC<AccessoryBarProps> = ({
+const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   onSend,
   uploadMediaFile,
   user,
@@ -61,10 +58,11 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
   recipient,
 }) => {
   const { setLoadingIndicator } = useAuth();
+
   const confirmAndShareLocation = (
     onSend: (messages: any[]) => void,
     user: User,
-    name: string
+    name: string | null
   ) => {
     Alert.alert(
       "Share Location",
@@ -84,9 +82,10 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
   };
 
   return (
-    <Animated.View style={styles.container} entering={FadeInLeft.duration(150)}>
+    <View style={styles.container}>
       <Button
-        onPress={() => openPicker("images")}
+        onPress={() => {
+          openPicker("images")}}
         // onPress={() => pickImageAsync(onSend, user, uploadMediaFile)}
         name="image"
       />
@@ -98,9 +97,9 @@ const AccessoryBar: React.FC<AccessoryBarProps> = ({
         onPress={() => confirmAndShareLocation(onSend, user, recipient)} // Pass the recipient's name
         name="add-location-alt"
       />
-    </Animated.View>
+    </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -116,4 +115,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AccessoryBar;
+export default ActionButtons;

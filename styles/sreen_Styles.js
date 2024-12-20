@@ -121,11 +121,12 @@ export default getStyles = (theme) => {
     editContainer: {
       flexDirection: "row",
       alignItems: "center",
-      paddingRight: 10,
+      paddingRight: 5,
+      paddingLeft: 5,
       // backgroundColor: theme.background, // Match the background color of the chat
       // borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: theme.border, // Add a subtle border (optional)
-      width: "93%",
+      width: "100%",
       borderRadius: 10,
       // bottom:2,
       // flex:1

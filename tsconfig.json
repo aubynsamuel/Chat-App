@@ -14,12 +14,13 @@
     "expo-env.d.ts",
     "components/CustomView.tsx",
     "components/AccessoryBar.js",
-    "components/mediaUtils.tsx",
+    "Functions/MediaUtils.tsx",
     "Functions/Storage.js",
-    "app/chatRoom.js",
+    "app/chatRoom.tsx",
     "components/InputToolBar.js",
-    "components/RenderMessageImage.tsx",
+    "components/ImageMessage.tsx",
     "components/ChatList.js",
-    "components/RenderAudioMessage.tsx"
+    "components/AudioMessage.tsx",
+    "components/ChatRoomBackground.tsx "
   ]
 }

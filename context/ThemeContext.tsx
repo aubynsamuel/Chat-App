@@ -48,7 +48,7 @@ export interface Theme {
 }
 
 // Define the shape of the context value
-interface ThemeContextType {
+export interface ThemeContextType {
   selectedTheme: Theme;
   changeTheme: (themeIndex: number) => void;
   chatBackgroundPic: string | undefined;

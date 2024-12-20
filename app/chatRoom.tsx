@@ -1,5 +1,13 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
-import { View, Text, Alert, TextInput, TouchableOpacity } from "react-native";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  View,
+  Text,
+  Alert,
+  TextInput,
+  TouchableOpacity,
+  ViewStyle,
+  Keyboard,
+} from "react-native";
 import {
   GiftedChat,
   Bubble,
@@ -21,7 +29,7 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-import { StatusBar } from "expo-status-bar";
+import { StatusBar, StatusBarStyle } from "expo-status-bar";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { useLocalSearchParams } from "expo-router";
@@ -43,36 +51,50 @@ import ChatRoomBackground from "../components/ChatRoomBackground";
 import { sendNotification } from "../services/NotificationActions";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
-import AccessoryBar from "../components/AccessoryBar";
+import ActionButtons from "../components/ActionButtons";
 import CustomView from "../components/CustomView";
-import RenderMessageImage from "../components/RenderMessageImage";
-import Animated, { FadeInRight } from "react-native-reanimated";
-import ImageMessageDetails from "../components/ImageMessageDetails";
-import InputToolBar from "../components/RenderInputToolBar";
-import AudioPlayerComponent from "../components/RenderAudioMessage";
+import RenderMessageImage from "../components/ImageMessage";
+import ImageMessageDetails, {
+  MediaFile,
+} from "../components/ImageMessageDetails";
+import InputToolBar from "../components/InputToolBar";
+import AudioPlayerComponent from "../components/AudioMessage";
+import { AuthContextType } from "../context/AuthContext";
+import { FirebaseMessage } from "../Functions/types";
+import { TextStyle } from "react-native";
+import { ThemeContextType } from "../context/ThemeContext";
+import purpleTheme from "../Themes/Purple";
+import { IMessage } from "../Functions/types";
+import LoadingIndicator from "../components/LoadingIndicator";
+import LottieView from "lottie-react-native";
+import Animated, { BounceIn, BounceOut } from "react-native-reanimated";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
-  const {
-    user,
-    setImageModalVisibility,
-    imageModalVisibility,
-    profileUrl,
-    setLoadingIndicator,
-  } = useAuth();
-  const { selectedTheme, chatBackgroundPic } = useTheme();
-  const [messages, setMessages] = useState([]);
-  const [otherUserToken, setOtherUserToken] = useState("");
-  const roomId = getRoomId(user?.userId, userId);
+  const { user, setImageModalVisibility, imageModalVisibility, profileUrl } =
+    useAuth() as AuthContextType;
+  const { selectedTheme, chatBackgroundPic }: ThemeContextType = useTheme();
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [otherUserToken, setOtherUserToken] = useState<string>("");
+  const roomId: any = getRoomId(user?.userId, userId);
   const styles = getStyles(selectedTheme);
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
-  const [editMessage, setEditMessage] = useState(null);
+  const [editMessage, setEditMessage] = useState<IMessage | null | undefined>();
   const [editText, setEditText] = useState("");
   const [showActions, setShowActionButtons] = useState(true);
-  const [imageUrl, setImageUrl] = useState();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [imageUrl, setImageUrl] =
+    useState<React.SetStateAction<string | null>>("");
+  const [unreadCount, setUnreadCount] = useState(5);
+  const [loadingIndicator, setLoadingIndicator] = useState(false);
+  const [playbackTime, setPlaybackTime] = useState(0);
 
+  // useEffect(() => {
+  //   const unreadMessages = messages.filter(
+  //     (msg) => msg.read === false && msg.user._id !== user?.userId
+  //   );
+  //   setUnreadCount(unreadMessages.length);
+  // }, [messages]);
   useEffect(() => {
     fetchOtherUserToken();
     const unsubscribe = initializeChat();
@@ -83,7 +105,7 @@ const ChatScreen = () => {
 
   useEffect(() => {
     markMessagesAsRead();
-  }, [roomId, user.userId, messages]);
+  }, [roomId, user?.userId, messages]);
 
   const initializeChat = async () => {
     const roomRef = doc(db, "rooms", roomId);
@@ -116,11 +138,12 @@ const ChatScreen = () => {
           delivered: data.delivered || false,
           location: data.location
             ? {
-                latitude: data.location.latitude,
-                longitude: data.location.longitude,
+                latitude: data.location?.latitude,
+                longitude: data.location?.longitude,
               }
             : null,
-        };
+          duration: data.type === "audio" ? data.duration : null,
+        } as IMessage;
       });
       setMessages(fetchedMessages);
       cacheMessages(roomId, fetchedMessages);
@@ -129,18 +152,24 @@ const ChatScreen = () => {
     return unsubscribe;
   };
 
-  const openPicker = async (SelectType) => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: [SelectType],
-      allowsEditing: true,
-      quality: 1,
-    });
+  const openPicker = async (SelectType: any) => {
+    const result: ImagePicker.ImagePickerResult =
+      await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: [SelectType],
+        allowsEditing: true,
+        quality: 1,
+      });
 
-    setImageUrl(result.assets[0].uri);
-    setImageModalVisibility(true);
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      setImageUrl(result.assets[0].uri);
+      setImageModalVisibility(true);
+    }
   };
 
-  const uploadMediaFile = async (media, username) => {
+  const uploadMediaFile = async (
+    media: { uri: string | URL | Request },
+    username: string
+  ) => {
     let downloadURL;
     try {
       if (media) {
@@ -162,7 +191,7 @@ const ChatScreen = () => {
     const messagesRef = collection(roomRef, "messages");
     const unreadMessagesQuery = query(
       messagesRef,
-      where("senderId", "!=", user.userId),
+      where("senderId", "!=", user?.userId),
       where("read", "==", false)
     );
 
@@ -180,7 +209,7 @@ const ChatScreen = () => {
 
   const fetchOtherUserToken = async () => {
     try {
-      const userRef = doc(db, "users", userId);
+      const userRef = doc(db, "users", userId as string);
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
         setOtherUserToken(userDoc.data().deviceToken);
@@ -191,14 +220,14 @@ const ChatScreen = () => {
   };
 
   const handleSend = useCallback(
-    async (newMessages = []) => {
-      const newMessage = newMessages[0];
+    async (newMessages: IMessage[] = []) => {
+      const newMessage: IMessage = newMessages[0];
 
       // Prepare message for Firestore
-      const messageData = {
+      const messageData: FirebaseMessage = {
         content: newMessage.text || "",
-        senderId: user.userId,
-        senderName: user.username,
+        senderId: user?.userId,
+        senderName: user?.username,
         createdAt: getCurrentTime(),
         replyTo: newMessage.replyTo || null,
         read: false,
@@ -212,10 +241,11 @@ const ChatScreen = () => {
               longitude: newMessage.location.longitude,
             }
           : null,
+        duration: newMessage.type === "audio" ? durationToString() : null,
       };
 
       // Update local messages state
-      setMessages((prevMessages) =>
+      setMessages((prevMessages: IMessage[]) =>
         GiftedChat.append(prevMessages, newMessages)
       );
 
@@ -227,21 +257,13 @@ const ChatScreen = () => {
         await setDoc(doc(messagesRef), messageData);
 
         // Update room last message
-        await setDoc(
-          roomRef,
-          {
-            lastMessage: messageBody(newMessage),
-            lastMessageTimestamp: getCurrentTime(),
-            lastMessageSenderId: user.userId,
-          },
-          { merge: true }
-        );
+        updateRoomLastMessage(newMessage);
 
         // Send notification if other user token exists
         if (otherUserToken) {
           sendNotification(
             otherUserToken,
-            `${user.username}`,
+            `${user?.username}`,
             messageBody(newMessage),
             roomId
           );
@@ -253,7 +275,23 @@ const ChatScreen = () => {
     [roomId, user, otherUserToken]
   );
 
-  const messageBody = (newMessage) => {
+  const updateRoomLastMessage = async (
+    newMessage: IMessage = messages[messages.length - 1]
+  ) => {
+    const roomRef = doc(db, "rooms", roomId);
+    // Update room last message
+    await setDoc(
+      roomRef,
+      {
+        lastMessage: messageBody(newMessage),
+        lastMessageTimestamp: getCurrentTime(),
+        lastMessageSenderId: user?.userId,
+      },
+      { merge: true }
+    );
+  };
+
+  const messageBody = (newMessage: IMessage) => {
     if (newMessage.type === "image") {
       return "📷 Sent an image";
     } else if (newMessage.type === "audio") {
@@ -265,7 +303,7 @@ const ChatScreen = () => {
     }
   };
 
-  const handleDelete = async (message) => {
+  const handleDelete = async (message: IMessage) => {
     Alert.alert(
       "Delete message",
       "This action cannot be undone, do you want to continue?",
@@ -280,13 +318,18 @@ const ChatScreen = () => {
           onPress: async () => {
             try {
               const roomRef = doc(db, "rooms", roomId);
-              const messageRef = doc(roomRef, "messages", message._id);
+              const messageRef = doc(
+                roomRef,
+                "messages",
+                message._id as string
+              );
 
               await deleteDoc(messageRef);
 
-              setMessages((prevMessages) =>
+              setMessages((prevMessages: IMessage[]) =>
                 prevMessages.filter((msg) => msg._id !== message._id)
               );
+              updateRoomLastMessage();
             } catch (error) {
               console.error("Failed to delete message", error);
             }
@@ -297,12 +340,12 @@ const ChatScreen = () => {
   };
 
   const handleMessagePress = useCallback(
-    (context, currentMessage) => {
+    (context: any, currentMessage: IMessage) => {
       if (!currentMessage.text) return;
 
       const options = [];
 
-      if (currentMessage.user._id === user.userId) {
+      if (currentMessage.user._id === user?.userId) {
         options.push("Copy text");
         options.push("Edit Message");
         options.push("Delete message");
@@ -317,21 +360,21 @@ const ChatScreen = () => {
           options,
           cancelButtonIndex,
         },
-        (buttonIndex) => {
+        (buttonIndex: number) => {
           switch (buttonIndex) {
             case 0:
               Clipboard.setStringAsync(currentMessage.text);
               break;
             case 1:
-              if (currentMessage.user._id === user.userId) {
+              if (currentMessage.user._id === user?.userId) {
                 setIsEditing(true);
                 setEditMessage(currentMessage);
                 setEditText(currentMessage.text);
-                setShowActionButtons(false);
+                // setShowActionButtons(false);
               }
               break;
             case 2:
-              if (currentMessage.user._id === user.userId)
+              if (currentMessage.user._id === user?.userId)
                 handleDelete(currentMessage);
               break;
             default:
@@ -340,7 +383,7 @@ const ChatScreen = () => {
         }
       );
     },
-    [user.userId, handleDelete, isEditing]
+    [user?.userId, handleDelete, isEditing]
   );
 
   const handleEditSave = async () => {
@@ -348,7 +391,7 @@ const ChatScreen = () => {
 
     try {
       const roomRef = doc(db, "rooms", roomId);
-      const messageRef = doc(roomRef, "messages", editMessage._id);
+      const messageRef = doc(roomRef, "messages", editMessage._id as string);
 
       await updateDoc(messageRef, { content: editText });
 
@@ -356,22 +399,23 @@ const ChatScreen = () => {
       setEditMessage(null);
       setIsEditing(false);
 
-      setMessages((prevMessages) =>
+      setMessages((prevMessages: IMessage[]) =>
         prevMessages.map((msg) =>
-          msg._id === editMessage._id ? { ...msg, text: editText } : msg
+          msg._id === editMessage?._id ? { ...msg, text: editText } : msg
         )
       );
+      updateRoomLastMessage();
     } catch (error) {
       console.error("Failed to edit message:", error);
       Alert.alert("Error", "Failed to edit message. Please try again.");
     }
   };
 
-  const renderBubble = (props) => {
+  const renderBubble = (props: any) => {
     const { currentMessage } = props;
 
     let ticks = null;
-    if (currentMessage.user._id === user.userId) {
+    if (currentMessage.user._id === user?.userId) {
       // Only for user's messages
       if (currentMessage.read) {
         ticks = (
@@ -420,11 +464,11 @@ const ChatScreen = () => {
     );
   };
 
-  const renderCustomView = useCallback((props) => {
+  const renderCustomView = useCallback((props: any) => {
     return <CustomView {...props} />;
   }, []);
 
-  const renderMessageAudio = (props) => {
+  const renderMessageAudio = (props: any) => {
     const { currentMessage } = props;
 
     // Only render if it's an audio message
@@ -434,6 +478,7 @@ const ChatScreen = () => {
           currentAudio={currentMessage.audio}
           selectedTheme={selectedTheme}
           profileUrl={profileUrl}
+          playBackDuration={currentMessage.duration}
         />
       );
     }
@@ -441,26 +486,34 @@ const ChatScreen = () => {
     return null;
   };
 
+  const durationToString = () => {
+    return playbackTime % 60 < 10
+      ? `${(playbackTime / 60).toFixed(0)}:0${playbackTime % 60}`
+      : `${(playbackTime / 60).toFixed(0)}:${playbackTime % 60}`;
+  };
+  
   return (
     <View style={{ flex: 1 }}>
       <ChatRoomBackground source={chatBackgroundPic} />
       <StatusBar
-        style={`${
-          selectedTheme === purpleTheme
-            ? "light"
-            : selectedTheme.Statusbar.style
-        }`}
+        style={
+          `${
+            selectedTheme === purpleTheme
+              ? "light"
+              : selectedTheme.Statusbar.style
+          }` as StatusBarStyle | undefined
+        }
         backgroundColor={selectedTheme.primary}
         animated={true}
       />
       <View style={{ position: "absolute", zIndex: 5, width: "100%" }}>
         <TopHeaderBar
           theme={selectedTheme}
-          title={username}
+          title={username as string}
           profileUrl={profileUrl}
         />
       </View>
-      <View style={styles.crContainer}>
+      <View style={styles.crContainer as ViewStyle}>
         <GiftedChat
           onInputTextChanged={(text) => {
             if (text.length > 0) {
@@ -469,17 +522,17 @@ const ChatScreen = () => {
               setShowActionButtons(true);
             }
           }}
-          messagesContainerStyle={styles.crMessages}
+          messagesContainerStyle={styles.crMessages as ViewStyle}
           keyboardShouldPersistTaps="always"
           alwaysShowSend={false}
           renderCustomView={renderCustomView}
           renderComposer={(props) =>
             isEditing ? (
-              <View style={styles.editContainer}>
+              <View style={styles.editContainer as ViewStyle}>
                 <TextInput
                   value={editText}
                   onChangeText={setEditText}
-                  style={styles.editInput}
+                  style={styles.editInput as TextStyle}
                   autoFocus
                   multiline={true}
                   numberOfLines={5}
@@ -487,24 +540,24 @@ const ChatScreen = () => {
                 <TouchableOpacity
                   onPress={() => {
                     setIsEditing(false);
-                    setShowActionButtons(true);
+                    // setShowActionButtons(true);
                     handleEditSave();
                   }}
-                  style={styles.editButton}
+                  style={styles.editButton as ViewStyle}
                 >
-                  <Text style={styles.editButtonText}>✓</Text>
+                  <Text style={styles.editButtonText as TextStyle}>✓</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
                     setIsEditing(false);
-                    setShowActionButtons(true);
+                    // setShowActionButtons(true);
                   }}
-                  style={styles.editButton}
+                  style={styles.editButton as ViewStyle}
                 >
                   <MaterialIcons
                     name="close"
                     size={20}
-                    style={styles.editButtonText}
+                    style={styles.editButtonText as TextStyle}
                   />
                 </TouchableOpacity>
               </View>
@@ -517,20 +570,22 @@ const ChatScreen = () => {
                     isEditing || isReplying || !showActions ? "96%" : "85%",
                   justifyContent: "center",
                   borderRadius: 10,
-                  marginLeft: showActions ? 25 : 5,
+                  marginLeft: 25,
                 }}
               />
             )
           }
-          messages={messages}
-          onSend={(newMessages) => {
+          messages={messages as IMessage[] | undefined}
+          onSend={(newMessages: IMessage[]) => {
             handleSend(newMessages);
-            setShowActionButtons(true);
+            // setShowActionButtons(true);
           }}
-          user={{
-            _id: user.userId,
-            name: user.username,
-          }}
+          user={
+            {
+              _id: user?.userId,
+              name: user?.username,
+            } as any
+          }
           renderMessageText={(props) => {
             return (
               <MessageText
@@ -552,6 +607,8 @@ const ChatScreen = () => {
               props={props}
               handleSend={handleSend}
               user={user}
+              setLoadingIndicator={setLoadingIndicator}
+              setPlaybackTime={setPlaybackTime}
             />
           )}
           renderMessageAudio={renderMessageAudio}
@@ -561,31 +618,14 @@ const ChatScreen = () => {
           }}
           renderBubble={renderBubble}
           renderActions={() =>
-            showActions ? (
-              <AccessoryBar
-                recipient={username}
+            !isEditing ? (
+              <ActionButtons
+                recipient={username as string | null}
                 onSend={handleSend}
                 openPicker={openPicker}
-                user={user}
+                user={user as any}
                 uploadMediaFile={uploadMediaFile}
-                setLoadingIndicator={setLoadingIndicator}
               />
-            ) : !isEditing ? (
-              <Animated.View
-                entering={FadeInRight.duration(100)}
-                style={{ alignSelf: "center" }}
-              >
-                <MaterialIcons
-                  name="arrow-back-ios"
-                  size={25}
-                  color="black"
-                  onPress={() => setShowActionButtons(true)}
-                  style={{
-                    marginLeft: 8,
-                    transform: [{ rotate: "180deg" }],
-                  }}
-                />
-              </Animated.View>
             ) : null
           }
           renderChatEmpty={() => (
@@ -595,7 +635,10 @@ const ChatScreen = () => {
           )}
           scrollToBottom={true}
           scrollToBottomComponent={() => (
-            <View>
+            <Animated.View
+              entering={BounceIn.duration(200)}
+              exiting={BounceOut.duration(200)}
+            >
               {unreadCount > 0 ? (
                 <Text
                   style={{
@@ -617,23 +660,25 @@ const ChatScreen = () => {
               ) : null}
               <MaterialIcons
                 style={[
-                  styles.crScrollToEndButton,
+                  styles.crScrollToEndButton as any,
                   { bottom: unreadCount > 0 ? 10 : null },
                 ]}
                 name="double-arrow"
                 color={"#000"}
                 size={30}
               />
-            </View>
+            </Animated.View>
           )}
           renderMessageImage={(props) => (
             <RenderMessageImage
-              imageStyle={{
-                borderTopLeftRadius:
-                  props.currentMessage.user._id === user.userId ? 13 : 0,
-                borderTopRightRadius:
-                  props.currentMessage.user._id === user.userId ? 0 : 13,
-              }}
+              imageStyle={
+                {
+                  borderTopLeftRadius:
+                    props.currentMessage.user._id === user?.userId ? 13 : 0,
+                  borderTopRightRadius:
+                    props.currentMessage.user._id === user?.userId ? 0 : 13,
+                } as any
+              }
               {...props}
             />
           )}
@@ -663,8 +708,49 @@ const ChatScreen = () => {
         {imageModalVisibility && (
           <ImageMessageDetails
             handleSend={handleSend}
-            image={imageUrl}
-            uploadMediaFile={uploadMediaFile}
+            image={imageUrl as string}
+            uploadMediaFile={
+              uploadMediaFile as (
+                media: MediaFile,
+                username: string
+              ) => Promise<string | null>
+            }
+          />
+        )}
+        {loadingIndicator && (
+          <LoadingIndicator
+            containerStyles={{ bottom: 54, height: null, paddingBottom: 50 }}
+            showIndicator={false}
+            children={
+              <View style={{ alignItems: "center" }}>
+                <LottieView
+                  source={require("../myAssets/Lottie_Files/Recording.json")}
+                  autoPlay
+                  loop={true}
+                  style={{ width: 80, height: 80 }}
+                />
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "semibold",
+                    color: "white",
+                  }}
+                >
+                  Recording...
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "semibold",
+                    color: "white",
+                  }}
+                >
+                  {playbackTime % 60 < 10
+                    ? `${(playbackTime / 60).toFixed(0)}:0${playbackTime % 60}`
+                    : `${(playbackTime / 60).toFixed(0)}:${playbackTime % 60}`}
+                </Text>
+              </View>
+            }
           />
         )}
       </View>

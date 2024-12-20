@@ -5,33 +5,31 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
-  Auth,
 } from "firebase/auth";
 import {
   doc,
   getDoc,
   setDoc,
   updateDoc,
-  DocumentReference,
-  Firestore,
 } from "firebase/firestore";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "au-react-native-toast";
 import { auth, db } from "../env/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export let userDetails: User | null;
+export let userDetails: UserData | null;
 
 // Define interfaces for type safety
-interface UserData {
+export interface UserData {
   userId: string;
   username?: string;
   email: string;
   profileUrl?: string;
   deviceToken?: string;
+  uid?: any;
 }
 
-interface AuthContextType {
+export interface AuthContextType {
   login: (
     email: string,
     password: string
@@ -41,7 +39,7 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ success: boolean; data?: User; msg?: string }>;
-  user: (User & UserData) | null;
+  user: UserData | null;
   isAuthenticated: boolean | undefined;
   isLoading: boolean;
   updateProfile: (
@@ -84,7 +82,7 @@ interface AuthContextProviderProps {
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   children,
 }) => {
-  const [user, setUser] = useState<(User & UserData) | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(
     undefined
   );

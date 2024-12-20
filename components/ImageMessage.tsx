@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import {
   Image,
   View,
@@ -22,7 +22,7 @@ interface RenderMessageImageProps {
   imageStyle?: ImageStyle;
 }
 
-const RenderMessageImage: React.FC<RenderMessageImageProps> = ({
+const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(({
   currentMessage,
   imageStyle,
 }) => {
@@ -73,7 +73,7 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = ({
       </Modal>
     </>
   );
-};
+});
 
 const styles = StyleSheet.create({
   image: {

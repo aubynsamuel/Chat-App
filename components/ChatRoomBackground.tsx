@@ -1,7 +1,7 @@
 import { View, Image, StyleSheet } from "react-native";
 import React, { memo } from "react";
 
-const ChatRoomBackground = memo(({ source }) => {
+const ChatRoomBackground = memo(({ source }: { source: any }) => {
   const defaultSource = "../myAssets/Images/default-chat-background.webp";
   return (
     <View

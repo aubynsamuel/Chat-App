@@ -13,6 +13,7 @@ import { PanGestureHandler } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
+import { Theme } from "../context/ThemeContext";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 const { width: IMAGE_WIDTH } = Dimensions.get("window");
@@ -21,7 +22,12 @@ const MAX_IMAGE_WIDTH = IMAGE_WIDTH;
 const MAX_HEADER_HEIGHT = SCREEN_HEIGHT * 0.6;
 const MIN_HEADER_HEIGHT = 65;
 
-const TopHeaderBar = memo(({ title, profileUrl, theme }) => {
+const TopHeaderBar = memo(({ title, profileUrl, theme }:{
+  title: string;
+  profileUrl: string;
+  theme: Theme;
+ 
+}) => {
   // console.log("profileUrl from TopBar: ",profileUrl)
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
@@ -34,7 +40,7 @@ const TopHeaderBar = memo(({ title, profileUrl, theme }) => {
     onStart: (_, context) => {
       context.startY = gestureProgress.value;
     },
-    onActive: (event, context) => {
+    onActive: (event, context : any) => {
       const progress = context.startY + event.translationY / MAX_HEADER_HEIGHT;
       gestureProgress.value = Math.max(0, Math.min(1, progress));
     },
@@ -134,7 +140,6 @@ const TopHeaderBar = memo(({ title, profileUrl, theme }) => {
               </View>
             </MenuTrigger>
             <MenuOptions
-              style={styles.hcContainer}
               customStyles={{
                 optionsContainer: styles.hcMenuOptionsContainer,
               }}
