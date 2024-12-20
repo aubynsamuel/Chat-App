@@ -120,13 +120,13 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
 
             {/* Image and loading indicator */}
             <>
-              {/* {isLoading && (
+              {isLoading && (
                 <ActivityIndicator
                   size={45}
                   color={"white"}
                   style={styles.activityIndicator}
                 />
-              )} */}
+              )}
 
               <Image
                 source={{ uri: image }}
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   activityIndicator: {
     position: "absolute",
     zIndex: 10,
-    // alignSelf: "center",
+    alignSelf: "center",
   },
 });
 
