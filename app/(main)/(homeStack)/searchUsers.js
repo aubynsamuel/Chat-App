@@ -15,7 +15,7 @@ import { router } from "expo-router";
 import { useTheme, useAuth, db, getStyles } from "../../../imports";
 
 const SearchUsersScreen = () => {
-  const { user } = useAuth();
+  const { user, setProfileUrlLink } = useAuth();
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const inputRef = useRef();
@@ -54,6 +54,7 @@ const SearchUsersScreen = () => {
   }, []);
 
   const handleUserPress = (selectedUser) => {
+    setProfileUrlLink(selectedUser.profileUrl);
     router.navigate({
       pathname: "/chatRoom",
       params: {
