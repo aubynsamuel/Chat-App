@@ -1,4 +1,10 @@
-import { ActivityIndicator, StyleSheet, Text, View, ViewStyle } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+} from "react-native";
 import React from "react";
 
 const LoadingIndicator = ({
@@ -11,7 +17,7 @@ const LoadingIndicator = ({
   children?: React.ReactNode;
   showIndicator: boolean;
   containerStyles?: ViewStyle;
-} ) => {
+}) => {
   return (
     <View style={[styles.loadingSpinnerContainer, containerStyles]}>
       {showIndicator && (
@@ -31,8 +37,8 @@ const LoadingIndicator = ({
         }}
       >
         {title}
-        {children}
       </Text>
+      {children}
     </View>
   );
 };

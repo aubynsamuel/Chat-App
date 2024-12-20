@@ -6,33 +6,22 @@ import {
   Modal,
   StyleSheet,
   TextInput,
-  Text,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useAuth, useTheme } from "../imports";
+import { useAuth } from "../imports";
 import { StatusBar } from "expo-status-bar";
+import { IMessage } from "../Functions/types";
+import LoadingIndicator from "./LoadingIndicator";
 
 // Define types for the message and upload file
-interface MediaFile {
+export interface MediaFile {
   uri: string;
-}
-interface Message {
-  _id: string;
-  text: string;
-  image?: string;
-  createdAt: Date;
-  user: {
-    _id: string;
-    name: string;
-  };
-  type: string;
-  delivered: boolean;
 }
 
 interface ImageMessageDetailsProps {
-  handleSend: (messages: Message[]) => void;
+  handleSend: (messages?: IMessage[]) => Promise<void>;
   image: string;
   uploadMediaFile: (
     media: MediaFile,
@@ -78,7 +67,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
         return;
       }
 
-      const newMessage: Message = {
+      const newMessage: IMessage = {
         _id: Math.random().toString(36).substring(7),
         text: caption || "",
         image: downloadURL,
@@ -101,58 +90,74 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
   };
 
   return (
-    <Modal
-      visible={imageModalVisibility}
-      transparent={true}
-      onRequestClose={() => setImageModalVisibility(false)}
-    >
-      {imageModalVisibility ? (
-        <StatusBar style="dark" backgroundColor="black" />
-      ) : null}
-
-      <View style={styles.modalContainer}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => setImageModalVisibility(false)}
+    <LoadingIndicator
+      showIndicator={false}
+      containerStyles={{
+        top: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.96)",
+        paddingBottom: 0,
+      }}
+      children={
+        <Modal
+          visible={imageModalVisibility}
+          transparent={true}
+          onRequestClose={() => setImageModalVisibility(false)}
         >
-          <MaterialIcons name="close" size={30} color="white" />
-        </TouchableOpacity>
-        <>
-          {isLoading && (
-            <ActivityIndicator
-              size={"large"}
-              color={"white"}
-              style={styles.loadingSpinnerContainer}
-            />
-          )}
-          <Image
-            source={{ uri: image }}
-            style={styles.fullScreenImage}
-            resizeMode="contain"
-          />
-        </>
+          {imageModalVisibility ? (
+            <StatusBar style="light" backgroundColor="black" />
+          ) : null}
 
-        <View style={styles.captionAndSend}>
-          <View style={styles.captionContainer}>
-            <TextInput
-              style={styles.captionInput}
-              placeholder="Write a caption..."
-              placeholderTextColor="white"
-              multiline={true}
-              numberOfLines={5}
-              onChangeText={(text) => setCaption(text)}
-            />
+          {/* View Content */}
+          <View style={{ height: "100%", justifyContent: "center" }}>
+            {/* Close button */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setImageModalVisibility(false)}
+            >
+              <MaterialIcons name="close" size={30} color="white" />
+            </TouchableOpacity>
+
+            {/* Image and loading indicator */}
+            <>
+              {/* {isLoading && (
+                <ActivityIndicator
+                  size={45}
+                  color={"white"}
+                  style={styles.activityIndicator}
+                />
+              )} */}
+
+              <Image
+                source={{ uri: image }}
+                style={styles.image}
+                resizeMode="contain"
+              />
+            </>
+
+            {/* Caption field and send button */}
+            <View style={styles.captionAndSend}>
+              <View style={styles.captionContainer}>
+                <TextInput
+                  style={styles.captionInput}
+                  placeholder="Write a caption..."
+                  placeholderTextColor="white"
+                  multiline={true}
+                  numberOfLines={5}
+                  onChangeText={(text) => setCaption(text)}
+                />
+              </View>
+              <TouchableOpacity
+                style={styles.sendButton}
+                onPress={sendImageMessage}
+              >
+                <MaterialIcons name="send" size={28} color={"white"} />
+              </TouchableOpacity>
+            </View>
           </View>
-          <TouchableOpacity
-            style={styles.sendButton}
-            onPress={sendImageMessage}
-          >
-            <MaterialIcons name="send" size={28} color={"white"} />
-            {/* <Text>Send</Text> */}
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
+        </Modal>
+      }
+    />
   );
 };
 
@@ -163,26 +168,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  fullScreenImage: {
+  image: {
     width: "100%",
-    height: "80%",
+    height: "90%",
   },
   closeButton: {
     position: "absolute",
-    top: 20,
+    top: 10,
     right: 20,
     zIndex: 10,
   },
   captionAndSend: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
     marginBottom: 10,
     gap: 5,
   },
   captionContainer: {
-    width: "90%",
+    width: "88%",
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 10,
@@ -202,9 +205,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  loadingSpinnerContainer: {
+  activityIndicator: {
     position: "absolute",
     zIndex: 10,
+    // alignSelf: "center",
   },
 });
 
