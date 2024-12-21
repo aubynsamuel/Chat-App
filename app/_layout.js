@@ -10,12 +10,13 @@ import {
   useTheme,
   useAuth,
 } from "../imports";
-import LoadingIndicator from "../components/LoadingIndicator";
+import ScreenOverlay from "../components/ScreenOverlay";
 import { LogBox } from "react-native";
+import { ChatProvider } from "../context/ChatContext";
 
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
-  const { loadingIndicator } = useAuth();
+  const { gettingLocationOverlay } = useAuth();
   return (
     <>
       {LogBox.ignoreAllLogs()}
@@ -42,7 +43,7 @@ const RootLayout = () => {
       </Stack>
       <Toast />
       {/* Loading spinner */}
-      {loadingIndicator && <LoadingIndicator title={"Getting your location"} />}
+      {gettingLocationOverlay && <ScreenOverlay title={"Getting your location"} />}
     </>
   );
 };
@@ -54,7 +55,9 @@ const App = () => {
         <AuthContextProvider>
           <ExpoPushNotifications>
             <MenuProvider>
-              <RootLayout />
+              <ChatProvider>
+                <RootLayout />
+              </ChatProvider>
             </MenuProvider>
           </ExpoPushNotifications>
         </AuthContextProvider>

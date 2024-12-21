@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ViewStyle,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import {
   GiftedChat,
@@ -65,15 +66,28 @@ import { TextStyle } from "react-native";
 import { ThemeContextType } from "../context/ThemeContext";
 import purpleTheme from "../Themes/Purple";
 import { IMessage } from "../Functions/types";
-import LoadingIndicator from "../components/LoadingIndicator";
+import ScreenOverlay from "../components/ScreenOverlay";
 import LottieView from "lottie-react-native";
 import Animated, { BounceIn, BounceOut } from "react-native-reanimated";
+import { useChatContext } from "@/context/ChatContext";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
-  const { user, setImageModalVisibility, imageModalVisibility, profileUrl } =
-    useAuth() as AuthContextType;
+  const { user, profileUrl } = useAuth() as AuthContextType;
   const { selectedTheme, chatBackgroundPic }: ThemeContextType = useTheme();
+  const {
+    isRecording,
+    setIsRecording,
+    setAudioRecordingOverlay,
+    setPlaybackTime,
+    audioRecordingOverlay,
+    playbackTime,
+    recordedAudioUri,
+    setRecordedAudioUri,
+    setImageModalVisibility,
+    imageModalVisibility,
+  } = useChatContext();
+
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [otherUserToken, setOtherUserToken] = useState<string>("");
   const roomId: any = getRoomId(user?.userId, userId);
@@ -85,9 +99,14 @@ const ChatScreen = () => {
   const [showActions, setShowActionButtons] = useState(true);
   const [imageUrl, setImageUrl] =
     useState<React.SetStateAction<string | null>>("");
-  const [unreadCount, setUnreadCount] = useState(5);
-  const [loadingIndicator, setLoadingIndicator] = useState(false);
-  const [playbackTime, setPlaybackTime] = useState(0);
+  // const [unreadCount, setUnreadCount] = useState(0);
+  const [sendingAudio, setSendingAudio] = useState<boolean>(false);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
 
   // useEffect(() => {
   //   const unreadMessages = messages.filter(
@@ -95,6 +114,7 @@ const ChatScreen = () => {
   //   );
   //   setUnreadCount(unreadMessages.length);
   // }, [messages]);
+
   useEffect(() => {
     fetchOtherUserToken();
     const unsubscribe = initializeChat();
@@ -241,7 +261,7 @@ const ChatScreen = () => {
               longitude: newMessage.location.longitude,
             }
           : null,
-        duration: newMessage.type === "audio" ? durationToString() : null,
+        duration: newMessage.duration || null,
       };
 
       // Update local messages state
@@ -275,9 +295,7 @@ const ChatScreen = () => {
     [roomId, user, otherUserToken]
   );
 
-  const updateRoomLastMessage = async (
-    newMessage: IMessage = messages[messages.length - 1]
-  ) => {
+  const updateRoomLastMessage = async (newMessage: IMessage) => {
     const roomRef = doc(db, "rooms", roomId);
     // Update room last message
     await setDoc(
@@ -329,7 +347,7 @@ const ChatScreen = () => {
               setMessages((prevMessages: IMessage[]) =>
                 prevMessages.filter((msg) => msg._id !== message._id)
               );
-              updateRoomLastMessage();
+              // updateRoomLastMessage();
             } catch (error) {
               console.error("Failed to delete message", error);
             }
@@ -404,7 +422,7 @@ const ChatScreen = () => {
           msg._id === editMessage?._id ? { ...msg, text: editText } : msg
         )
       );
-      updateRoomLastMessage();
+      // updateRoomLastMessage();
     } catch (error) {
       console.error("Failed to edit message:", error);
       Alert.alert("Error", "Failed to edit message. Please try again.");
@@ -486,12 +504,96 @@ const ChatScreen = () => {
     return null;
   };
 
-  const durationToString = () => {
-    return playbackTime % 60 < 10
-      ? `${(playbackTime / 60).toFixed(0)}:0${playbackTime % 60}`
-      : `${(playbackTime / 60).toFixed(0)}:${playbackTime % 60}`;
+  // const discardRecording = () => {
+  //   Alert.alert(
+  //     "Discard Recording",
+  //     "Are you sure you want to discard this recording?",
+  //     [
+  //       {
+  //         text: "Cancel",
+  //         style: "cancel",
+  //       },
+  //       {
+  //         text: "Discard",
+  //         style: "destructive",
+  //         onPress: resetRecording,
+  //       },
+  //     ]
+  //   );
+  // };
+
+  const uploadAudioFile = async (
+    audio: string | null,
+    username: string | null | undefined
+  ): Promise<string | null> => {
+    let downloadURL: string | null = null;
+    try {
+      if (audio) {
+        const response = await fetch(audio);
+        const blob = await response.blob();
+        const storageRef = ref(
+          storage,
+          `chatAudio/${username}_${Date.now()}.m4a`
+        );
+        await uploadBytes(storageRef, blob);
+        downloadURL = await getDownloadURL(storageRef);
+      }
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+      return null;
+    }
   };
-  
+
+  const resetRecording = () => {
+    setRecordedAudioUri("");
+    setAudioRecordingOverlay(false);
+    setPlaybackTime(0);
+    setIsRecording(false);
+  };
+
+  const sendAudioMessage = async () => {
+    try {
+      if (!recordedAudioUri || !user) {
+        Alert.alert("Error", "No audio file found");
+        return;
+      }
+      setSendingAudio(true);
+      const downloadURL = await uploadAudioFile(
+        recordedAudioUri,
+        user.username
+      );
+
+      if (!downloadURL) {
+        Alert.alert("Error", "Failed to upload audio");
+        setSendingAudio(false);
+        return;
+      }
+
+      console.log("Audio File Uploaded", downloadURL);
+
+      const newMessage: IMessage = {
+        _id: Math.random().toString(36).substring(7),
+        text: "",
+        audio: downloadURL,
+        createdAt: new Date(),
+        user: {
+          _id: user.userId,
+          name: user.username as string,
+        },
+        type: "audio",
+        delivered: true,
+      };
+
+      handleSend([{ ...newMessage, duration: formatTime(playbackTime) }]);
+      setSendingAudio(false);
+      resetRecording();
+    } catch (error) {
+      console.error("Error sending audio message:", error);
+      Alert.alert("Error", "Failed to send audio message");
+    }
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <ChatRoomBackground source={chatBackgroundPic} />
@@ -606,9 +708,6 @@ const ChatScreen = () => {
               isEditing={isEditing}
               props={props}
               handleSend={handleSend}
-              user={user}
-              setLoadingIndicator={setLoadingIndicator}
-              setPlaybackTime={setPlaybackTime}
             />
           )}
           renderMessageAudio={renderMessageAudio}
@@ -635,12 +734,11 @@ const ChatScreen = () => {
           )}
           scrollToBottom={true}
           scrollToBottomComponent={() => (
-            <Animated.View
-              entering={BounceIn.duration(200)}
-              exiting={BounceOut.duration(200)}
-            >
-              {unreadCount > 0 ? (
-                <Text
+            <View>
+              {/* {unreadCount > 0 ? (
+                <Animated.Text
+                  entering={BounceIn.duration(200)}
+                  exiting={BounceOut.duration(200)}
                   style={{
                     fontSize: 18,
                     fontWeight: "bold",
@@ -656,18 +754,18 @@ const ChatScreen = () => {
                   }}
                 >
                   {unreadCount}
-                </Text>
-              ) : null}
+                </Animated.Text>
+              ) : null} */}
               <MaterialIcons
                 style={[
                   styles.crScrollToEndButton as any,
-                  { bottom: unreadCount > 0 ? 10 : null },
+                  // { bottom: unreadCount > 0 ? 10 : null },
                 ]}
                 name="double-arrow"
                 color={"#000"}
                 size={30}
               />
-            </Animated.View>
+            </View>
           )}
           renderMessageImage={(props) => (
             <RenderMessageImage
@@ -717,38 +815,57 @@ const ChatScreen = () => {
             }
           />
         )}
-        {loadingIndicator && (
-          <LoadingIndicator
+        {audioRecordingOverlay && (
+          <ScreenOverlay
             containerStyles={{ bottom: 54, height: null, paddingBottom: 50 }}
             showIndicator={false}
             children={
               <View style={{ alignItems: "center" }}>
+                {/* Recording State and timer */}
                 <LottieView
                   source={require("../myAssets/Lottie_Files/Recording.json")}
                   autoPlay
                   loop={true}
                   style={{ width: 80, height: 80 }}
                 />
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontWeight: "semibold",
-                    color: "white",
-                  }}
-                >
-                  Recording...
+                <Text style={styles.recordingText as TextStyle}>
+                  {isRecording ? "Recording..." : "Recording Complete"}
                 </Text>
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontWeight: "semibold",
-                    color: "white",
-                  }}
-                >
-                  {playbackTime % 60 < 10
-                    ? `${(playbackTime / 60).toFixed(0)}:0${playbackTime % 60}`
-                    : `${(playbackTime / 60).toFixed(0)}:${playbackTime % 60}`}
+                <Text style={styles.timeText as TextStyle}>
+                  {formatTime(playbackTime)}
                 </Text>
+
+                {/* Recording Controls */}
+                {!isRecording && !sendingAudio && (
+                  <View style={styles.controlsContainer as ViewStyle}>
+                    <TouchableOpacity
+                      style={[
+                        styles.controlButton as any,
+                        styles.discardButton as any,
+                      ]}
+                      onPress={resetRecording}
+                    >
+                      <MaterialIcons name="delete" size={24} color="white" />
+                      <Text style={styles.buttonText as TextStyle}>
+                        Discard
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.controlButton as any,
+                        styles.sendButton as any,
+                      ]}
+                      onPress={sendAudioMessage}
+                    >
+                      <MaterialIcons name="send" size={24} color="white" />
+                      <Text style={styles.buttonText as TextStyle}>Send</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+                {!isRecording && sendingAudio && (
+                  <ActivityIndicator size={"large"} color={"white"} />
+                )}
               </View>
             }
           />

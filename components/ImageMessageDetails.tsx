@@ -13,7 +13,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../imports";
 import { StatusBar } from "expo-status-bar";
 import { IMessage } from "../Functions/types";
-import LoadingIndicator from "./LoadingIndicator";
+import ScreenOverlay from "./ScreenOverlay";
+import { useChatContext } from "@/context/ChatContext";
 
 // Define types for the message and upload file
 export interface MediaFile {
@@ -35,7 +36,8 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
   uploadMediaFile,
 }) => {
   const [caption, setCaption] = useState<string>("");
-  const { user, imageModalVisibility, setImageModalVisibility } = useAuth();
+  const { user } = useAuth();
+  const {imageModalVisibility, setImageModalVisibility} = useChatContext();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const sendImageMessage = async () => {
@@ -90,7 +92,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = ({
   };
 
   return (
-    <LoadingIndicator
+    <ScreenOverlay
       showIndicator={false}
       containerStyles={{
         top: 0,

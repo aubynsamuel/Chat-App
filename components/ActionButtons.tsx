@@ -1,16 +1,9 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { memo } from "react";
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import {
-  getLocationAsync,
-} from "../Functions/MediaUtils";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Alert } from "react-native";
 import { useAuth } from "../imports";
-
+import { useChatContext } from "@/context/ChatContext";
 
 // Define interfaces for type safety
 
@@ -39,67 +32,62 @@ interface ActionButtonsProps {
   recipient: string | null;
 }
 
-const Button: React.FC<ButtonProps> = memo(({
-  onPress,
-  size = 27,
-  color = "rgba(0,0,0,0.9)",
-  name,
-}) => (
-  <TouchableOpacity onPress={onPress}>
-    <MaterialIcons size={size} color={color} name={name as any} />
-  </TouchableOpacity>
-));
+const Button: React.FC<ButtonProps> = memo(
+  ({ onPress, size = 27, color = "rgba(0,0,0,0.9)", name }) => (
+    <TouchableOpacity onPress={onPress}>
+      <MaterialIcons size={size} color={color} name={name as any} />
+    </TouchableOpacity>
+  )
+);
 
-const ActionButtons: React.FC<ActionButtonsProps> = memo(({
-  onSend,
-  uploadMediaFile,
-  user,
-  openPicker,
-  recipient,
-}) => {
-  const { setLoadingIndicator } = useAuth();
+const ActionButtons: React.FC<ActionButtonsProps> = memo(
+  ({ onSend, user, openPicker, recipient }) => {
+    const { setGettingLocationOverlay } = useAuth();
+    const { getLocationAsync } = useChatContext();
 
-  const confirmAndShareLocation = (
-    onSend: (messages: any[]) => void,
-    user: User,
-    name: string | null
-  ) => {
-    Alert.alert(
-      "Share Location",
-      `You are about to share your location with ${name}. Do you want to continue?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Continue",
-          onPress: () => getLocationAsync(onSend, user, setLoadingIndicator),
-        },
-      ],
-      { cancelable: true }
-    );
-  };
+    const confirmAndShareLocation = (
+      onSend: (messages: any[]) => void,
+      user: User,
+      name: string | null
+    ) => {
+      Alert.alert(
+        "Share Location",
+        `You are about to share your location with ${name}. Do you want to continue?`,
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Continue",
+            onPress: () => getLocationAsync(onSend, user, setGettingLocationOverlay),
+          },
+        ],
+        { cancelable: true }
+      );
+    };
 
-  return (
-    <View style={styles.container}>
-      <Button
-        onPress={() => {
-          openPicker("images")}}
-        // onPress={() => pickImageAsync(onSend, user, uploadMediaFile)}
-        name="image"
-      />
-      {/* <Button
+    return (
+      <View style={styles.container}>
+        <Button
+          onPress={() => {
+            openPicker("images");
+          }}
+          // onPress={() => pickImageAsync(onSend, user, uploadMediaFile)}
+          name="image"
+        />
+        {/* <Button
         onPress={() => takePictureAsync(onSend, user, uploadMediaFile)}
         name="camera-alt"
       /> */}
-      <Button
-        onPress={() => confirmAndShareLocation(onSend, user, recipient)} // Pass the recipient's name
-        name="add-location-alt"
-      />
-    </View>
-  );
-});
+        <Button
+          onPress={() => confirmAndShareLocation(onSend, user, recipient)} // Pass the recipient's name
+          name="add-location-alt"
+        />
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {

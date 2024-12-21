@@ -117,7 +117,7 @@ export default getStyles = (theme) => {
       color: theme.text.primary,
     },
 
-    // news styles for editing
+    // new styles for editing
     editContainer: {
       flexDirection: "row",
       alignItems: "center",
@@ -168,6 +168,51 @@ export default getStyles = (theme) => {
     playbackTime: {
       fontSize: 14,
       color: "#333",
+    },
+
+    // chatroom audio controls
+    titleText: {
+      zIndex: 1,
+      fontSize: 18,
+      textAlign: "center",
+      color: "white",
+      fontWeight: "600",
+    },
+    recordingText: {
+      fontSize: 20,
+      fontWeight: "600",
+      color: "white",
+      marginBottom: 5,
+    },
+    timeText: {
+      fontSize: 20,
+      fontWeight: "600",
+      color: "white",
+      marginBottom: 20,
+    },
+    controlsContainer: {
+      flexDirection: "row",
+      justifyContent: "center",
+      gap: 20,
+      marginTop: 10,
+    },
+    controlButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 10,
+      borderRadius: 25,
+      gap: 8,
+    },
+    discardButton: {
+      backgroundColor: "#FF5252",
+    },
+    sendButton: {
+      backgroundColor: "#4CAF50",
+    },
+    buttonText: {
+      color: "white",
+      fontSize: 16,
+      fontWeight: "600",
     },
 
     // Edit Profile Screen

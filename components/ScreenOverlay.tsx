@@ -7,17 +7,19 @@ import {
 } from "react-native";
 import React from "react";
 
-const LoadingIndicator = ({
-  title = "",
-  children = null,
-  showIndicator = true,
-  containerStyles,
-}: {
+interface LoadingIndicatorProps {
   title?: string;
   children?: React.ReactNode;
   showIndicator: boolean;
   containerStyles?: ViewStyle;
-}) => {
+}
+
+const ScreenOverlay = ({
+  title = "",
+  children = null,
+  showIndicator = true,
+  containerStyles,
+}: LoadingIndicatorProps) => {
   return (
     <View style={[styles.loadingSpinnerContainer, containerStyles]}>
       {showIndicator && (
@@ -27,23 +29,11 @@ const LoadingIndicator = ({
           style={{ zIndex: 1 }}
         />
       )}
-      <Text
-        style={{
-          zIndex: 1,
-          fontSize: 18,
-          textAlign: "center",
-          color: "white",
-          fontWeight: "semibold",
-        }}
-      >
-        {title}
-      </Text>
+      <Text style={styles.titleText}>{title}</Text>
       {children}
     </View>
   );
 };
-
-export default LoadingIndicator;
 
 const styles = StyleSheet.create({
   loadingSpinnerContainer: {
@@ -58,4 +48,13 @@ const styles = StyleSheet.create({
     height: "100%",
     backgroundColor: "#0005",
   },
+  titleText: {
+    zIndex: 1,
+    fontSize: 18,
+    textAlign: "center",
+    color: "white",
+    fontWeight: "600",
+  },
 });
+
+export default ScreenOverlay;

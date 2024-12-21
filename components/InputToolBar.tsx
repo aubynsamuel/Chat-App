@@ -4,6 +4,7 @@ import { TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { InputToolbar } from "react-native-gifted-chat";
 import RenderAudioButton from "./RecordAudioButton";
+import { IMessage } from "@/Functions/types";
 
 interface InputToolBarProps {
   isReplying: boolean;
@@ -12,10 +13,7 @@ interface InputToolBarProps {
   showActions: boolean;
   isEditing: boolean;
   props: any;
-  handleSend: (messages: any[]) => void;
-  user: any;
-  setLoadingIndicator: (value: boolean) => void;
-  setPlaybackTime: React.Dispatch<React.SetStateAction<number>>;
+  handleSend : (newMessages?: IMessage[]) => Promise<void>
 }
 
 const InputToolBar = memo(
@@ -27,9 +25,6 @@ const InputToolBar = memo(
     isEditing,
     props,
     handleSend,
-    user,
-    setLoadingIndicator,
-    setPlaybackTime,
   }: InputToolBarProps) => {
     return (
       <View>
@@ -110,10 +105,7 @@ const InputToolBar = memo(
           />
           {!isEditing && !isReplying && showActions && (
             <RenderAudioButton
-              user={user}
               handleSend={handleSend}
-              setLoadingIndicator={setLoadingIndicator}
-              setPlaybackTime={setPlaybackTime}
             />
           )}
         </View>

@@ -76,5 +76,5 @@ export interface ChatScreenProps {
   profileUrl: string;
   imageModalVisibility: boolean;
   setImageModalVisibility: (visibility: boolean) => void;
-  setLoadingIndicator: (loading: boolean) => void;
+  setAudioRecordingOverlay: (loading: boolean) => void;
 }

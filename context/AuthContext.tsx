@@ -51,12 +51,10 @@ export interface AuthContextType {
   removeFromUnread: (roomId: string) => void;
   unreadChats: string[];
   setDeviceToken: React.Dispatch<React.SetStateAction<string>>;
-  imageModalVisibility: boolean;
-  setImageModalVisibility: React.Dispatch<React.SetStateAction<boolean>>;
   setProfileUrlLink: React.Dispatch<React.SetStateAction<string>>;
   profileUrl: string;
-  loadingIndicator: boolean;
-  setLoadingIndicator: React.Dispatch<React.SetStateAction<boolean>>;
+  gettingLocationOverlay: boolean;
+  setGettingLocationOverlay: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,10 +87,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [unreadChats, setUnreadChats] = useState<string[]>([]);
   const [deviceToken, setDeviceToken] = useState<string>("");
-  const [imageModalVisibility, setImageModalVisibility] =
-    useState<boolean>(false);
   const [profileUrl, setProfileUrlLink] = useState<string>("");
-  const [loadingIndicator, setLoadingIndicator] = useState<boolean>(false);
+  const [gettingLocationOverlay, setGettingLocationOverlay] = useState<boolean>(false);
 
   userDetails = user;
 
@@ -342,12 +338,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         removeFromUnread,
         unreadChats,
         setDeviceToken,
-        imageModalVisibility,
-        setImageModalVisibility,
         setProfileUrlLink,
         profileUrl,
-        loadingIndicator,
-        setLoadingIndicator,
+        gettingLocationOverlay,
+        setGettingLocationOverlay,
       }}
     >
       {children}
