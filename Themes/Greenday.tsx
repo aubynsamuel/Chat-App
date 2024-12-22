@@ -1,4 +1,4 @@
-export default greenTheme = {
+const greenTheme = {
   primary: "lightgreen",
   secondary: "darkgreen",
   background: "#f3f3f3",
@@ -17,7 +17,7 @@ export default greenTheme = {
   border: "#CCCCCC",
   input: {
     background: "#FFFFFF",
-    border: "#DDDDDD",  
+    border: "#DDDDDD",
   },
   message: {
     user: {
@@ -32,3 +32,5 @@ export default greenTheme = {
     },
   },
 };
+
+export default greenTheme;

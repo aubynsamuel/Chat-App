@@ -1,4 +1,4 @@
-export default purpleTheme = {
+const purpleTheme = {
   primary: "purple",
   secondary: "purple",
   background: "#f3f3f3",
@@ -8,7 +8,7 @@ export default purpleTheme = {
   Statusbar: {
     style: "dark",
     backgroundColor: "#f3f3f3",
-  }, 
+  },
   text: {
     primary: "#FFFFFF",
     secondary: "#666666",
@@ -32,3 +32,5 @@ export default purpleTheme = {
     },
   },
 };
+
+export default purpleTheme;

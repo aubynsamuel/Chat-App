@@ -1,4 +1,4 @@
-export default lightBlueTheme = {
+const lightBlueTheme = {
   primary: "lightblue",
   secondary: "#007993",
   background: "#f3f3f3",
@@ -29,6 +29,8 @@ export default lightBlueTheme = {
       background: "lightblue",
       text: "#000000",
       time: "#000000",
-    },  
+    },
   },
 };
+
+export default lightBlueTheme;

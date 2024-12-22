@@ -22,5 +22,5 @@
     "components/ChatList.js",
     "components/AudioMessage.tsx",
     "components/ChatRoomBackground.tsx "
-  ]
+, "Themes/DarkMode.js"  ]
 }

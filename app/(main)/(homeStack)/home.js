@@ -17,6 +17,9 @@ import { router } from "expo-router";
 import { useTheme, useAuth, db, usersRef, getStyles } from "../../../imports";
 import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
 import ChatList from "../../../components/ChatList";
+import darkTheme from "../../../Themes/DarkMode";
+import purpleTheme from "../../../Themes/Purple";
+
 
 function HomeScreen() {
   const { user } = useAuth();
