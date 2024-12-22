@@ -14,16 +14,34 @@ import NotificationTokenManager from "../../../Functions/NotificationTokenManage
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { useTheme, useAuth, db, usersRef, getStyles } from "../../../imports";
+import {
+  useTheme,
+  useAuth,
+  db,
+  usersRef,
+  getStyles,
+  darkTheme,
+  purpleTheme,
+} from "../../../imports";
 import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
 import ChatList from "../../../components/ChatList";
-import darkTheme from "../../../Themes/DarkMode";
-import purpleTheme from "../../../Themes/Purple";
 
+export interface RoomData {
+  roomId: any;
+  lastMessage?: string;
+  lastMessageTimestamp?: number;
+  lastMessageSenderId?: string;
+  otherParticipant: {
+    userId: string;
+    username: string;
+    profileUrl: string;
+    otherUsersDeviceToken: string;
+  };
+}
 
 function HomeScreen() {
   const { user } = useAuth();
-  const [rooms, setRooms] = useState([]);
+  const [rooms, setRooms] = useState<RoomData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
@@ -58,7 +76,7 @@ function HomeScreen() {
 
   const loadCachedRooms = async () => {
     try {
-      const cachedData = await AsyncStorage.getItem(`rooms_${user.uid}`);
+      const cachedData = await AsyncStorage.getItem(`rooms_${user?.uid}`);
       if (cachedData) {
         return JSON.parse(cachedData);
       }
@@ -73,16 +91,18 @@ function HomeScreen() {
     const roomsRef = collection(db, "rooms");
     const roomsQuery = query(
       roomsRef,
-      where("participants", "array-contains", user.uid),
+      where("participants", "array-contains", user?.uid),
       orderBy("lastMessageTimestamp", "desc")
     );
 
     return onSnapshot(roomsQuery, async (snapshot) => {
-      const roomsData = [];
+      const roomsData: RoomData[] = [];
 
       for (const roomDoc of snapshot.docs) {
         const roomData = roomDoc.data();
-        const otherUserId = roomData.participants.find((id) => id !== user.uid);
+        const otherUserId = roomData.participants.find(
+          (id: any) => id !== user?.uid
+        );
 
         if (otherUserId) {
           const userDocRef = doc(usersRef, otherUserId);
@@ -108,7 +128,7 @@ function HomeScreen() {
       if (roomsData.length > 0) {
         setRooms(roomsData);
         await AsyncStorage.setItem(
-          `rooms_${user.uid}`,
+          `rooms_${user?.uid}`,
           JSON.stringify(roomsData)
         );
       }
@@ -117,18 +137,22 @@ function HomeScreen() {
 
   return (
     <View
-      style={{
-        flex: 1,
-        backgroundColor:
-          selectedTheme === darkTheme ? selectedTheme.background : null,
-      }}
+      style={
+        {
+          flex: 1,
+          backgroundColor:
+            selectedTheme === darkTheme ? selectedTheme.background : null,
+        } as any
+      }
     >
       <StatusBar
-        style={`${
-          selectedTheme === purpleTheme
-            ? "light"
-            : selectedTheme.Statusbar.style
-        }`}
+        style={
+          `${
+            selectedTheme === purpleTheme
+              ? "light"
+              : selectedTheme.Statusbar.style
+          }` as any
+        }
         backgroundColor={selectedTheme.primary}
         animated={true}
       />

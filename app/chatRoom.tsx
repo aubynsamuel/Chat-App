@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, memo } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,6 @@ import {
   onSnapshot,
   doc,
   setDoc,
-  getDoc,
   where,
   getDocs,
   writeBatch,
@@ -69,7 +68,7 @@ import AudioRecordingOverlay from "@/components/AudioRecordingOverlay";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
-  const { userId, username } = useLocalSearchParams();
+  const { userId, username, otherUserToken } = useLocalSearchParams();
   const { user, profileUrl, setGettingLocationOverlay } =
     useAuth() as AuthContextType;
   const { selectedTheme, chatBackgroundPic }: ThemeContextType = useTheme();
@@ -87,7 +86,6 @@ const ChatScreen = () => {
   } = useChatContext();
 
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [otherUserToken, setOtherUserToken] = useState<string>("");
   const roomId: any = getRoomId(user?.userId, userId);
   const styles = getStyles(selectedTheme);
   const [isEditing, setIsEditing] = useState(false);
@@ -106,7 +104,6 @@ const ChatScreen = () => {
   }, []);
 
   useEffect(() => {
-    fetchOtherUserToken();
     const unsubscribe = initializeChat();
     return () => {
       if (unsubscribe) unsubscribe;
@@ -122,56 +119,59 @@ const ChatScreen = () => {
     const messagesRef = collection(roomRef, "messages");
     const q = query(messagesRef, orderBy("createdAt", "desc"));
 
-    const cachedMessages = await fetchCachedMessages(roomId);
-    if (cachedMessages && cachedMessages.length > 0) {
-      setMessages(cachedMessages);
-    }
+    try {
+      const cachedMessages = await fetchCachedMessages(roomId);
+      if (cachedMessages && cachedMessages.length > 0) {
+        setMessages(cachedMessages);
+      }
 
-    await createRoomIfItDoesNotExist(roomId, user, userId);
+      await createRoomIfItDoesNotExist(roomId, user, userId);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      // snapshot.docChanges().forEach((change) => {
-      //   if (change.type === "added") {
-      //     const message = change.doc.data();
-      //     if (
-      //       message.senderId !== user?.userId &&
-      //       change.doc.data().createdAt?.toDate() > new Date(Date.now() - 1000)
-      //     ) {
-      //       Vibration.vibrate([0, 60, 60, 40]);
-      //     }
-      //   }
-      // });
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        // snapshot.docChanges().forEach((change) => {
+        //   if (change.type === "added") {
+        //     const message = change.doc.data();
+        //     if (
+        //       message.senderId !== user?.userId &&
+        //       change.doc.data().createdAt?.toDate() > new Date(Date.now() - 1000)
+        //     ) {
+        //       Vibration.vibrate([0, 60, 60, 40]);
+        //     }
+        //   }
+        // });
 
-      const fetchedMessages = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          _id: doc.id,
-          text: data.content,
-          image: data.type === "image" ? data.image : null,
-          audio: data.type === "audio" ? data.audio : null,
-          createdAt: data.createdAt.toDate(),
-          user: {
-            _id: data.senderId,
-            name: data.senderName,
-          },
-          replyTo: data.replyTo,
-          read: data.read || false,
-          type: data.type || "text",
-          delivered: data.delivered || false,
-          location: data.location
-            ? {
-                latitude: data.location?.latitude,
-                longitude: data.location?.longitude,
-              }
-            : null,
-          duration: data.type === "audio" ? data.duration : null,
-        } as IMessage;
+        const fetchedMessages = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            _id: doc.id,
+            text: data.content,
+            image: data.type === "image" ? data.image : null,
+            audio: data.type === "audio" ? data.audio : null,
+            createdAt: data.createdAt.toDate(),
+            user: {
+              _id: data.senderId,
+              name: data.senderName,
+            },
+            replyTo: data.replyTo,
+            read: data.read || false,
+            type: data.type || "text",
+            delivered: data.delivered || false,
+            location: data.location
+              ? {
+                  latitude: data.location?.latitude,
+                  longitude: data.location?.longitude,
+                }
+              : null,
+            duration: data.type === "audio" ? data.duration : null,
+          } as IMessage;
+        });
+        setMessages(fetchedMessages);
+        cacheMessages(roomId, fetchedMessages);
+        return unsubscribe;
       });
-      setMessages(fetchedMessages);
-      cacheMessages(roomId, fetchedMessages);
-    });
-
-    return unsubscribe;
+    } catch (error) {
+      console.error("Error initializing chat:", error);
+    }
   };
 
   const openPicker = async (SelectType: any) => {
@@ -226,18 +226,6 @@ const ChatScreen = () => {
 
     if (!snapshot.empty) {
       await batch.commit();
-    }
-  };
-
-  const fetchOtherUserToken = async () => {
-    try {
-      const userRef = doc(db, "users", userId as string);
-      const userDoc = await getDoc(userRef);
-      if (userDoc.exists()) {
-        setOtherUserToken(userDoc.data().deviceToken);
-      }
-    } catch (error) {
-      console.error("Error fetching other user's token:", error);
     }
   };
 

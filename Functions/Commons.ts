@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 
-export const getRoomId = (userId1, userId2) => {
+export const getRoomId = (userId1 : string | undefined, userId2 : string | string[]) => {
   const sortedIds = [userId1, userId2].sort();
   const roomId = sortedIds.join("_");
   return roomId;
@@ -11,7 +11,7 @@ export const getCurrentTime = () => {
   return now;
 };
 
-export const formatTime = (seconds) => {
+export const formatTime = (seconds : number) => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
@@ -74,7 +74,7 @@ export const formatTime = (seconds) => {
 //   return formattedDate;
 // };
 
-export const formatTimeWithoutSeconds = (firestoreTimestamp) => {
+export const formatTimeWithoutSeconds = (firestoreTimestamp : any) => {
   // Extract seconds from Firestore Timestamp
   const seconds = firestoreTimestamp.seconds;
 

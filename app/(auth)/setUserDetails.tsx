@@ -22,8 +22,10 @@ import { useTheme, getStyles, useAuth } from "../../imports";
 
 const EditProfileScreen = () => {
   const { user, updateProfile, showToast } = useAuth();
-  const [username, setUsername] = useState(user.username || "");
-  const [profileUrl, setProfileUrl] = useState(user.profileUrl || null);
+  const [username, setUsername] = useState(user?.username || "");
+  const [profileUrl, setProfileUrl] = useState(
+    user?.profileUrl || null || undefined
+  );
   const [isLoading, setIsLoading] = useState(false);
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
@@ -35,8 +37,8 @@ const EditProfileScreen = () => {
         allowsEditing: true,
         quality: 1,
       });
-      const selectedImage = result.assets[0];
-      setProfileUrl(selectedImage.uri);
+      const selectedImage = result.assets?.[0];
+      setProfileUrl(selectedImage?.uri);
     } catch (error) {
       console.error(error);
     }
@@ -57,7 +59,7 @@ const EditProfileScreen = () => {
       // If profileUrl is a local URI (starts with file://), upload it to Firebase Storage
       if (profileUrl && profileUrl.startsWith("file://")) {
         const storage = getStorage();
-        const storageRef = ref(storage, `profilePictures/${user.uid}`);
+        const storageRef = ref(storage, `profilePictures/${user?.uid}`);
 
         const response = await fetch(profileUrl);
         const blob = await response.blob();
@@ -91,7 +93,7 @@ const EditProfileScreen = () => {
               showToast("Profile updated successfully!");
               router.replace("/home");
             } else {
-              showToast(response.msg);
+              showToast(response.msg as string);
             }
             setIsLoading(false);
           }
@@ -102,7 +104,7 @@ const EditProfileScreen = () => {
           showToast("Profile updated successfully!");
           router.replace("/home");
         } else {
-          showToast(response.msg);
+          showToast(response.msg as string);
         }
         setIsLoading(false);
       }
@@ -114,32 +116,45 @@ const EditProfileScreen = () => {
   };
 
   return (
-    <ScrollView style={[styles.epContainer]}>
-      <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: "bold",
-          color: selectedTheme.secondary,
-          textAlign: "center",
-          marginBottom: 10,
-        }}
-      >
-        Let Others Recognize You Easily
-      </Text>
-      <Text
-        style={{
-          fontSize: 13.5,
-          textAlign: "center",
-          marginBottom: 40,
-          fontWeight: "bold",
-          color: selectedTheme.text.primary,
-          textTransform: "uppercase",
-        }}
-      >
-        Set Your Username and Profile Picture
-      </Text>
-      <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
+    <ScrollView
+      style={styles.epContainer}
+      contentContainerStyle={{
+        justifyContent: "center",
+        alignContent: "center",
+        flex: 1,
+        paddingBottom: 40,
+      }}
+    >
+      <StatusBar
+        style={`${selectedTheme.Statusbar.style}` as any}
+        animated={true}
+      />
+      <View style={{marginBottom:60}}>
+        <Text
+          style={{
+            fontSize: 23,
+            fontWeight: "bold",
+            color: selectedTheme.secondary,
+            textAlign: "center",
+            marginBottom: 10,
+          }}
+        >
+          Let Others Recognize You Easily
+        </Text>
+        <Text
+          style={{
+            fontSize: 13.5,
+            textAlign: "center",
+            marginBottom: 10,
+            fontWeight: "bold",
+            color: selectedTheme.text.primary,
+            textTransform: "uppercase",
+          }}
+        >
+          Set Your Username and Profile Picture
+        </Text>
+      </View>
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
         {/* Profile Picture */}
         {profileUrl ? (
           <Image source={{ uri: profileUrl }} style={styles.epProfileImage} />
@@ -155,7 +170,7 @@ const EditProfileScreen = () => {
 
         {/* Username */}
         <View style={styles.epInputField}>
-          <MaterialIcons name="person" color={styles.IconColor} size={25} />
+          <MaterialIcons name="person" size={25} />
           <TextInput
             placeholder="Username*"
             style={styles.epInputText}

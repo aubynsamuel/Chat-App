@@ -4,8 +4,11 @@ import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import { router } from "expo-router";
 import getStyles from "../styles/Component_Styles";
 import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
-
-const ChatObject = memo(({ room, theme }) => {
+import { RoomData } from "@/app/(main)/(homeStack)/home";
+import { Theme } from "@/context/ThemeContext";
+const ChatObject = memo(({ room, theme } :{
+  room: RoomData,
+  theme: Theme}) => {
   const { user, addToUnread, removeFromUnread, setProfileUrlLink } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
@@ -46,7 +49,7 @@ const ChatObject = memo(({ room, theme }) => {
         userId: room.otherParticipant.userId,
         username: room.otherParticipant.username,
         profileUrl: room.otherParticipant.profileUrl,
-        deviceToken: room.otherParticipant.deviceToken,
+        otherUserToken: room.otherParticipant.otherUsersDeviceToken,
       },
     });
   };
@@ -65,13 +68,11 @@ const ChatObject = memo(({ room, theme }) => {
               <Image
                 style={{ width: 50, height: 50, borderRadius: 30 }}
                 source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
-                transition={500}
               />
             ) : (
               <Image
                 style={{ width: 50, height: 50, borderRadius: 30 }}
                 source={{ uri: room?.otherParticipant.profileUrl }}
-                transition={500}
                 onError={() => {
                   setImageFailed(true);
                 }}

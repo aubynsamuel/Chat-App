@@ -10,14 +10,16 @@ import {
 import ChatObject from "./ChatObject";
 import getStyles from "../styles/Component_Styles";
 import { useAuth } from "../imports";
+import { Theme } from "@/context/ThemeContext";
 
-const ChatList = memo(({ rooms, isLoading, onRefresh, theme }) => {
+const ChatList = memo(({ rooms, isLoading, onRefresh, theme }: 
+  { rooms: any[]; isLoading: boolean; onRefresh: () => void; theme: Theme; }
+) => {
   const styles = getStyles(theme);
   const { unreadChats } = useAuth();
   const [roomData, setRooms] = useState(rooms);
   const [filter, setFilter] = useState("all"); // Track active filter
-  const [emptyListMessage, setEmptyListMessage] =
-    useState("No chats available");
+  const [emptyListMessage, setEmptyListMessage] =useState<string | null>("No chats available");
 
   useEffect(() => {
     // Update the displayed list based on the filter
@@ -65,6 +67,7 @@ const ChatList = memo(({ rooms, isLoading, onRefresh, theme }) => {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setFilter("unread")}>
             <Text
+              onPress={() => setFilter("unread")}
               style={[
                 headerStyles.text,
                 { backgroundColor: filter === "unread" ? "#000" : "#0007" },
@@ -77,7 +80,7 @@ const ChatList = memo(({ rooms, isLoading, onRefresh, theme }) => {
       )}
       snapToOffsets={multiplesOf35}
       decelerationRate="fast"
-      contentOffset={{ y: 35 }}
+      contentOffset={{ y: 35, x: 0 }}
       renderItem={({ item }) => <ChatObject room={item} theme={theme} />}
       keyExtractor={(item, index) => item.roomId || index.toString()}
       ItemSeparatorComponent={() => <View style={{ height: 15 }} />}

@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Image,
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
@@ -13,7 +12,7 @@ import LottieView from "lottie-react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { useTheme, useAuth, getStyles, storage, SignUp } from "../../imports";
+import { useTheme, useAuth, getStyles, SignUp, darkTheme } from "../../imports";
 
 const SignUpScreen = () => {
   const email = useRef("");
@@ -85,9 +84,9 @@ const SignUpScreen = () => {
         paddingTop: 24,
         backgroundColor:
           selectedTheme === darkTheme ? selectedTheme.background : null,
-      }}
+      } as any}
     >
-      <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
+      <StatusBar style={`${selectedTheme.Statusbar.style}` as any} animated={true} />
 
       <LottieView
         source={SignUp}
@@ -102,7 +101,7 @@ const SignUpScreen = () => {
       <View style={styles.suForm}>
         {/* Email field */}
         <View style={styles.suInputField}>
-          <MaterialIcons name="email" color={styles.IconColor} size={25} />
+          <MaterialIcons name="email" size={25} />
           <TextInput
             placeholder="Email*"
             style={styles.suInputText}
@@ -113,7 +112,7 @@ const SignUpScreen = () => {
 
         {/* Password */}
         <View style={styles.suInputField}>
-          <MaterialIcons name="lock" color={styles.IconColor} size={25} />
+          <MaterialIcons name="lock" size={25} />
           <View
             style={{
               flexDirection: "row",
@@ -132,7 +131,7 @@ const SignUpScreen = () => {
             <TouchableOpacity
               onPress={() => {
                 setPasswordReveal((prev) => !prev);
-                setColor(passwordReveal ? "grey" : styles.IconColor);
+                setColor(passwordReveal ? "grey" : "black");
               }}
             >
               <MaterialIcons name="remove-red-eye" color={color} size={25} />

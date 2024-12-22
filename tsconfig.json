@@ -14,13 +14,13 @@
     "expo-env.d.ts",
     "components/CustomView.tsx",
     "components/AccessoryBar.js",
-    "Functions/MediaUtils.tsx",
-    "Functions/Storage.js",
+    "Functions/MediaUtils.ts",
+    "Functions/Storage.ts",
     "app/chatRoom.tsx",
     "components/InputToolBar.js",
     "components/ImageMessage.tsx",
-    "components/ChatList.js",
+    "components/ChatList.tsx",
     "components/AudioMessage.tsx",
     "components/ChatRoomBackground.tsx "
-, "Themes/DarkMode.js"  ]
+, "Themes/DarkMode.js", "app/(main)/(homeStack)/home.js", "env/firebaseConfig.js"  ]
 }

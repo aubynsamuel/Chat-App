@@ -26,6 +26,7 @@ export interface IMessage {
   duration?: string | null;
 }
 export interface FirebaseMessage {
+  roomId? : any
   content: any;
   senderId: string | undefined;
   senderName: string | undefined;

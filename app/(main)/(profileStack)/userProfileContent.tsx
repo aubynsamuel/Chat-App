@@ -36,8 +36,6 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
 
       if (response.canceled) {
         console.log("User cancelled image picker");
-      } else if (response.assets.length > 0) {
-        console.log("ImagePicker Error: " + response.assets.length);
       } else if (response.assets && response.assets.length > 0) {
         const selectedImage = response.assets[0].uri;
         console.log("ImagePicker Selected: ", selectedImage);
@@ -49,7 +47,6 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
       showToast("Failed to change background picture");
     }
   };
-
   return (
     <ScrollView style={styles.upContainer}>
       <StatusBar

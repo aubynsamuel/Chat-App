@@ -1,8 +1,13 @@
 import { db } from "../env/firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { getCurrentTime } from "./Commons";
+import { UserData } from "@/context/AuthContext";
 
-export default createRoomIfItDoesNotExist = async (roomId, user, userId) => {
+const createRoomIfItDoesNotExist = async (
+  roomId: string,
+  user: UserData | null,
+  userId: string | string[]
+) => {
   const roomRef = doc(db, "rooms", roomId);
 
   // Check if the room already exists
@@ -14,7 +19,7 @@ export default createRoomIfItDoesNotExist = async (roomId, user, userId) => {
       roomRef,
       {
         roomId,
-        participants: [user.userId, userId],
+        participants: [user?.userId, userId],
         createdAt: getCurrentTime(),
         lastMessage: "",
         lastMessageTimestamp: getCurrentTime(),
@@ -26,3 +31,5 @@ export default createRoomIfItDoesNotExist = async (roomId, user, userId) => {
     // console.log("Room already exists");
   }
 };
+
+export default createRoomIfItDoesNotExist;
