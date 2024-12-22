@@ -1,4 +1,4 @@
-import { memo, React, useState } from "react";
+import React, { memo, useState } from "react";
 import { Text, TouchableOpacity, View, Image } from "react-native";
 import {
   Menu,
@@ -7,19 +7,26 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { ExternalPathString, router } from "expo-router";
 import getStyles from "../styles/Component_Styles";
 import { useAuth } from "../imports";
+import { Theme } from "@/context/ThemeContext";
 
+interface HeaderBarProp {
+  title: string;
+  theme: Theme;
+  backButtonShown: boolean;
+  profilePicShown?: boolean;
+}
 const TopHeaderBar = memo(
-  ({ title, theme, backButtonShown, profilePicShown = true }) => {
+  ({ title, theme, backButtonShown, profilePicShown = true }: HeaderBarProp) => {
     const { user, logout } = useAuth();
     const [imageFailed, setImageFailed] = useState(false);
     const styles = getStyles(theme);
 
     const handleLogout = () => {
       logout();
-      router.replace("login");
+      router.replace("/login" as ExternalPathString);
     };
 
     return (
@@ -49,19 +56,16 @@ const TopHeaderBar = memo(
                 <Image
                   source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
                   style={{ width: 45, height: 45, borderRadius: 30 }}
-                  transition={500}
                 />
               ) : (
                 <Image
                   source={{ uri: user?.profileUrl }}
                   style={{ width: 45, height: 45, borderRadius: 30 }}
-                  transition={500}
                   onError={() => setImageFailed(true)}
                 />
               )}
             </MenuTrigger>
             <MenuOptions
-              style={styles.hhContainer}
               customStyles={{
                 optionsContainer: {
                   elevation: 5,
@@ -69,6 +73,10 @@ const TopHeaderBar = memo(
                   borderCurve: "circular",
                   marginTop: 40,
                   marginLeft: -30,
+                },
+                optionsWrapper: {
+                  backgroundColor: theme.primary,
+                  elevation: 10,
                 },
               }}
             >
@@ -80,7 +88,7 @@ const TopHeaderBar = memo(
                   alignItems: "center",
                 }}
                 onSelect={() => {
-                  router.navigate("/profile");
+                  router.navigate("/profile" as ExternalPathString);
                 }}
               >
                 <Text style={styles.hhMenuText}>Profile</Text>

@@ -1,9 +1,10 @@
 import { View } from "react-native";
 import React, { useEffect } from "react";
 import LottieView from "lottie-react-native";
-import { router } from "expo-router";
+import { ExternalPathString, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth, useTheme, Send } from "../imports";
+import purpleTheme from "@/Themes/Purple";
 
 const Index = () => {
   const { isLoading, isAuthenticated } = useAuth();
@@ -12,9 +13,9 @@ const Index = () => {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.replace("/home");
+        router.replace("/home" as ExternalPathString);
       } else {
-        router.replace("/login");
+        router.replace("/login" as ExternalPathString);
       }
     }
   }, [isLoading, isAuthenticated]);
@@ -34,11 +35,11 @@ const Index = () => {
             selectedTheme === purpleTheme
               ? "light"
               : selectedTheme.Statusbar.style
-          }`}
+          }` as any}
           backgroundColor={selectedTheme.background}
           animated={true}
         />
-        
+
         <LottieView
           source={Send}
           autoPlay

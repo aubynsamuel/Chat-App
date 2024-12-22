@@ -38,7 +38,7 @@ const CallsScreen = () => {
     },
   ];
 
-  const renderCallItem = ({ item }) => {
+  const renderCallItem = ({ item }: {item:any}) => {
     const callIcon =
       item.type === "missed"
         ? "call-missed"

@@ -1,24 +1,41 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  View,
+  Text,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+} from "react-native";
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
 import {
   BottomSheetModal,
   BottomSheetView,
   BottomSheetModalProvider,
   TouchableOpacity,
   BottomSheetBackdrop,
+  BottomSheetBackdropProps,
 } from "@gorhom/bottom-sheet";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ScrollView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import UserProfileContent from "./userProfileContent";
 import { useTheme, getStyles } from "../../../imports";
 
-const UserProfileScreen = () => {
+interface ThemeOption {
+  id: string;
+  color: string;
+  name: string;
+}
+
+const UserProfileScreen: React.FC = () => {
   const { selectedTheme, changeTheme } = useTheme();
   const styles = getStyles(selectedTheme);
+
   // ref
-  const bottomSheetModalRef = useRef(null);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
   // snap points
   const snapPoints = useMemo(() => ["25%"], []);
@@ -28,11 +45,11 @@ const UserProfileScreen = () => {
     bottomSheetModalRef.current?.present();
   }, []);
 
-  const handleSheetChanges = useCallback((index) => {
+  const handleSheetChanges = useCallback((index: number) => {
     console.log("handleSheetChanges", index);
   }, []);
 
-  const themes = [
+  const themes: ThemeOption[] = [
     { id: "0", color: "lightgreen", name: "Green Day" },
     { id: "1", color: "lightblue", name: "Sky Lander" },
     { id: "2", color: "black", name: "Dark Angel" },
@@ -40,8 +57,8 @@ const UserProfileScreen = () => {
   ];
 
   return (
-    <GestureHandlerRootView>
-      <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar style={selectedTheme.Statusbar.style as any} animated />
       <BottomSheetModalProvider>
         <UserProfileContent>
           <TouchableOpacity
@@ -62,7 +79,7 @@ const UserProfileScreen = () => {
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
           backgroundStyle={{ backgroundColor: "lightgrey" }}
-          backdropComponent={(props) => (
+          backdropComponent={(props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop
               {...props}
               disappearsOnIndex={-1}
@@ -71,21 +88,23 @@ const UserProfileScreen = () => {
             />
           )}
         >
-          <BottomSheetView style={stylesSheet.contentContainer}>
+          <BottomSheetView style={stylesSheet.contentContainer as any}>
             <Text style={{ fontSize: 16, margin: 10 }}>
               Select Your Preferred Theme
             </Text>
             <ScrollView
               showsHorizontalScrollIndicator={false}
-              horizontal={true}
-              contentContainerStyle={stylesSheet.flatListContentContainer}
+              horizontal
+              contentContainerStyle={
+                stylesSheet.flatListContentContainer as any
+              }
             >
               {themes.map((item) => (
-                <View key={item.id} style={stylesSheet.themeContainer}>
+                <View key={item.id} style={stylesSheet.themeContainer as any}>
                   <TouchableOpacity
-                    onPress={() => changeTheme(parseInt(item.id))}
+                    onPress={() => changeTheme(parseInt(item.id, 10))}
                     style={[
-                      stylesSheet.colorBox,
+                      stylesSheet.colorBox as any,
                       { backgroundColor: item.color },
                     ]}
                   />
@@ -115,11 +134,13 @@ const stylesSheet = StyleSheet.create({
     marginBottom: 10,
     elevation: 4,
   },
+
   themeContainer: {
     alignItems: "center",
     marginHorizontal: 15,
     marginBottom: 10,
   },
+
   flatListContentContainer: {
     flexDirection: "row",
   },

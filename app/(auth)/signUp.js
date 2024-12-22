@@ -10,8 +10,6 @@ import {
 import React, { useRef, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
-// import * as ImagePicker from "expo-image-picker";
-// import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
@@ -19,7 +17,6 @@ import { useTheme, useAuth, getStyles, storage, SignUp } from "../../imports";
 
 const SignUpScreen = () => {
   const email = useRef("");
-  // const username = useRef("");
   const password = useRef("");
   const { signUp, showToast } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -28,29 +25,14 @@ const SignUpScreen = () => {
   const [color, setColor] = useState(
     selectedTheme === darkTheme ? "white" : "black"
   );
-  // const [profileUrl, setProfileUrl] = useState();
 
   const styles = getStyles(selectedTheme);
-
-  // const selectImage = async () => {
-  //   try {
-  //     const result = await ImagePicker.launchImageLibraryAsync({
-  //       mediaTypes: ["images"],
-  //       allowsEditing: true,
-  //       quality: 1,
-  //     });
-  //     const selectedImage = result.assets[0].uri;
-  //     setProfileUrl(selectedImage);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
   // Email regex to validate the email format
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Password regex created to ensure password strength (at least 8 characters, including a number and a special character)
-  const passwordStrengthRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/;
+  const passwordStrengthRegex = /^(?=.*[0-9])(?=.*[!@#$_%^&*])(?=.{8,})/;
 
   const handleSignUpPressed = async () => {
     setIsLoading(true);
@@ -78,27 +60,6 @@ const SignUpScreen = () => {
     }
 
     try {
-      // let downloadURL = null;
-
-      // // Upload the profile picture if selected
-      // if (profileUrl) {
-      //   const response = await fetch(profileUrl); // Fetch the local file
-      //   const blob = await response.blob(); // Convert to Blob for Firebase
-
-      //   // Create a reference in Firebase Storage
-      //   const storageRef = ref(
-      //     storage,
-      //     `profilePictures/${username.current}.jpg`
-      //   );
-
-      //   // Upload the blob
-      //   await uploadBytes(storageRef, blob);
-
-      //   // Get the download URL
-      //   downloadURL = await getDownloadURL(storageRef);
-      // }
-
-      // Use the downloadURL in your signUp function
       let response = await signUp(
         email.current,
         password.current,
@@ -150,17 +111,6 @@ const SignUpScreen = () => {
           />
         </View>
 
-        {/* Username field */}
-        {/* <View style={styles.suInputField}>
-          <MaterialIcons name="person" color={styles.IconColor} size={25} />
-          <TextInput
-            placeholder="Username*"
-            style={styles.suInputText}
-            placeholderTextColor={"grey"}
-            onChangeText={(value) => (username.current = value)}
-          />
-        </View> */}
-
         {/* Password */}
         <View style={styles.suInputField}>
           <MaterialIcons name="lock" color={styles.IconColor} size={25} />
@@ -189,37 +139,6 @@ const SignUpScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* Profile Picture */}
-
-        {/* <MaterialIcons name="image" color="black" size={25} /> */}
-        {/*<View style={styles.suInputField}>
-          <TouchableOpacity
-            onPress={() => {
-              selectImage();
-              console.log("select image from gallery");
-            }}
-            style={{ flex: 1, alignItems: "center" }}
-          >
-            <Text style={{ color: styles.IconColor }}>
-              {profileUrl ? "Change profile pic" : "Select a profile picture"}
-            </Text>
-          </TouchableOpacity>
-        </View>*/}
-
-        {/* Uncomment to display image after selection */}
-        {/* Display selected image (if any) */}
-        {/* {profileUrl && (
-          <Image
-            source={{ uri: profileUrl }}
-            style={{
-              width: 100,
-              height: 100,
-              alignSelf: "center",
-              borderRadius: 100,
-            }}
-          />
-        )} */}
 
         <TouchableOpacity
           style={styles.suSignUpButton}

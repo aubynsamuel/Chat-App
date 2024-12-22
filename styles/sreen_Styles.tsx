@@ -1,10 +1,12 @@
+import { Theme } from "@/context/ThemeContext";
 import { StyleSheet } from "react-native";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
+import purpleTheme from "@/Themes/Purple";
 
-export default getStyles = (theme) => {
+const getStyles = (theme: Theme) => {
   return StyleSheet.create({
     // Chat Room styles
     crContainer: {
@@ -14,107 +16,8 @@ export default getStyles = (theme) => {
       marginTop: 65,
       flex: 1,
     },
-    crInputContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      borderWidth: 1,
-      borderColor: theme.border,
-      margin: 10,
-      borderRadius: 10,
-      // zIndex: 2,
-      backgroundColor: theme.input.background,
-    },
-    crTextInputField: {
-      width: "90%",
-      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
-      paddingHorizontal: 10,
-      fontSize: 16,
-      flex: 1,
-    },
-    crSendButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: theme.primary,
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: 10,
-    },
-    crReplyPreview: {
-      flexDirection: "row",
-      alignSelf: "center",
-      justifyContent: "center",
-      backgroundColor: theme.surface,
-      padding: 8,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: theme.border,
-      top: 16,
-      width: "90%",
-    },
-    crReplyPreviewContent: {
-      flex: 1,
-      marginRight: 8,
-    },
-    crReplyPreviewName: {
-      fontSize: 12,
-      fontWeight: "bold",
-      color: theme.primary,
-    },
-    cdReplyPreviewText: {
-      fontSize: 12,
-      color: theme.primary,
-    },
-    crAccessoryContainer: {
-      height: 44,
-      width: "100%",
-      backgroundColor: "white",
-      flexDirection: "row",
-      justifyContent: "space-around",
-      alignItems: "center",
-      borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: "rgba(0,0,0,0.3)",
-    },
     crScrollToEndButton: {
       transform: [{ rotate: "90deg" }],
-    },
-    crEditingPreview: {
-      flexDirection: "row",
-      alignSelf: "center",
-      justifyContent: "space-between",
-      backgroundColor: theme.surface,
-      padding: 8,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: theme.border,
-      top: 16,
-      width: "90%",
-    },
-    crEditingPreviewText: {
-      fontSize: 12,
-      color: theme.primary,
-    },
-    crEditingPreviewName: {
-      fontSize: 12,
-      fontWeight: "bold",
-      color: theme.primary,
-    },
-
-    sectionHeader: {
-      backgroundColor: theme.background,
-      opacity: 0.8,
-      borderRadius: 8,
-      alignSelf: "center",
-      marginVertical: 5,
-    },
-    sectionHeaderText: {
-      fontSize: 14,
-      fontWeight: "600",
-      textAlign: "center",
-      marginHorizontal: 5,
-      marginVertical: 1,
-      color: theme.text.primary,
     },
 
     // new styles for editing
@@ -123,96 +26,28 @@ export default getStyles = (theme) => {
       alignItems: "center",
       paddingRight: 5,
       paddingLeft: 5,
-      // backgroundColor: theme.background, // Match the background color of the chat
-      // borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: theme.border, // Add a subtle border (optional)
+      borderTopColor: theme.border,
       width: "100%",
       borderRadius: 10,
-      // bottom:2,
-      // flex:1
     },
     editInput: {
-      // marginRight: 10,
-      flex: 1, // Take up remaining space
-      height: 40, // Set a fixed height or adjust as needed
-      // borderColor: theme.border, // Match the border color
-      // borderWidth: StyleSheet.hairlineWidth,
-      // borderRadius: 20,                           // Rounded corners
+      flex: 1,
+      height: 40,
       paddingHorizontal: 10,
-      color: theme.text.primary, // Set text color based on the theme
+      color: theme.text.primary,
     },
     editButton: {
-      backgroundColor: theme.surface, // Use your secondary color or choose a suitable one
+      backgroundColor: theme.surface,
       borderRadius: 40,
       paddingHorizontal: 15,
       marginHorizontal: 2,
       paddingVertical: 4,
     },
     editButtonText: {
-      color: theme.primary, // Text color that contrasts with the button background
+      color: theme.primary,
       fontWeight: "bold",
-      width: 300,
       width: 18,
       textAlign: "center",
-    },
-    playbackControls: {
-      backgroundColor: "lightgrey",
-      borderRadius: 10,
-      elevation: 2,
-      padding: 6,
-      width: "50%",
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    playbackTime: {
-      fontSize: 14,
-      color: "#333",
-    },
-
-    // chatroom audio controls
-    titleText: {
-      zIndex: 1,
-      fontSize: 18,
-      textAlign: "center",
-      color: "white",
-      fontWeight: "600",
-    },
-    recordingText: {
-      fontSize: 20,
-      fontWeight: "600",
-      color: "white",
-      marginBottom: 5,
-    },
-    timeText: {
-      fontSize: 20,
-      fontWeight: "600",
-      color: "white",
-      marginBottom: 20,
-    },
-    controlsContainer: {
-      flexDirection: "row",
-      justifyContent: "center",
-      gap: 20,
-      marginTop: 10,
-    },
-    controlButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      padding: 10,
-      borderRadius: 25,
-      gap: 8,
-    },
-    discardButton: {
-      backgroundColor: "#FF5252",
-    },
-    sendButton: {
-      backgroundColor: "#4CAF50",
-    },
-    buttonText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "600",
     },
 
     // Edit Profile Screen
@@ -264,7 +99,7 @@ export default getStyles = (theme) => {
     epSaveButtonText: {
       color: theme.text.primary,
       fontSize: 20,
-      fontWeight: "450",
+      fontWeight: "500",
       textAlign: "center",
     },
 
@@ -272,7 +107,6 @@ export default getStyles = (theme) => {
     hsContainer: {
       paddingHorizontal: 10,
       // paddingBottom: 10,
-      backgroundColor: theme === darkTheme ? theme.background : null,
       flex: 1,
     },
     floatingButton: {
@@ -365,7 +199,7 @@ export default getStyles = (theme) => {
       backgroundColor: theme.input.background,
       borderRadius: 8,
       fontSize: 16,
-      color: theme === purpleTheme ? theme.inverse : theme.text.primary,
+      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
     },
     userItem: {
       padding: 15,
@@ -483,6 +317,7 @@ export default getStyles = (theme) => {
       fontSize: 16,
       color: theme.text.primary,
     },
-    IconColor: theme == purpleTheme ? theme.text.inverse : theme.text.primary,
   });
 };
+
+export default getStyles;

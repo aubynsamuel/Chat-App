@@ -3,12 +3,7 @@ import { memo, useEffect, useState } from "react";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import { router } from "expo-router";
 import getStyles from "../styles/Component_Styles";
-import {
-  formatTimeWithoutSeconds,
-  getRoomId,
-  useAuth,
-  db,
-} from "../imports";
+import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
 
 const ChatObject = memo(({ room, theme }) => {
   const { user, addToUnread, removeFromUnread, setProfileUrlLink } = useAuth();

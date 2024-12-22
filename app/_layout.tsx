@@ -17,10 +17,11 @@ import { ChatProvider } from "../context/ChatContext";
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
   const { gettingLocationOverlay } = useAuth();
+  LogBox.ignoreAllLogs()
   return (
     <>
-      {LogBox.ignoreAllLogs()}
       <Stack
+        initialRouteName="index"
         screenOptions={{
           headerShown: false,
         }}

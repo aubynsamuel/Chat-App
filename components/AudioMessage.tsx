@@ -14,7 +14,7 @@ const AudioPlayerComponent = memo(
   }: {
     currentAudio: any;
     selectedTheme: Theme;
-    profileUrl: string;
+    profileUrl?: string;
     playBackDuration: string;
   }) => {
     const [sound, setSound] = useState<Audio.Sound | null>(null);

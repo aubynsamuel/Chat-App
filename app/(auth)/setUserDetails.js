@@ -114,7 +114,7 @@ const EditProfileScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.epContainer}>
+    <ScrollView style={[styles.epContainer]}>
       <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
       <Text
         style={{
@@ -150,7 +150,7 @@ const EditProfileScreen = () => {
           />
         )}
         <TouchableOpacity onPress={selectImage}>
-          <Text style={styles.epChangePicText}>Change Profile Picture</Text>
+          <Text style={styles.epChangePicText}>Set Profile Picture</Text>
         </TouchableOpacity>
 
         {/* Username */}

@@ -46,8 +46,8 @@ interface ChatContextType {
     user: User,
     setGettingLocationOverlay: React.Dispatch<React.SetStateAction<boolean>>
   ) => Promise<void>;
-  setRecording: React.Dispatch<React.SetStateAction<Audio.Recording | null>>
-  recording: Audio.Recording | null
+  setRecording: React.Dispatch<React.SetStateAction<Audio.Recording | null>>;
+  recording: Audio.Recording | null;
 }
 
 interface ChatProvider {
@@ -63,7 +63,7 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
   const [playbackTime, setPlaybackTime] = useState(0);
   const [recordedAudioUri, setRecordedAudioUri] = useState<string>("");
   const [imageModalVisibility, setImageModalVisibility] =
-  useState<boolean>(false);
+    useState<boolean>(false);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
 
   async function getLocationAsync(
@@ -82,7 +82,9 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
       return;
     }
 
-    const location = await Location.getCurrentPositionAsync({});
+    const location = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Highest,
+    });
     if (!location) {
       Alert.alert("Error", "Location is not available");
       setGettingLocationOverlay(false);
@@ -124,7 +126,8 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
     getLocationAsync,
     imageModalVisibility,
     setImageModalVisibility,
-    recording, setRecording
+    recording,
+    setRecording,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

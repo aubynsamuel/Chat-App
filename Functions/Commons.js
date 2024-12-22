@@ -11,65 +11,68 @@ export const getCurrentTime = () => {
   return now;
 };
 
-export const formatDate = (firestoreTimestamp) => {
-  // Extract seconds from Firestore Timestamp
-  const seconds = firestoreTimestamp.seconds;
-
-  // Convert seconds to milliseconds and create a Date object
-  const date = new Date(seconds * 1000);
-
-  // Get day, date, month, and year
-  const dayOfTheWeek = date.getUTCDay();
-  const day = date.getUTCDate();
-  const month = date.getUTCMonth(); // Months are 0-based
-  const year = date.getUTCFullYear();
-
-  const formattedDayOfTheWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-  // Format day, date, month, and year
-  const formattedDay = day.toString().padStart(2, "0");
-  // const formattedMonth = month.toString().padStart(2, '0');
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  let formattedDate;
-
-  const currentDate = new Date();
-  const currentDay = currentDate.getUTCDate();
-  // console.log(' current day: ' + currentDay);
-  // console.log(' formatted day: ' + formattedDay);
-
-  if (formattedDay == currentDay - 1) {
-    formattedDate = `Yesterday`;
-  } else if (formattedDay == currentDay) {
-    formattedDate = `Today`;
-  } else {
-    formattedDate = `${
-      formattedDayOfTheWeek[dayOfTheWeek]
-    } ${formattedDay} ${months[month]}, ${year}`;
-  }
-
-  return formattedDate;
+export const formatTime = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
+// export const formatDate = (firestoreTimestamp) => {
+//   // Extract seconds from Firestore Timestamp
+//   const seconds = firestoreTimestamp.seconds;
+
+//   // Convert seconds to milliseconds and create a Date object
+//   const date = new Date(seconds * 1000);
+
+//   // Get day, date, month, and year
+//   const dayOfTheWeek = date.getUTCDay();
+//   const day = date.getUTCDate();
+//   const month = date.getUTCMonth(); // Months are 0-based
+//   const year = date.getUTCFullYear();
+
+//   const formattedDayOfTheWeek = [
+//     "Sunday",
+//     "Monday",
+//     "Tuesday",
+//     "Wednesday",
+//     "Thursday",
+//     "Friday",
+//     "Saturday",
+//   ];
+//   // Format day, date, month, and year
+//   const formattedDay = day.toString().padStart(2, "0");
+//   // const formattedMonth = month.toString().padStart(2, '0');
+//   const months = [
+//     "January",
+//     "February",
+//     "March",
+//     "April",
+//     "May",
+//     "June",
+//     "July",
+//     "August",
+//     "September",
+//     "October",
+//     "November",
+//     "December",
+//   ];
+//   let formattedDate;
+
+//   const currentDate = new Date();
+//   const currentDay = currentDate.getUTCDate();
+//   // console.log(' current day: ' + currentDay);
+//   // console.log(' formatted day: ' + formattedDay);
+
+//   if (formattedDay == currentDay - 1) {
+//     formattedDate = `Yesterday`;
+//   } else if (formattedDay == currentDay) {
+//     formattedDate = `Today`;
+//   } else {
+//     formattedDate = `${formattedDayOfTheWeek[dayOfTheWeek]} ${formattedDay} ${months[month]}, ${year}`;
+//   }
+
+//   return formattedDate;
+// };
 
 export const formatTimeWithoutSeconds = (firestoreTimestamp) => {
   // Extract seconds from Firestore Timestamp

@@ -7,23 +7,31 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  TextInputProps,
 } from "react-native";
 import { getDocs, query, where, collection } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
+import { ExternalPathString, router } from "expo-router";
 import { useTheme, useAuth, db, getStyles } from "../../../imports";
 
-const SearchUsersScreen = () => {
+interface User {
+  userId: string;
+  username: string;
+  profileUrl: string;
+}
+
+const SearchUsersScreen: React.FC = () => {
   const { user, setProfileUrlLink } = useAuth();
-  const [searchText, setSearchText] = useState("");
-  const [filteredUsers, setFilteredUsers] = useState([]);
-  const inputRef = useRef();
+  const [searchText, setSearchText] = useState<string>("");
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const inputRef = useRef<TextInput>(null);
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
 
-  const handleSearch = async (text) => {
+  const handleSearch = async (text: string) => {
     setSearchText(text);
+
     if (text.trim() === "") {
       setFilteredUsers([]);
       return;
@@ -37,12 +45,16 @@ const SearchUsersScreen = () => {
         where("username", ">=", text),
         where("username", "<=", text + "\uf8ff")
       );
-      const querySnapshot = await getDocs(q);
 
-      const userData = [];
-      querySnapshot.forEach((doc) => {
-        userData.push({ ...doc.data() });
-      });
+      const querySnapshot = await getDocs(q);
+      const userData: User[] = querySnapshot.docs.map(
+        (doc) =>
+          ({
+            userId: doc.id,
+            ...doc.data(),
+          } as User)
+      );
+
       setFilteredUsers(userData);
     } catch (error) {
       console.error("Error searching users:", error);
@@ -50,13 +62,13 @@ const SearchUsersScreen = () => {
   };
 
   useEffect(() => {
-    inputRef.current.focus();
+    inputRef.current?.focus();
   }, []);
 
-  const handleUserPress = (selectedUser) => {
+  const handleUserPress = (selectedUser: User) => {
     setProfileUrlLink(selectedUser.profileUrl);
-    router.navigate({
-      pathname: "/chatRoom",
+    router.push({
+      pathname: "/chatRoom" as ExternalPathString,
       params: {
         userId: selectedUser.userId,
         username: selectedUser.username,
@@ -70,16 +82,11 @@ const SearchUsersScreen = () => {
       style={{
         flex: 1,
         paddingTop: 24,
-        backgroundColor:
-          selectedTheme === darkTheme ? selectedTheme.background : null,
+        backgroundColor: selectedTheme.background,
       }}
     >
       <StatusBar
-        style={`${
-          selectedTheme === purpleTheme
-            ? "light"
-            : selectedTheme.Statusbar.style
-        }`}
+        style={selectedTheme.Statusbar.style as any}
         backgroundColor={selectedTheme.primary}
         animated={true}
       />
@@ -87,20 +94,14 @@ const SearchUsersScreen = () => {
         <MaterialIcons
           name="arrow-back"
           size={25}
-          color={
-            selectedTheme === darkTheme || selectedTheme === purpleTheme
-              ? "lightgrey"
-              : "black"
-          }
-          onPress={() => router.navigate("..")}
+          color={selectedTheme.text.primary}
+          onPress={() => router.push("..")}
         />
         <TextInput
           ref={inputRef}
           style={styles.searchInput}
           placeholder="Search users..."
-          placeholderTextColor={
-            selectedTheme === darkTheme ? "lightgrey" : "black"
-          }
+          placeholderTextColor={selectedTheme.text.secondary}
           value={searchText}
           onChangeText={handleSearch}
         />
@@ -116,8 +117,9 @@ const SearchUsersScreen = () => {
           >
             <Image
               source={
-                { uri: item.profileUrl } ||
-                require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
+                item.profileUrl
+                  ? { uri: item.profileUrl }
+                  : require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
               }
               style={{ width: 50, height: 50, borderRadius: 25 }}
             />

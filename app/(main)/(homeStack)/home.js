@@ -14,13 +14,7 @@ import NotificationTokenManager from "../../../Functions/NotificationTokenManage
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import {
-  useTheme,
-  useAuth,
-  db,
-  usersRef,
-  getStyles,
-} from "../../../imports";
+import { useTheme, useAuth, db, usersRef, getStyles } from "../../../imports";
 import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
 import ChatList from "../../../components/ChatList";
 

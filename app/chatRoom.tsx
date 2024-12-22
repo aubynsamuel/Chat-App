@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, memo } from "react";
 import {
   View,
   Text,
@@ -6,8 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ViewStyle,
-  Keyboard,
-  ActivityIndicator,
 } from "react-native";
 import {
   GiftedChat,
@@ -45,6 +43,7 @@ import {
   createRoomIfItDoesNotExist,
   getStyles,
   storage,
+  formatTime,
 } from "../imports";
 import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import EmptyChatRoomList from "../components/EmptyChatRoomList";
@@ -61,19 +60,18 @@ import ImageMessageDetails, {
 import InputToolBar from "../components/InputToolBar";
 import AudioPlayerComponent from "../components/AudioMessage";
 import { AuthContextType } from "../context/AuthContext";
-import { FirebaseMessage } from "../Functions/types";
 import { TextStyle } from "react-native";
 import { ThemeContextType } from "../context/ThemeContext";
 import purpleTheme from "../Themes/Purple";
-import { IMessage } from "../Functions/types";
-import ScreenOverlay from "../components/ScreenOverlay";
-import LottieView from "lottie-react-native";
-import Animated, { BounceIn, BounceOut } from "react-native-reanimated";
+import { IMessage, FirebaseMessage } from "../Functions/types";
 import { useChatContext } from "@/context/ChatContext";
+import AudioRecordingOverlay from "@/components/AudioRecordingOverlay";
+// import { Vibration } from "react-native";
 
 const ChatScreen = () => {
   const { userId, username } = useLocalSearchParams();
-  const { user, profileUrl } = useAuth() as AuthContextType;
+  const { user, profileUrl, setGettingLocationOverlay } =
+    useAuth() as AuthContextType;
   const { selectedTheme, chatBackgroundPic }: ThemeContextType = useTheme();
   const {
     isRecording,
@@ -99,21 +97,13 @@ const ChatScreen = () => {
   const [showActions, setShowActionButtons] = useState(true);
   const [imageUrl, setImageUrl] =
     useState<React.SetStateAction<string | null>>("");
-  // const [unreadCount, setUnreadCount] = useState(0);
   const [sendingAudio, setSendingAudio] = useState<boolean>(false);
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  // useEffect(() => {
-  //   const unreadMessages = messages.filter(
-  //     (msg) => msg.read === false && msg.user._id !== user?.userId
-  //   );
-  //   setUnreadCount(unreadMessages.length);
-  // }, [messages]);
+  useEffect(() => {
+    return () => {
+      setGettingLocationOverlay(false);
+    };
+  }, []);
 
   useEffect(() => {
     fetchOtherUserToken();
@@ -140,6 +130,18 @@ const ChatScreen = () => {
     await createRoomIfItDoesNotExist(roomId, user, userId);
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
+      // snapshot.docChanges().forEach((change) => {
+      //   if (change.type === "added") {
+      //     const message = change.doc.data();
+      //     if (
+      //       message.senderId !== user?.userId &&
+      //       change.doc.data().createdAt?.toDate() > new Date(Date.now() - 1000)
+      //     ) {
+      //       Vibration.vibrate([0, 60, 60, 40]);
+      //     }
+      //   }
+      // });
+
       const fetchedMessages = snapshot.docs.map((doc) => {
         const data = doc.data();
         return {
@@ -482,9 +484,9 @@ const ChatScreen = () => {
     );
   };
 
-  const renderCustomView = useCallback((props: any) => {
+  const renderCustomView = (props: any) => {
     return <CustomView {...props} />;
-  }, []);
+  };
 
   const renderMessageAudio = (props: any) => {
     const { currentMessage } = props;
@@ -495,7 +497,11 @@ const ChatScreen = () => {
         <AudioPlayerComponent
           currentAudio={currentMessage.audio}
           selectedTheme={selectedTheme}
-          profileUrl={profileUrl}
+          profileUrl={
+            currentMessage.user._id === user?.userId
+              ? user?.profileUrl
+              : profileUrl
+          }
           playBackDuration={currentMessage.duration}
         />
       );
@@ -503,24 +509,6 @@ const ChatScreen = () => {
 
     return null;
   };
-
-  // const discardRecording = () => {
-  //   Alert.alert(
-  //     "Discard Recording",
-  //     "Are you sure you want to discard this recording?",
-  //     [
-  //       {
-  //         text: "Cancel",
-  //         style: "cancel",
-  //       },
-  //       {
-  //         text: "Discard",
-  //         style: "destructive",
-  //         onPress: resetRecording,
-  //       },
-  //     ]
-  //   );
-  // };
 
   const uploadAudioFile = async (
     audio: string | null,
@@ -680,7 +668,6 @@ const ChatScreen = () => {
           messages={messages as IMessage[] | undefined}
           onSend={(newMessages: IMessage[]) => {
             handleSend(newMessages);
-            // setShowActionButtons(true);
           }}
           user={
             {
@@ -734,38 +721,12 @@ const ChatScreen = () => {
           )}
           scrollToBottom={true}
           scrollToBottomComponent={() => (
-            <View>
-              {/* {unreadCount > 0 ? (
-                <Animated.Text
-                  entering={BounceIn.duration(200)}
-                  exiting={BounceOut.duration(200)}
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "bold",
-                    color: "red",
-                    bottom: 13,
-                    textAlign: "center",
-                    zIndex: 2,
-                    backgroundColor: selectedTheme.primary,
-                    borderRadius: 50,
-                    marginTop: 10,
-                    width: 40,
-                    height: 25,
-                  }}
-                >
-                  {unreadCount}
-                </Animated.Text>
-              ) : null} */}
-              <MaterialIcons
-                style={[
-                  styles.crScrollToEndButton as any,
-                  // { bottom: unreadCount > 0 ? 10 : null },
-                ]}
-                name="double-arrow"
-                color={"#000"}
-                size={30}
-              />
-            </View>
+            <MaterialIcons
+              style={[styles.crScrollToEndButton as any]}
+              name="double-arrow"
+              color={"#000"}
+              size={30}
+            />
           )}
           renderMessageImage={(props) => (
             <RenderMessageImage
@@ -816,58 +777,12 @@ const ChatScreen = () => {
           />
         )}
         {audioRecordingOverlay && (
-          <ScreenOverlay
-            containerStyles={{ bottom: 54, height: null, paddingBottom: 50 }}
-            showIndicator={false}
-            children={
-              <View style={{ alignItems: "center" }}>
-                {/* Recording State and timer */}
-                <LottieView
-                  source={require("../myAssets/Lottie_Files/Recording.json")}
-                  autoPlay
-                  loop={true}
-                  style={{ width: 80, height: 80 }}
-                />
-                <Text style={styles.recordingText as TextStyle}>
-                  {isRecording ? "Recording..." : "Recording Complete"}
-                </Text>
-                <Text style={styles.timeText as TextStyle}>
-                  {formatTime(playbackTime)}
-                </Text>
-
-                {/* Recording Controls */}
-                {!isRecording && !sendingAudio && (
-                  <View style={styles.controlsContainer as ViewStyle}>
-                    <TouchableOpacity
-                      style={[
-                        styles.controlButton as any,
-                        styles.discardButton as any,
-                      ]}
-                      onPress={resetRecording}
-                    >
-                      <MaterialIcons name="delete" size={24} color="white" />
-                      <Text style={styles.buttonText as TextStyle}>
-                        Discard
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[
-                        styles.controlButton as any,
-                        styles.sendButton as any,
-                      ]}
-                      onPress={sendAudioMessage}
-                    >
-                      <MaterialIcons name="send" size={24} color="white" />
-                      <Text style={styles.buttonText as TextStyle}>Send</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-                {!isRecording && sendingAudio && (
-                  <ActivityIndicator size={"large"} color={"white"} />
-                )}
-              </View>
-            }
+          <AudioRecordingOverlay
+            isRecording={isRecording}
+            playbackTime={playbackTime}
+            resetRecording={resetRecording}
+            sendAudioMessage={sendAudioMessage}
+            sendingAudio={sendingAudio}
           />
         )}
       </View>

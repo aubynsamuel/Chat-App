@@ -10,7 +10,7 @@ import React from "react";
 interface LoadingIndicatorProps {
   title?: string;
   children?: React.ReactNode;
-  showIndicator: boolean;
+  showIndicator?: boolean;
   containerStyles?: ViewStyle;
 }
 

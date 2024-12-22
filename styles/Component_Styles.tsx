@@ -1,6 +1,8 @@
+import { Theme } from "@/context/ThemeContext";
 import { StyleSheet } from "react-native";
+import purpleTheme from "@/Themes/Purple";
 
-export default getStyles = (theme) => {
+const getStyles = (theme: Theme) => {
   return StyleSheet.create({
     // Chat list component
     clEmptyContainer: {
@@ -119,8 +121,7 @@ export default getStyles = (theme) => {
       marginHorizontal: 10,
     },
     hhContainer: {
-      backgroundColor: theme.primary,
-      elevation: 10,
+      
     },
     hhMenuText: {
       fontSize: 15,
@@ -207,3 +208,5 @@ export default getStyles = (theme) => {
     },
   });
 };
+
+export default getStyles;

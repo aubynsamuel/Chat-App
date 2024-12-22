@@ -6,39 +6,25 @@ import {
   ScrollView,
   Switch,
 } from "react-native";
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
+import { ExternalPathString, router } from "expo-router";
 import { useTheme, getStyles, useAuth } from "../../../imports";
 
-const UserProfileContent = ({ children }) => {
+const UserProfileContent = ({ children }: { children: ReactNode }) => {
   const { user, logout, showToast } = useAuth();
   const profileUrl = user?.profileUrl;
   const [imageFailed, setImageFailed] = useState(false);
   const { selectedTheme, changeBackgroundPic } = useTheme();
   const styles = getStyles(selectedTheme);
 
-  const [selected, setSelected] = useState();
+  const [selected, setSelected] = useState<boolean>();
   const handleLogout = async () => {
     await logout();
-    router.replace("login");
+    router.replace("/login" as ExternalPathString);
   };
-
-  //  const selectImage = async () => {
-  //     try {
-  //       const result = await ImagePicker.launchImageLibraryAsync({
-  //         mediaTypes: ["images"],
-  //         allowsEditing: true,
-  //         quality: 1,
-  //       });
-  //       const selectedImage = result.assets[0];
-  //       setProfileUrl(selectedImage.uri);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
 
   const selectImage = async () => {
     try {
@@ -48,14 +34,14 @@ const UserProfileContent = ({ children }) => {
         quality: 1,
       });
 
-      if (response.didCancel) {
+      if (response.canceled) {
         console.log("User cancelled image picker");
-      } else if (response.errorMessage) {
-        console.log("ImagePicker Error: ", response.errorMessage);
+      } else if (response.assets.length > 0) {
+        console.log("ImagePicker Error: " + response.assets.length);
       } else if (response.assets && response.assets.length > 0) {
         const selectedImage = response.assets[0].uri;
         console.log("ImagePicker Selected: ", selectedImage);
-        await changeBackgroundPic(selectedImage);
+        changeBackgroundPic(selectedImage);
         showToast("Background Picture Changed");
       }
     } catch (error) {
@@ -66,27 +52,21 @@ const UserProfileContent = ({ children }) => {
 
   return (
     <ScrollView style={styles.upContainer}>
-      <StatusBar style={`${selectedTheme.Statusbar.style}`} animated={true} />
-      {/* back icon */}
-      {/* <TouchableOpacity
-        // style={styles.backButton}
-        onPress={() => router.navigate("..")}
-      >
-        <MaterialIcons name="arrow-back" size={25} color={styles.IconColor} />
-      </TouchableOpacity> */}
+      <StatusBar
+        style={`${selectedTheme.Statusbar.style}` as any}
+        animated={true}
+      />
       {/* User Profile Info */}
       <View style={styles.upProfileContainer}>
         {imageFailed || profileUrl == "" ? (
           <Image
             style={styles.upAvatar}
             source={require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
-            transition={500}
           />
         ) : (
           <Image
             style={styles.upAvatar}
             source={{ uri: profileUrl }}
-            transition={500}
             onError={() => setImageFailed(true)}
           />
         )}
@@ -98,7 +78,7 @@ const UserProfileContent = ({ children }) => {
         {/* Edit profile */}
         <TouchableOpacity
           style={styles.upOption}
-          onPress={() => router.navigate("/editProfile")}
+          onPress={() => router.navigate("/editProfile" as ExternalPathString)}
         >
           <MaterialIcons
             name="edit"
