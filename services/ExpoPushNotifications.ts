@@ -16,7 +16,7 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function ExpoPushNotifications({ children }) {
+export default function ExpoPushNotifications({ children } :{children : React.ReactNode}) {
   // const responseListener = useRef(null);
 
   useEffect(() => {
@@ -120,7 +120,7 @@ export default function ExpoPushNotifications({ children }) {
   //   }
   // };
 
-  return <>{children}</>;
+  return {children};
 }
 
 // export async function schedulePushNotification(title, body, roomId) {

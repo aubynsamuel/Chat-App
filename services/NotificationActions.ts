@@ -11,7 +11,12 @@
 // import { getCurrentTime } from "../Functions/Commons";
 import { deviceToken } from "./RegisterForPushNotifications";
 
-async function sendNotification(expoPushToken, title, body, roomId) {
+async function sendNotification(
+  expoPushToken: string,
+  title: string,
+  body: string,
+  roomId: string
+) {
   if (!expoPushToken) {
     console.warn("No device token provided for notification");
     return;
