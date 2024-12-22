@@ -14,7 +14,6 @@ export { ThemeContextProvider } from "./context/ThemeContext";
 
 
 // Services
-// export { sendNotification, schedulePushNotification } from "./services/ExpoPushNotifications";
 export { default as ExpoPushNotifications } from "./services/ExpoPushNotifications";
 
 // Styles
