@@ -21,6 +21,9 @@
     "components/ImageMessage.tsx",
     "components/ChatList.tsx",
     "components/AudioMessage.tsx",
-    "components/ChatRoomBackground.tsx "
-, "Themes/DarkMode.js", "app/(main)/(homeStack)/home.js", "env/firebaseConfig.js"  ]
+    "components/ChatRoomBackground.tsx ",
+    "Themes/DarkMode.js",
+    "app/(main)/(homeStack)/home.js",
+    "env/firebaseConfig.js"
+  ]
 }

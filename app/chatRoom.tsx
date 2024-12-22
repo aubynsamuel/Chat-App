@@ -272,7 +272,7 @@ const ChatScreen = () => {
         // Send notification if other user token exists
         if (otherUserToken) {
           sendNotification(
-            otherUserToken,
+            otherUserToken as string,
             `${user?.username}`,
             messageBody(newMessage),
             roomId
