@@ -572,13 +572,13 @@ const ChatScreen = () => {
             backgroundColor: selectedTheme.message.other.background,
             marginLeft: 5,
             marginBottom: 3,
-            maxWidth: "70%",
+            maxWidth: "65%",
           },
           right: {
             backgroundColor: selectedTheme.message.user.background,
             marginRight: 5,
             marginBottom: 3,
-            maxWidth: "70%",
+            maxWidth: "65%",
           },
         }}
       />

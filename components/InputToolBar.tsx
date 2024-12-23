@@ -86,7 +86,7 @@ const InputToolBar = memo(
                 >
                   Replying to {replyToMessage.user.name}
                 </Text>
-                <Text style={{ color: selectedTheme.text.secondary }}>
+                <Text numberOfLines={1} style={{ color: selectedTheme.text.secondary , maxWidth: "81%" }}>
                   {getReplyPreview(replyToMessage)}
                 </Text>
               </View>
