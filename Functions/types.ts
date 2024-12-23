@@ -15,7 +15,7 @@ export interface IMessage {
   };
   image?: string;
   audio?: string;
-  replyTo?: string;
+  replyTo?: any;
   read?: boolean;
   delivered?: boolean;
   type?: string;

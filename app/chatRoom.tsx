@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -65,6 +65,7 @@ import purpleTheme from "../Themes/Purple";
 import { IMessage, FirebaseMessage } from "../Functions/types";
 import { useChatContext } from "@/context/ChatContext";
 import AudioRecordingOverlay from "@/components/AudioRecordingOverlay";
+import RenderMessageText from "@/components/RenderMessageText";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -89,13 +90,15 @@ const ChatScreen = () => {
   const roomId: any = getRoomId(user?.userId, userId);
   const styles = getStyles(selectedTheme);
   const [isEditing, setIsEditing] = useState(false);
-  const [isReplying, setIsReplying] = useState(false);
   const [editMessage, setEditMessage] = useState<IMessage | null | undefined>();
   const [editText, setEditText] = useState("");
   const [showActions, setShowActionButtons] = useState(true);
   const [imageUrl, setImageUrl] =
     useState<React.SetStateAction<string | null>>("");
   const [sendingAudio, setSendingAudio] = useState<boolean>(false);
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
+  const messageContainerRef = useRef<any>(null);
 
   useEffect(() => {
     return () => {
@@ -231,7 +234,22 @@ const ChatScreen = () => {
 
   const handleSend = useCallback(
     async (newMessages: IMessage[] = []) => {
+      console.log("replyToMessage onSend: ", replyToMessage);
       const newMessage: IMessage = newMessages[0];
+
+      const replyData = replyToMessage
+        ? {
+            _id: replyToMessage._id,
+            text: replyToMessage.text || "",
+            user: replyToMessage.user,
+            type: replyToMessage.type,
+            image: replyToMessage.image || null,
+            audio: replyToMessage.audio || null,
+            location: replyToMessage.location || null,
+          }
+        : null;
+
+      newMessage.replyTo = replyData;
 
       // Prepare message for Firestore
       const messageData: FirebaseMessage = {
@@ -239,7 +257,7 @@ const ChatScreen = () => {
         senderId: user?.userId,
         senderName: user?.username,
         createdAt: getCurrentTime(),
-        replyTo: newMessage.replyTo || null,
+        replyTo: replyData,
         read: false,
         delivered: true,
         type: newMessage.type || "text",
@@ -253,6 +271,11 @@ const ChatScreen = () => {
           : null,
         duration: newMessage.duration || null,
       };
+
+      setReplyToMessage(null);
+      setIsReplying(false);
+
+      // console.log("Replying to message: ", newMessage.replyTo);
 
       // Update local messages state
       setMessages((prevMessages: IMessage[]) =>
@@ -282,8 +305,19 @@ const ChatScreen = () => {
         console.error("Failed to send message:", error);
       }
     },
-    [roomId, user, otherUserToken]
+    [roomId, user, otherUserToken, replyToMessage]
   );
+
+  const scrollToMessage = (messageId: string) => {
+    const index = messages.findIndex((message) => message._id === messageId);
+    if (index !== -1 && messageContainerRef.current) {
+      messageContainerRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.5,
+      });
+    }
+  };
 
   const updateRoomLastMessage = async (newMessage: IMessage) => {
     const roomRef = doc(db, "rooms", roomId);
@@ -351,7 +385,7 @@ const ChatScreen = () => {
     (context: any, currentMessage: IMessage) => {
       if (!currentMessage.text) return;
 
-      const options = [];
+      const options = ["Reply"];
 
       if (currentMessage.user._id === user?.userId) {
         options.push("Copy text");
@@ -370,10 +404,15 @@ const ChatScreen = () => {
         },
         (buttonIndex: number) => {
           switch (buttonIndex) {
-            case 0:
+            case 0: {
+              setReplyToMessage(currentMessage);
+              setIsReplying(true);
+              break;
+            }
+            case 1:
               Clipboard.setStringAsync(currentMessage.text);
               break;
-            case 1:
+            case 2:
               if (currentMessage.user._id === user?.userId) {
                 setIsEditing(true);
                 setEditMessage(currentMessage);
@@ -381,7 +420,7 @@ const ChatScreen = () => {
                 // setShowActionButtons(false);
               }
               break;
-            case 2:
+            case 3:
               if (currentMessage.user._id === user?.userId)
                 handleDelete(currentMessage);
               break;
@@ -417,85 +456,6 @@ const ChatScreen = () => {
       console.error("Failed to edit message:", error);
       Alert.alert("Error", "Failed to edit message. Please try again.");
     }
-  };
-
-  const renderBubble = (props: any) => {
-    const { currentMessage } = props;
-
-    let ticks = null;
-    if (currentMessage.user._id === user?.userId) {
-      // Only for user's messages
-      if (currentMessage.read) {
-        ticks = (
-          <Text
-            style={{
-              fontSize: 12,
-              color: selectedTheme.secondary,
-              paddingRight: 5,
-            }}
-          >
-            ✓✓
-          </Text>
-        );
-      } else if (currentMessage.delivered) {
-        ticks = (
-          <Text
-            style={{
-              fontSize: 12,
-              color: selectedTheme.secondary,
-              paddingRight: 5,
-            }}
-          >
-            ✓
-          </Text>
-        );
-      }
-    }
-
-    return (
-      <Bubble
-        {...props}
-        renderTicks={() => ticks}
-        wrapperStyle={{
-          left: {
-            backgroundColor: selectedTheme.message.other.background,
-            marginLeft: 5,
-            marginBottom: 3,
-          },
-          right: {
-            backgroundColor: selectedTheme.message.user.background,
-            marginRight: 5,
-            marginBottom: 3,
-          },
-        }}
-      />
-    );
-  };
-
-  const renderCustomView = (props: any) => {
-    return <CustomView {...props} />;
-  };
-
-  const renderMessageAudio = (props: any) => {
-    const { currentMessage } = props;
-
-    // Only render if it's an audio message
-    if (currentMessage.type === "audio" && currentMessage.audio) {
-      return (
-        <AudioPlayerComponent
-          currentAudio={currentMessage.audio}
-          selectedTheme={selectedTheme}
-          profileUrl={
-            currentMessage.user._id === user?.userId
-              ? user?.profileUrl
-              : profileUrl
-          }
-          playBackDuration={currentMessage.duration}
-        />
-      );
-    }
-
-    return null;
   };
 
   const uploadAudioFile = async (
@@ -570,6 +530,87 @@ const ChatScreen = () => {
     }
   };
 
+  const renderBubble = (props: any) => {
+    const { currentMessage } = props;
+
+    let ticks = null;
+    if (currentMessage.user._id === user?.userId) {
+      // Only for user's messages
+      if (currentMessage.read) {
+        ticks = (
+          <Text
+            style={{
+              fontSize: 12,
+              color: selectedTheme.secondary,
+              paddingRight: 5,
+            }}
+          >
+            ✓✓
+          </Text>
+        );
+      } else if (currentMessage.delivered) {
+        ticks = (
+          <Text
+            style={{
+              fontSize: 12,
+              color: selectedTheme.secondary,
+              paddingRight: 5,
+            }}
+          >
+            ✓
+          </Text>
+        );
+      }
+    }
+
+    return (
+      <Bubble
+        {...props}
+        renderTicks={() => ticks}
+        wrapperStyle={{
+          left: {
+            backgroundColor: selectedTheme.message.other.background,
+            marginLeft: 5,
+            marginBottom: 3,
+            maxWidth: "70%",
+          },
+          right: {
+            backgroundColor: selectedTheme.message.user.background,
+            marginRight: 5,
+            marginBottom: 3,
+            maxWidth: "70%",
+          },
+        }}
+      />
+    );
+  };
+
+  const renderCustomView = (props: any) => {
+    return <CustomView {...props} />;
+  };
+
+  const renderMessageAudio = (props: any) => {
+    const { currentMessage } = props;
+
+    // Only render if it's an audio message
+    if (currentMessage.type === "audio" && currentMessage.audio) {
+      return (
+        <AudioPlayerComponent
+          currentAudio={currentMessage.audio}
+          selectedTheme={selectedTheme}
+          profileUrl={
+            currentMessage.user._id === user?.userId
+              ? user?.profileUrl
+              : profileUrl
+          }
+          playBackDuration={currentMessage.duration}
+        />
+      );
+    }
+
+    return null;
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <ChatRoomBackground source={chatBackgroundPic} />
@@ -593,6 +634,17 @@ const ChatScreen = () => {
       </View>
       <View style={styles.crContainer as ViewStyle}>
         <GiftedChat
+          messageContainerRef={messageContainerRef}
+          messagesContainerStyle={styles.crMessages as ViewStyle}
+          messages={messages as IMessage[] | undefined}
+          onPress={handleMessagePress}
+          scrollToBottom={true}
+          keyboardShouldPersistTaps="always"
+          alwaysShowSend={false}
+          renderCustomView={renderCustomView}
+          renderMessageAudio={renderMessageAudio}
+          renderBubble={renderBubble}
+          renderAvatar={null}
           onInputTextChanged={(text) => {
             if (text.length > 0) {
               setShowActionButtons(false);
@@ -600,10 +652,6 @@ const ChatScreen = () => {
               setShowActionButtons(true);
             }
           }}
-          messagesContainerStyle={styles.crMessages as ViewStyle}
-          keyboardShouldPersistTaps="always"
-          alwaysShowSend={false}
-          renderCustomView={renderCustomView}
           renderComposer={(props) =>
             isEditing ? (
               <View style={styles.editContainer as ViewStyle}>
@@ -653,7 +701,6 @@ const ChatScreen = () => {
               />
             )
           }
-          messages={messages as IMessage[] | undefined}
           onSend={(newMessages: IMessage[]) => {
             handleSend(newMessages);
           }}
@@ -663,17 +710,14 @@ const ChatScreen = () => {
               name: user?.username,
             } as any
           }
-          renderMessageText={(props) => {
-            return (
-              <MessageText
-                {...props}
-                textStyle={{
-                  left: { color: selectedTheme.message.other.text },
-                  right: { color: selectedTheme.message.user.text },
-                }}
-              />
-            );
-          }}
+          renderMessageText={(props) => (
+            <RenderMessageText
+              props={props}
+              scrollToMessage={scrollToMessage}
+              selectedTheme={selectedTheme}
+              user={user}
+            />
+          )}
           renderInputToolbar={(props) => (
             <InputToolBar
               isReplying={isReplying}
@@ -683,14 +727,14 @@ const ChatScreen = () => {
               isEditing={isEditing}
               props={props}
               handleSend={handleSend}
+              replyToMessage={replyToMessage}
+              setReplyToMessage={setReplyToMessage}
             />
           )}
-          renderMessageAudio={renderMessageAudio}
           timeTextStyle={{
             left: { color: selectedTheme.message.other.time },
             right: { color: selectedTheme.message.user.time },
           }}
-          renderBubble={renderBubble}
           renderActions={() =>
             !isEditing ? (
               <ActionButtons
@@ -707,7 +751,6 @@ const ChatScreen = () => {
               <EmptyChatRoomList />
             </View>
           )}
-          scrollToBottom={true}
           scrollToBottomComponent={() => (
             <MaterialIcons
               style={[styles.crScrollToEndButton as any]}
@@ -729,8 +772,6 @@ const ChatScreen = () => {
               {...props}
             />
           )}
-          onPress={handleMessagePress}
-          renderAvatar={null}
           renderSend={(props) => (
             <Send
               {...props}

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import React, { memo } from "react";
 import { TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -13,7 +13,9 @@ interface InputToolBarProps {
   showActions: boolean;
   isEditing: boolean;
   props: any;
-  handleSend : (newMessages?: IMessage[]) => Promise<void>
+  handleSend: (newMessages?: IMessage[]) => Promise<void>;
+  replyToMessage?: IMessage | null;
+  setReplyToMessage: React.Dispatch<React.SetStateAction<IMessage | null>>;
 }
 
 const InputToolBar = memo(
@@ -25,11 +27,21 @@ const InputToolBar = memo(
     isEditing,
     props,
     handleSend,
+    replyToMessage,
+    setReplyToMessage,
   }: InputToolBarProps) => {
+    const getReplyPreview = (message: IMessage) => {
+      if (message.type === "text") return message.text;
+      if (message.type === "image") return "📷 Image";
+      if (message.type === "audio") return "🔊 Audio";
+      if (message.type === "location") return "📍 Location";
+      return "";
+    };
+
     return (
       <View>
         {/* Reply to message UI */}
-        {isReplying && (
+        {isReplying && replyToMessage && (
           <View
             style={{
               flexDirection: "row",
@@ -48,33 +60,49 @@ const InputToolBar = memo(
               }}
             >
               <TouchableOpacity style={{ alignSelf: "center" }}>
-                <MaterialIcons name="reply" size={28} color="black" />
+                <MaterialIcons
+                  name="reply"
+                  size={28}
+                  color={selectedTheme.text.primary}
+                />
               </TouchableOpacity>
               <Text
                 style={{
                   fontSize: 35,
                   alignSelf: "flex-start",
                   bottom: 5,
+                  color: selectedTheme.text.primary,
                 }}
               >
                 |
               </Text>
               <View style={{ height: 50, gap: 3 }}>
-                <Text style={{ fontSize: 10, fontWeight: "bold" }}>
-                  Replying To Name
+                <Text
+                  style={{
+                    fontSize: 10,
+                    fontWeight: "bold",
+                    color: selectedTheme.text.primary,
+                  }}
+                >
+                  Replying to {replyToMessage.user.name}
                 </Text>
-                <Text>Replying Message</Text>
+                <Text style={{ color: selectedTheme.text.secondary }}>
+                  {getReplyPreview(replyToMessage)}
+                </Text>
               </View>
             </View>
 
             <TouchableOpacity
               style={{ alignSelf: "center" }}
-              onPress={() => setIsReplying(false)}
+              onPress={() => {
+                setIsReplying(false);
+                setReplyToMessage?.(null);
+              }}
             >
               <MaterialIcons
                 name="close"
                 size={24}
-                color="black"
+                color={selectedTheme.text.primary}
                 style={{
                   marginRight: 5,
                 }}
@@ -104,9 +132,7 @@ const InputToolBar = memo(
             }}
           />
           {!isEditing && !isReplying && showActions && (
-            <RenderAudioButton
-              handleSend={handleSend}
-            />
+            <RenderAudioButton handleSend={handleSend} />
           )}
         </View>
       </View>
@@ -115,5 +141,3 @@ const InputToolBar = memo(
 );
 
 export default InputToolBar;
-
-const styles = StyleSheet.create({});

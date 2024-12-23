@@ -11,13 +11,13 @@ import {
   useAuth,
 } from "../imports";
 import ScreenOverlay from "../components/ScreenOverlay";
-import { LogBox } from "react-native";
+// import { LogBox } from "react-native";
 import { ChatProvider } from "../context/ChatContext";
 
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
   const { gettingLocationOverlay } = useAuth();
-  LogBox.ignoreAllLogs()
+  // LogBox.ignoreAllLogs()
   return (
     <>
       <Stack
