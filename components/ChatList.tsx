@@ -37,11 +37,6 @@ const ChatList = memo(({ rooms, isLoading, onRefresh, theme }:
     }
   }, [filter, rooms, unreadChats]);
 
-  const multiplesOf35 = useMemo(() => {
-    if (rooms.length < 10) return [];
-    return rooms.map((_, index) => index * 65 + 35);
-  }, [rooms]);
-
   const renderEmptyComponent = () => (
     <View style={styles.clEmptyContainer}>
       <Text style={styles.clEmptyText}>
@@ -78,12 +73,10 @@ const ChatList = memo(({ rooms, isLoading, onRefresh, theme }:
           </TouchableOpacity>
         </View>
       )}
-      snapToOffsets={multiplesOf35}
-      decelerationRate="fast"
-      contentOffset={{ y: 35, x: 0 }}
       renderItem={({ item }) => <ChatObject room={item} theme={theme} />}
       keyExtractor={(item, index) => item.roomId || index.toString()}
       ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={isLoading}
