@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
-import { useChatContext } from "@/context/ChatContext";
+import { useChatContext } from "../context/ChatContext";
 
 interface AudioMessage {
   _id: string;

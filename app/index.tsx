@@ -4,7 +4,7 @@ import LottieView from "lottie-react-native";
 import { ExternalPathString, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth, useTheme, Send } from "../imports";
-import purpleTheme from "@/Themes/Purple";
+import purpleTheme from "../Themes/Purple";
 
 const Index = () => {
   const { isLoading, isAuthenticated } = useAuth();

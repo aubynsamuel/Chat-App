@@ -4,8 +4,8 @@ import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import { router } from "expo-router";
 import getStyles from "../styles/Component_Styles";
 import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
-import { RoomData } from "@/app/(main)/(homeStack)/home";
-import { Theme } from "@/context/ThemeContext";
+import { RoomData } from "../app/(main)/(homeStack)/home";
+import { Theme } from "../context/ThemeContext";
 const ChatObject = memo(({ room, theme } :{
   room: RoomData,
   theme: Theme}) => {

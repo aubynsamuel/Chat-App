@@ -1,12 +1,20 @@
 import { TouchableOpacity, Text, View } from "react-native";
-import { MessageText } from "react-native-gifted-chat";
+import { MessageText, MessageTextProps } from "react-native-gifted-chat";
+import { IMessage } from "../Functions/types";
+import { UserData } from "../context/AuthContext";
+import { Theme } from "../context/ThemeContext";
 
 const RenderMessageText = ({
   props,
   scrollToMessage,
   selectedTheme,
   user,
-}: any) => {
+}: {
+  props: MessageTextProps<IMessage>;
+  scrollToMessage: (message?: string | number) => void;
+  selectedTheme: Theme;
+  user: UserData | null;
+}) => {
   const { currentMessage } = props;
 
   return (
@@ -15,7 +23,7 @@ const RenderMessageText = ({
       {currentMessage.replyTo && (
         <TouchableOpacity
           activeOpacity={0.5}
-          onPress={() => scrollToMessage(currentMessage.replyTo._id)}
+          onPress={() => scrollToMessage(currentMessage.replyTo?._id)}
           style={
             {
               backgroundColor:
@@ -60,7 +68,7 @@ const RenderMessageText = ({
             numberOfLines={2}
             style={{
               fontSize: 14,
-              color: selectedTheme.reply?.text,
+              color: selectedTheme.text.primary,
             }}
           >
             {currentMessage.replyTo.type === "text"

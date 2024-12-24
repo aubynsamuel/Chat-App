@@ -47,7 +47,7 @@ function HomeScreen() {
   const styles = getStyles(selectedTheme);
 
   useEffect(() => {
-    NotificationTokenManager.initializeAndUpdateToken(user?.userId);
+    NotificationTokenManager.initializeAndUpdateToken(user?.userId as string);
   }, [user]);
 
   useEffect(() => {

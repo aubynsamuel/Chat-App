@@ -3,7 +3,7 @@ import React, { memo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Alert } from "react-native";
 import { useAuth } from "../imports";
-import { useChatContext } from "@/context/ChatContext";
+import { useChatContext } from "../context/ChatContext";
 
 // Define interfaces for type safety
 

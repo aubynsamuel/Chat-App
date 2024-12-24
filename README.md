@@ -5,7 +5,7 @@ A real-time chat application built with **Expo Router**, **React Native**, and *
 ## 📱 Key Features
 
 - **Real-Time Messaging**: Instant message delivery powered by Firebase
-- **Authentication**: Secure login/signup system with Firebase Auth
+- **Authentication**: Secure login/sign up system with Firebase Auth
 - **Offline Support**: Local message caching for offline access
 - **Rich Media**: Support for images, audio messages, and location sharing
 - **Profile Management**: Customizable user profiles with profile pictures
