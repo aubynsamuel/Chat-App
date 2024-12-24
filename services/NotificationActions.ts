@@ -26,7 +26,7 @@ async function sendNotification(
     to: expoPushToken,
     sound: "default",
     title: title,
-    body: body,
+    body: body.length < 100 ? body : body.substring(0, 100) + "...",
     data: {
       tokenToReplyTo: deviceToken || null,
       replyToRoomId: roomId || null,
