@@ -1,10 +1,10 @@
-import { Theme } from "@/context/ThemeContext";
+import { Theme } from "../context/ThemeContext";
 import { StyleSheet } from "react-native";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
-import purpleTheme from "@/Themes/Purple";
+import purpleTheme from "../Themes/Purple";
 
 const getStyles = (theme: Theme) => {
   return StyleSheet.create({

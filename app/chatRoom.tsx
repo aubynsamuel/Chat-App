@@ -11,8 +11,10 @@ import {
   GiftedChat,
   Bubble,
   Send,
-  MessageText,
   Composer,
+  BubbleProps,
+  MessageAudioProps,
+  MessageTextProps,
 } from "react-native-gifted-chat";
 import {
   collection,
@@ -63,9 +65,9 @@ import { TextStyle } from "react-native";
 import { ThemeContextType } from "../context/ThemeContext";
 import purpleTheme from "../Themes/Purple";
 import { IMessage, FirebaseMessage } from "../Functions/types";
-import { useChatContext } from "@/context/ChatContext";
-import AudioRecordingOverlay from "@/components/AudioRecordingOverlay";
-import RenderMessageText from "@/components/RenderMessageText";
+import { useChatContext } from "../context/ChatContext";
+import AudioRecordingOverlay from "../components/AudioRecordingOverlay";
+import RenderMessageText from "../components/RenderMessageText";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -308,7 +310,7 @@ const ChatScreen = () => {
     [roomId, user, otherUserToken, replyToMessage]
   );
 
-  const scrollToMessage = (messageId: string) => {
+  const scrollToMessage = (messageId?: string | number) => {
     const index = messages.findIndex((message) => message._id === messageId);
     if (index !== -1 && messageContainerRef.current) {
       messageContainerRef.current.scrollToIndex({
@@ -530,7 +532,7 @@ const ChatScreen = () => {
     }
   };
 
-  const renderBubble = (props: any) => {
+  const renderBubble = (props: Readonly<BubbleProps<IMessage>>) => {
     const { currentMessage } = props;
 
     let ticks = null;
@@ -589,7 +591,7 @@ const ChatScreen = () => {
     return <CustomView {...props} />;
   };
 
-  const renderMessageAudio = (props: any) => {
+  const renderMessageAudio = (props: MessageAudioProps<IMessage>) => {
     const { currentMessage } = props;
 
     // Only render if it's an audio message
@@ -710,7 +712,7 @@ const ChatScreen = () => {
               name: user?.username,
             } as any
           }
-          renderMessageText={(props) => (
+          renderMessageText={(props: MessageTextProps<IMessage>) => (
             <RenderMessageText
               props={props}
               scrollToMessage={scrollToMessage}

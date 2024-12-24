@@ -1,7 +1,7 @@
 import { db } from "../env/firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { getCurrentTime } from "./Commons";
-import { UserData } from "@/context/AuthContext";
+import { UserData } from "../context/AuthContext";
 
 const createRoomIfItDoesNotExist = async (
   roomId: string,

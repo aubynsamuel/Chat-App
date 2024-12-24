@@ -7,7 +7,6 @@ import {
   Text,
   TouchableOpacity,
   Image,
-  TextInputProps,
 } from "react-native";
 import { getDocs, query, where, collection } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";

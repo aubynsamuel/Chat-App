@@ -11,7 +11,7 @@ import React from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import ScreenOverlay from "./ScreenOverlay";
-import { formatTime } from "@/imports";
+import { formatTime } from "../imports";
 
 
 interface AudioRecordingOverlayProps {

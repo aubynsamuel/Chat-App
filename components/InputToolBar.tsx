@@ -4,7 +4,8 @@ import { TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { InputToolbar } from "react-native-gifted-chat";
 import RenderAudioButton from "./RecordAudioButton";
-import { IMessage } from "@/Functions/types";
+import { IMessage } from "../Functions/types";
+import { useAuth } from "../imports";
 
 interface InputToolBarProps {
   isReplying: boolean;
@@ -38,6 +39,7 @@ const InputToolBar = memo(
       return "";
     };
 
+    const user = useAuth().user;
     return (
       <View>
         {/* Reply to message UI */}
@@ -84,9 +86,18 @@ const InputToolBar = memo(
                     color: selectedTheme.text.primary,
                   }}
                 >
-                  Replying to {replyToMessage.user.name}
+                  Replying to{" "}
+                  {replyToMessage.user.name === user?.username
+                    ? "Yourself"
+                    : replyToMessage.user.name}
                 </Text>
-                <Text numberOfLines={1} style={{ color: selectedTheme.text.secondary , maxWidth: "81%" }}>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    color: selectedTheme.text.secondary,
+                    maxWidth: "81%",
+                  }}
+                >
                   {getReplyPreview(replyToMessage)}
                 </Text>
               </View>

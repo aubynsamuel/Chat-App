@@ -14,7 +14,7 @@ import { useAuth } from "../imports";
 import { StatusBar } from "expo-status-bar";
 import { IMessage } from "../Functions/types";
 import ScreenOverlay from "./ScreenOverlay";
-import { useChatContext } from "@/context/ChatContext";
+import { useChatContext } from "../context/ChatContext";
 
 // Define types for the message and upload file
 export interface MediaFile {

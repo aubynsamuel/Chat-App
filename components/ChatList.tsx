@@ -10,7 +10,7 @@ import {
 import ChatObject from "./ChatObject";
 import getStyles from "../styles/Component_Styles";
 import { useAuth } from "../imports";
-import { Theme } from "@/context/ThemeContext";
+import { Theme } from "../context/ThemeContext";
 
 const ChatList = memo(({ rooms, isLoading, onRefresh, theme }: 
   { rooms: any[]; isLoading: boolean; onRefresh: () => void; theme: Theme; }

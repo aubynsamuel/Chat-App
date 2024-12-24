@@ -10,7 +10,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { ExternalPathString, router } from "expo-router";
 import getStyles from "../styles/Component_Styles";
 import { useAuth } from "../imports";
-import { Theme } from "@/context/ThemeContext";
+import { Theme } from "../context/ThemeContext";
 
 interface HeaderBarProp {
   title: string;

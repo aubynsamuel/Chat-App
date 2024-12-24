@@ -1,6 +1,6 @@
-import { Theme } from "@/context/ThemeContext";
+import { Theme } from "../context/ThemeContext";
 import { StyleSheet } from "react-native";
-import purpleTheme from "@/Themes/Purple";
+import purpleTheme from "../Themes/Purple";
 
 const getStyles = (theme: Theme) => {
   return StyleSheet.create({

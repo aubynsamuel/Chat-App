@@ -5,6 +5,22 @@ export interface User {
   username: string;
 }
 
+export interface replyData {
+  _id: string | number;
+  text: string;
+  user: {
+      _id: string;
+      name: string;
+  };
+  type: string | undefined;
+  image: string | null;
+  audio: string | null;
+  location: {
+      latitude?: number;
+      longitude?: number;
+  } | null;
+}
+
 export interface IMessage {
   _id: string | number;
   text: string;
@@ -15,7 +31,7 @@ export interface IMessage {
   };
   image?: string;
   audio?: string;
-  replyTo?: any;
+  replyTo?: replyData | null;
   read?: boolean;
   delivered?: boolean;
   type?: string;
@@ -31,7 +47,7 @@ export interface FirebaseMessage {
   senderId: string | undefined;
   senderName: string | undefined;
   createdAt: Timestamp;
-  replyTo: any;
+  replyTo?: replyData | null;
   read: boolean;
   delivered: boolean;
   type: any;
