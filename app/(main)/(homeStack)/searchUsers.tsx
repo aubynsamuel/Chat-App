@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { getDocs, query, where, collection } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -27,11 +28,15 @@ const SearchUsersScreen: React.FC = () => {
   const inputRef = useRef<TextInput>(null);
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
+  const [errorMessage, setErrorMessage] = useState("Search users");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (text: string) => {
+    setIsLoading(true);
     setSearchText(text);
 
     if (text.trim() === "") {
+      setIsLoading(false);
       setFilteredUsers([]);
       return;
     }
@@ -56,7 +61,17 @@ const SearchUsersScreen: React.FC = () => {
 
       setFilteredUsers(userData);
     } catch (error) {
+      setIsLoading(false);
       console.error("Error searching users:", error);
+    } finally {
+      if (filteredUsers.length < 0) {
+        setErrorMessage("No users found");
+      } else {
+        setErrorMessage(
+          "An error occurred \n Please check your internet connection"
+        );
+      }
+      setIsLoading(false);
     }
   };
 
@@ -99,36 +114,44 @@ const SearchUsersScreen: React.FC = () => {
         <TextInput
           ref={inputRef}
           style={styles.searchInput}
-          placeholder="Search users..."
+          placeholder="Search..."
           placeholderTextColor={selectedTheme.text.secondary}
           value={searchText}
           onChangeText={handleSearch}
         />
       </View>
 
-      <FlatList
-        data={filteredUsers}
-        keyExtractor={(item) => item.userId}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.userItem}
-            onPress={() => handleUserPress(item)}
-          >
-            <Image
-              source={
-                item.profileUrl
-                  ? { uri: item.profileUrl }
-                  : require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
-              }
-              style={{ width: 50, height: 50, borderRadius: 25 }}
-            />
-            <Text style={styles.username}>{item.username}</Text>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.noResults}>No users found</Text>
-        }
-      />
+      {!isLoading ? (
+        <FlatList
+          data={filteredUsers}
+          keyExtractor={(item) => item.userId}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.userItem}
+              onPress={() => handleUserPress(item)}
+            >
+              <Image
+                source={
+                  item.profileUrl
+                    ? { uri: item.profileUrl }
+                    : require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
+                }
+                style={{ width: 50, height: 50, borderRadius: 25 }}
+              />
+              <Text style={styles.username}>{item.username}</Text>
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <Text style={styles.noResults}>{errorMessage}</Text>
+          }
+        />
+      ) : (
+        <ActivityIndicator
+          size={"large"}
+          color={selectedTheme.secondary}
+          style={{ padding: 20, marginTop: "10%" }}
+        />
+      )}
     </SafeAreaView>
   );
 };
