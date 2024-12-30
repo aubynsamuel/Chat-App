@@ -17,7 +17,8 @@ const RenderBubble = memo(
     const { currentMessage } = props;
     const { selectedTheme } = useTheme();
     const swipeableRef = useRef<any>(null);
-    const { setIsReplying, setReplyToMessage } = useChatContext();
+    const { setIsReplying, setReplyToMessage, isReplying, replyToMessage } =
+      useChatContext();
 
     const renderLeftActions = useCallback(
       (progress: any) => {
@@ -34,7 +35,7 @@ const RenderBubble = memo(
           </Animated.View>
         );
       },
-      [currentMessage]
+      [user, selectedTheme, replyToMessage, isReplying]
     );
 
     const handleSwipe = (currentMessage: IMessage) => {

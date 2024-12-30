@@ -1,5 +1,5 @@
-import React, { memo, useState } from "react";
-import { Text, TouchableOpacity, View, Image } from "react-native";
+import React, { memo } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import {
   Menu,
   MenuOptions,
@@ -27,8 +27,8 @@ const TopHeaderBar = memo(
     profilePicShown = true,
     searchButtonShown,
   }: HeaderBarProp) => {
-    const { user, logout } = useAuth();
-    const [imageFailed, setImageFailed] = useState(false);
+    const { logout } = useAuth();
+    // const [imageFailed, setImageFailed] = useState(false);
     const styles = getStyles(theme);
 
     const handleLogout = () => {
