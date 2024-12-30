@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import {
   GiftedChat,
-  Bubble,
   Send,
   Composer,
   BubbleProps,
@@ -68,6 +67,7 @@ import { IMessage, FirebaseMessage } from "../Functions/types";
 import { useChatContext } from "../context/ChatContext";
 import AudioRecordingOverlay from "../components/AudioRecordingOverlay";
 import RenderMessageText from "../components/RenderMessageText";
+import RenderBubble from "@/components/RenderBubble";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -86,6 +86,10 @@ const ChatScreen = () => {
     setRecordedAudioUri,
     setImageModalVisibility,
     imageModalVisibility,
+    isReplying,
+    setIsReplying,
+    replyToMessage,
+    setReplyToMessage,
   } = useChatContext();
 
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -98,13 +102,13 @@ const ChatScreen = () => {
   const [imageUrl, setImageUrl] =
     useState<React.SetStateAction<string | null>>("");
   const [sendingAudio, setSendingAudio] = useState<boolean>(false);
-  const [isReplying, setIsReplying] = useState(false);
-  const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
   const messageContainerRef = useRef<any>(null);
 
   useEffect(() => {
     return () => {
       setGettingLocationOverlay(false);
+      setIsReplying(false);
+      setReplyToMessage(null);
     };
   }, []);
 
@@ -532,61 +536,6 @@ const ChatScreen = () => {
     }
   };
 
-  const renderBubble = (props: Readonly<BubbleProps<IMessage>>) => {
-    const { currentMessage } = props;
-
-    let ticks = null;
-    if (currentMessage.user._id === user?.userId) {
-      // Only for user's messages
-      if (currentMessage.read) {
-        ticks = (
-          <Text
-            style={{
-              fontSize: 12,
-              color: selectedTheme.secondary,
-              paddingRight: 5,
-            }}
-          >
-            ✓✓
-          </Text>
-        );
-      } else if (currentMessage.delivered) {
-        ticks = (
-          <Text
-            style={{
-              fontSize: 12,
-              color: selectedTheme.secondary,
-              paddingRight: 5,
-            }}
-          >
-            ✓
-          </Text>
-        );
-      }
-    }
-
-    return (
-      <Bubble
-        {...props}
-        renderTicks={() => ticks}
-        wrapperStyle={{
-          left: {
-            backgroundColor: selectedTheme.message.other.background,
-            marginLeft: 5,
-            marginBottom: 3,
-            maxWidth: "65%",
-          },
-          right: {
-            backgroundColor: selectedTheme.message.user.background,
-            marginRight: 5,
-            marginBottom: 3,
-            maxWidth: "65%",
-          },
-        }}
-      />
-    );
-  };
-
   const renderCustomView = (props: any) => {
     return <CustomView {...props} />;
   };
@@ -624,7 +573,7 @@ const ChatScreen = () => {
               : selectedTheme.Statusbar.style
           }` as StatusBarStyle | undefined
         }
-        backgroundColor={selectedTheme.primary}
+        backgroundColor={"white"}
         animated={true}
       />
       <View style={{ position: "absolute", zIndex: 5, width: "100%" }}>
@@ -645,7 +594,9 @@ const ChatScreen = () => {
           alwaysShowSend={false}
           renderCustomView={renderCustomView}
           renderMessageAudio={renderMessageAudio}
-          renderBubble={renderBubble}
+          renderBubble={(props: Readonly<BubbleProps<IMessage>>) => (
+            <RenderBubble props={props} />
+          )}
           renderAvatar={null}
           onInputTextChanged={(text) => {
             if (text.length > 0) {

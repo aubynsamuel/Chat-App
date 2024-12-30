@@ -3,6 +3,7 @@ import { useAuth, UserData } from "./AuthContext";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
 import { Audio } from "expo-av";
+import { IMessage } from "@/Functions/types";
 
 // Define interfaces for type safety
 interface User {
@@ -48,6 +49,10 @@ interface ChatContextType {
   ) => Promise<void>;
   setRecording: React.Dispatch<React.SetStateAction<Audio.Recording | null>>;
   recording: Audio.Recording | null;
+  isReplying: boolean;
+  setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
+  replyToMessage: IMessage | null;
+  setReplyToMessage: React.Dispatch<React.SetStateAction<IMessage | null>>;
 }
 
 interface ChatProvider {
@@ -65,6 +70,8 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
   const [imageModalVisibility, setImageModalVisibility] =
     useState<boolean>(false);
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
 
   async function getLocationAsync(
     handleSend: OnSendFunction,
@@ -128,6 +135,10 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
     setImageModalVisibility,
     recording,
     setRecording,
+    isReplying,
+    setIsReplying,
+    replyToMessage,
+    setReplyToMessage,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
