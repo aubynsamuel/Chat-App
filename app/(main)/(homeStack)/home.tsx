@@ -140,8 +140,7 @@ function HomeScreen() {
       style={
         {
           flex: 1,
-          backgroundColor:
-            selectedTheme === darkTheme ? selectedTheme.background : null,
+          backgroundColor: selectedTheme.background,
         } as any
       }
     >
@@ -158,9 +157,10 @@ function HomeScreen() {
       />
 
       <TopHeaderBar
-        title={"Chats"}
+        title={"Flash Send"}
         backButtonShown={false}
         theme={selectedTheme}
+        searchButtonShown={true}
       />
       <View style={styles.hsContainer}>
         <ChatList
@@ -174,11 +174,7 @@ function HomeScreen() {
         style={styles.floatingButton}
         onPress={() => router.navigate("/searchUsers")}
       >
-        <MaterialIcons
-          name="search"
-          size={30}
-          color={selectedTheme.text.primary}
-        />
+        <MaterialIcons name="add" size={30} color={selectedTheme.primary} />
       </TouchableOpacity>
     </View>
   );

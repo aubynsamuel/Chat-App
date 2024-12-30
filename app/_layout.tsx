@@ -11,13 +11,13 @@ import {
   useAuth,
 } from "../imports";
 import ScreenOverlay from "../components/ScreenOverlay";
-// import { LogBox } from "react-native";
+import { LogBox } from "react-native";
 import { ChatProvider } from "../context/ChatContext";
 
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
   const { gettingLocationOverlay } = useAuth();
-  // LogBox.ignoreAllLogs()
+  LogBox.ignoreAllLogs();
   return (
     <>
       <Stack
@@ -33,7 +33,12 @@ const RootLayout = () => {
           }}
         />
         <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(main)" />
+        <Stack.Screen
+          name="(main)"
+          options={{
+            navigationBarColor: selectedTheme.background,
+          }}
+        />
         <Stack.Screen
           name="chatRoom"
           options={{
@@ -44,7 +49,9 @@ const RootLayout = () => {
       </Stack>
       <Toast />
       {/* Loading spinner */}
-      {gettingLocationOverlay && <ScreenOverlay title={"Getting your location"} />}
+      {gettingLocationOverlay && (
+        <ScreenOverlay title={"Getting your location"} />
+      )}
     </>
   );
 };

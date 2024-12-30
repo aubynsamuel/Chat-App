@@ -39,7 +39,7 @@ const getStyles = (theme: Theme) => {
       color: theme.text.secondary,
     },
     time: {
-      fontSize: 14,
+      fontSize: 12,
       color: theme.text.secondary,
       marginBottom: 2,
       alignSelf: "flex-end",
@@ -59,8 +59,8 @@ const getStyles = (theme: Theme) => {
     hcHeaderContainer: {
       flexDirection: "row",
       alignItems: "center",
-      padding: 10,
-      backgroundColor: theme.screenHeaderBarColor,
+      // padding: 10,
+      backgroundColor: "white",
       elevation: 10,
       justifyContent: "space-between",
       overflow: "hidden",
@@ -73,19 +73,20 @@ const getStyles = (theme: Theme) => {
       marginRight: 53,
     },
     hcHeaderBarIcon: {
-      marginHorizontal: 10,
+      marginLeft: 15,
     },
     hcContainer: {
       backgroundColor: theme.primary,
       elevation: 10,
     },
     hcAvatar: {
-      height: 45,
-      width: 45,
-      borderRadius: 30,
+      // height: 45,
+      // width: 45,
+      // borderRadius: 30,
+      top: 5,
       position: "absolute",
       right: 10,
-      zIndex: 2,
+      // zIndex: 2,
     },
     hcProfileContainer: {
       alignItems: "flex-end",
@@ -107,21 +108,18 @@ const getStyles = (theme: Theme) => {
       padding: 10,
       backgroundColor: theme.screenHeaderBarColor,
       elevation: 10,
-      height: 85,
+      height: "10%",
       paddingTop: 24,
       justifyContent: "space-between",
     },
     hhHeaderTitle: {
-      fontSize: 25,
-      fontWeight: "500",
+      fontSize: 21,
+      fontWeight: "bold",
       marginHorizontal: 10,
       color: theme.text.primary,
     },
     hhHeaderBarIcon: {
       marginHorizontal: 10,
-    },
-    hhContainer: {
-      
     },
     hhMenuText: {
       fontSize: 15,

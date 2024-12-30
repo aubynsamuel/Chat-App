@@ -1,13 +1,13 @@
 const greenTheme = {
   primary: "lightgreen",
   secondary: "darkgreen",
-  background: "#f3f3f3",
+  background: "white",
   surface: "#373737",
   readColor: "darkgreen",
   screenHeaderBarColor: "lightgreen",
   Statusbar: {
     style: "dark",
-    backgroundColor: "#f3f3f3",
+    backgroundColor: "white",
   },
   text: {
     primary: "#000000",

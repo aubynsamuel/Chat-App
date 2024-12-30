@@ -8,7 +8,6 @@ const ProfileLayout = () => {
     <Stack
       screenOptions={{
         headerShown: false,
-        navigationBarColor: selectedTheme.primary,
       }}
     >
       <Stack.Screen name="profile" />

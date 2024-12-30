@@ -1,13 +1,13 @@
 const lightBlueTheme = {
   primary: "lightblue",
   secondary: "#007993",
-  background: "#f3f3f3",
+  background: "white",
   surface: "#373737",
   readColor: "#007993",
   screenHeaderBarColor: "lightblue",
   Statusbar: {
     style: "dark",
-    backgroundColor: "#f3f3f3",
+    backgroundColor: "white",
   },
   text: {
     primary: "#000000",

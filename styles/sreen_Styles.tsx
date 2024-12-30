@@ -13,7 +13,7 @@ const getStyles = (theme: Theme) => {
       flex: 1,
     },
     crMessages: {
-      marginTop: 65,
+      marginTop: 55,
       flex: 1,
     },
     crScrollToEndButton: {
@@ -113,7 +113,7 @@ const getStyles = (theme: Theme) => {
       position: "absolute",
       bottom: 50,
       right: 20,
-      backgroundColor: theme.primary,
+      backgroundColor: theme.surface,
       borderRadius: 50,
       width: 50,
       height: 50,
@@ -202,10 +202,11 @@ const getStyles = (theme: Theme) => {
       color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
     },
     userItem: {
-      padding: 15,
+      padding: 5,
       borderBottomWidth: 1,
       borderBottomColor: theme.border,
       marginLeft: 10,
+      marginRight: 10,
       flexDirection: "row",
       alignItems: "center",
     },
@@ -216,6 +217,7 @@ const getStyles = (theme: Theme) => {
     },
     noResults: {
       padding: 20,
+      marginTop: "10%",
       textAlign: "center",
       color: theme.text.secondary,
       fontSize: 16,

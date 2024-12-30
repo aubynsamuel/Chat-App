@@ -10,7 +10,6 @@ const HomeLayout = () => {
       <Stack
         screenOptions={{
           headerShown: false,
-          navigationBarColor: selectedTheme.primary,
         }}
       >
         <Stack.Screen name="home" />
