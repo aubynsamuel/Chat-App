@@ -38,7 +38,7 @@ const CallsScreen = () => {
     },
   ];
 
-  const renderCallItem = ({ item }: {item:any}) => {
+  const renderCallItem = ({ item }: { item: any }) => {
     const callIcon =
       item.type === "missed"
         ? "call-missed"
@@ -72,6 +72,7 @@ const CallsScreen = () => {
         backButtonShown={false}
         theme={selectedTheme}
         profilePicShown={false}
+        searchButtonShown={false}
       />
       <FlatList
         data={callsData}

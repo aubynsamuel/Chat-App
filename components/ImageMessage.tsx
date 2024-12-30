@@ -22,58 +22,57 @@ interface RenderMessageImageProps {
   imageStyle?: ImageStyle;
 }
 
-const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(({
-  currentMessage,
-  imageStyle,
-}) => {
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
+  ({ currentMessage, imageStyle }) => {
+    const [modalVisible, setModalVisible] = useState<boolean>(false);
 
-  if (!currentMessage.image) return null;
+    if (!currentMessage.image) return null;
 
-  return (
-    <>
-      <TouchableOpacity
-        onPress={() => setModalVisible(true)}
-        activeOpacity={0.8}
-      >
-        <Image
-          source={{ uri: currentMessage.image }}
-          style={[styles.image, imageStyle]}
-          resizeMode="cover"
-        />
-      </TouchableOpacity>
-
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        {modalVisible ? (
-          <StatusBar style="dark" backgroundColor="black" />
-        ) : null}
-        <View style={styles.modalContainer}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <MaterialIcons name="close" size={30} color="white" />
-          </TouchableOpacity>
-
+    return (
+      <>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.8}
+        >
           <Image
             source={{ uri: currentMessage.image }}
-            style={styles.fullScreenImage}
-            resizeMode="contain"
+            style={[styles.image, imageStyle]}
+            resizeMode="cover"
           />
-          {currentMessage.text && (
-            <Text style={{ color: "white", fontSize: 18 }}>
-              {currentMessage.text}
-            </Text>
-          )}
-        </View>
-      </Modal>
-    </>
-  );
-});
+        </TouchableOpacity>
+
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          {modalVisible ? (
+            <StatusBar style="dark" backgroundColor="black" />
+          ) : null}
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <MaterialIcons name="close" size={24} color="white" />
+            </TouchableOpacity>
+
+            <Image
+              source={{ uri: currentMessage.image }}
+              style={styles.fullScreenImage}
+              resizeMode="contain"
+            />
+            {currentMessage.text && (
+              <Text style={{ color: "white", fontSize: 18 }}>
+                {currentMessage.text}
+              </Text>
+            )}
+          </View>
+        </Modal>
+      </>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   image: {

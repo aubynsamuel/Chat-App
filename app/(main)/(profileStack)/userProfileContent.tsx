@@ -20,7 +20,7 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
   const { selectedTheme, changeBackgroundPic } = useTheme();
   const styles = getStyles(selectedTheme);
 
-  const [selected, setSelected] = useState<boolean>();
+  const [selected, setSelected] = useState<boolean>(true);
   const handleLogout = async () => {
     await logout();
     router.replace("/login" as ExternalPathString);

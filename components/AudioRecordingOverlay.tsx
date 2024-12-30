@@ -7,12 +7,11 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import React from "react";
+import React, { memo } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import ScreenOverlay from "./ScreenOverlay";
 import { formatTime } from "../imports";
-
 
 interface AudioRecordingOverlayProps {
   isRecording: boolean;
@@ -21,64 +20,69 @@ interface AudioRecordingOverlayProps {
   sendAudioMessage: () => Promise<void>;
   sendingAudio: boolean;
 }
-const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = ({
-  isRecording,
-  playbackTime,
-  resetRecording,
-  sendAudioMessage,
-  sendingAudio,
-}) => {
-  return (
-    <ScreenOverlay
-      containerStyles={{ bottom: 54, height: null, paddingBottom: 50 }}
-      showIndicator={false}
-      children={
-        <View style={{ alignItems: "center" }}>
-          {/* Recording State and timer */}
-          <LottieView
-            source={require("../myAssets/Lottie_Files/Recording.json")}
-            autoPlay
-            loop={true}
-            style={{ width: 80, height: 80 }}
-          />
-          <Text style={styles.recordingText as TextStyle}>
-            {isRecording ? "Recording..." : "Recording Complete"}
-          </Text>
-          <Text style={styles.timeText as TextStyle}>
-            {formatTime(playbackTime)}
-          </Text>
+const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
+  ({
+    isRecording,
+    playbackTime,
+    resetRecording,
+    sendAudioMessage,
+    sendingAudio,
+  }) => {
+    return (
+      <ScreenOverlay
+        containerStyles={{ bottom: 54, height: null, paddingBottom: 50 }}
+        showIndicator={false}
+        children={
+          <View style={{ alignItems: "center" }}>
+            {/* Recording State and timer */}
+            <LottieView
+              source={require("../myAssets/Lottie_Files/Recording.json")}
+              autoPlay
+              loop={true}
+              style={{ width: 80, height: 80 }}
+            />
+            <Text style={styles.recordingText as TextStyle}>
+              {isRecording ? "Recording..." : "Recording Complete"}
+            </Text>
+            <Text style={styles.timeText as TextStyle}>
+              {formatTime(playbackTime)}
+            </Text>
 
-          {/* Recording Controls */}
-          {!isRecording && !sendingAudio && (
-            <View style={styles.controlsContainer as ViewStyle}>
-              <TouchableOpacity
-                style={[
-                  styles.controlButton as any,
-                  styles.discardButton as any,
-                ]}
-                onPress={resetRecording}
-              >
-                <MaterialIcons name="delete" size={24} color="white" />
-                <Text style={styles.buttonText as TextStyle}>Discard</Text>
-              </TouchableOpacity>
+            {/* Recording Controls */}
+            {!isRecording && !sendingAudio && (
+              <View style={styles.controlsContainer as ViewStyle}>
+                <TouchableOpacity
+                  style={[
+                    styles.controlButton as any,
+                    styles.discardButton as any,
+                  ]}
+                  onPress={resetRecording}
+                >
+                  <MaterialIcons name="delete" size={24} color="white" />
+                  <Text style={styles.buttonText as TextStyle}>Discard</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.controlButton as any, styles.sendButton as any]}
-                onPress={sendAudioMessage}
-              >
-                <MaterialIcons name="send" size={24} color="white" />
-                <Text style={styles.buttonText as TextStyle}>Send</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {!isRecording && sendingAudio && (
-            <ActivityIndicator size={"large"} color={"white"} />
-          )}
-        </View>
-      }
-    />
-  );
-};
+                <TouchableOpacity
+                  style={[
+                    styles.controlButton as any,
+                    styles.sendButton as any,
+                  ]}
+                  onPress={sendAudioMessage}
+                >
+                  <MaterialIcons name="send" size={24} color="white" />
+                  <Text style={styles.buttonText as TextStyle}>Send</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {!isRecording && sendingAudio && (
+              <ActivityIndicator size={"large"} color={"white"} />
+            )}
+          </View>
+        }
+      />
+    );
+  }
+);
 
 export default AudioRecordingOverlay;
 

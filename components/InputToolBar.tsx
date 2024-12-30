@@ -6,6 +6,7 @@ import { InputToolbar } from "react-native-gifted-chat";
 import RenderAudioButton from "./RecordAudioButton";
 import { IMessage } from "../Functions/types";
 import { useAuth } from "../imports";
+import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
 
 interface InputToolBarProps {
   isReplying: boolean;
@@ -31,6 +32,8 @@ const InputToolBar = memo(
     replyToMessage,
     setReplyToMessage,
   }: InputToolBarProps) => {
+    const user = useAuth().user;
+
     const getReplyPreview = (message: IMessage) => {
       if (message.type === "text") return message.text;
       if (message.type === "image") return "📷 Image";
@@ -39,12 +42,13 @@ const InputToolBar = memo(
       return "";
     };
 
-    const user = useAuth().user;
     return (
       <View>
         {/* Reply to message UI */}
         {isReplying && replyToMessage && (
-          <View
+          <Animated.View
+            entering={FadeInDown.duration(300)}
+            exiting={FadeOutDown.duration(200)}
             style={{
               flexDirection: "row",
               width: "100%",
@@ -59,6 +63,7 @@ const InputToolBar = memo(
               style={{
                 flexDirection: "row",
                 gap: 10,
+                width: "94%",
               }}
             >
               <TouchableOpacity style={{ alignSelf: "center" }}>
@@ -95,7 +100,7 @@ const InputToolBar = memo(
                   numberOfLines={1}
                   style={{
                     color: selectedTheme.text.secondary,
-                    maxWidth: "81%",
+                    maxWidth: "90%",
                   }}
                 >
                   {getReplyPreview(replyToMessage)}
@@ -119,7 +124,7 @@ const InputToolBar = memo(
                 }}
               />
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         )}
 
         {/* Input toolbar and microphone */}

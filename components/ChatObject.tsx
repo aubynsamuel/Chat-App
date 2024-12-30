@@ -6,9 +6,7 @@ import getStyles from "../styles/Component_Styles";
 import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
 import { RoomData } from "../app/(main)/(homeStack)/home";
 import { Theme } from "../context/ThemeContext";
-const ChatObject = memo(({ room, theme } :{
-  room: RoomData,
-  theme: Theme}) => {
+const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
   const { user, addToUnread, removeFromUnread, setProfileUrlLink } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
@@ -60,25 +58,24 @@ const ChatObject = memo(({ room, theme } :{
         style={[styles.chatBox, { width: "82%", justifyContent: "flex-start" }]}
       >
         {/* Avatar */}
+
         <View>
-          <TouchableOpacity>
-            {imageFailed ||
-            room?.otherParticipant.profileUrl == "" ||
-            room?.otherParticipant.profileUrl == null ? (
-              <Image
-                style={{ width: 50, height: 50, borderRadius: 30 }}
-                source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
-              />
-            ) : (
-              <Image
-                style={{ width: 50, height: 50, borderRadius: 30 }}
-                source={{ uri: room?.otherParticipant.profileUrl }}
-                onError={() => {
-                  setImageFailed(true);
-                }}
-              />
-            )}
-          </TouchableOpacity>
+          {imageFailed ||
+          room?.otherParticipant.profileUrl == "" ||
+          room?.otherParticipant.profileUrl == null ? (
+            <Image
+              style={{ width: 50, height: 50, borderRadius: 30 }}
+              source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+            />
+          ) : (
+            <Image
+              style={{ width: 50, height: 50, borderRadius: 30 }}
+              source={{ uri: room?.otherParticipant.profileUrl }}
+              onError={() => {
+                setImageFailed(true);
+              }}
+            />
+          )}
         </View>
 
         <View style={{ marginLeft: 8, width: "80%" }}>

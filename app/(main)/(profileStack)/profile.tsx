@@ -78,7 +78,7 @@ const UserProfileScreen: React.FC = () => {
           ref={bottomSheetModalRef}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
-          backgroundStyle={{ backgroundColor: "lightgrey" }}
+          backgroundStyle={{ backgroundColor: "white" }}
           backdropComponent={(props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop
               {...props}
@@ -122,7 +122,7 @@ const UserProfileScreen: React.FC = () => {
 const stylesSheet = StyleSheet.create({
   contentContainer: {
     alignItems: "center",
-    backgroundColor: "lightgrey",
+    backgroundColor: "white",
     flexDirection: "column",
     justifyContent: "space-evenly",
   },
