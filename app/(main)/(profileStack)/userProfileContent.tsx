@@ -136,6 +136,7 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
           />
           <Text style={styles.upOptionText}>Logout</Text>
         </TouchableOpacity>
+        <View style={{ paddingBottom: 30 }}></View>
       </View>
     </ScrollView>
   );

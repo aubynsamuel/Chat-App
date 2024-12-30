@@ -5,7 +5,7 @@ import { EmptyChatRoom } from "../imports";
 
 const EmptyChatRoomList = () => {
   return (
-    <View style={{ flex: 1, }}>
+    <View>
       <LottieView
         source={EmptyChatRoom}
         autoPlay
@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
     color: "white",
   },
   lottieImage: {
-    flex: 0.8,
     width: 90 * 2,
     height: 90 * 2,
     alignSelf: "center",

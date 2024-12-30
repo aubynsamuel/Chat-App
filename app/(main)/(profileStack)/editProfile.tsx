@@ -163,6 +163,7 @@ const EditProfileScreen = () => {
             <Text style={styles.epSaveButtonText}>Save</Text>
           )}
         </TouchableOpacity>
+        <View style={{ paddingBottom: 50 }}></View>
       </View>
     </ScrollView>
   );

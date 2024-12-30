@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   ViewStyle,
+  Dimensions,
 } from "react-native";
 import {
   GiftedChat,
@@ -700,7 +701,12 @@ const ChatScreen = () => {
             ) : null
           }
           renderChatEmpty={() => (
-            <View style={{ transform: [{ rotate: "180deg" }], bottom: -300 }}>
+            <View
+              style={{
+                transform: [{ rotate: "180deg" }],
+                top: Dimensions.get("window").height / 4,
+              }}
+            >
               <EmptyChatRoomList />
             </View>
           )}

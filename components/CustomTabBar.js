@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { View, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { Text } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -10,9 +10,8 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTheme } from "@/imports";
 
-const { width } = Dimensions.get("window");
-
 const CustomTabBar = ({ state, descriptors, navigation }) => {
+  const { width } = Dimensions.get("window");
   const { selectedTheme } = useTheme();
   // Filter out system routes
   const visibleRoutes = state.routes.filter(

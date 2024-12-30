@@ -1,4 +1,4 @@
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, SafeAreaView, ViewStyle } from "react-native";
 import { useEffect, useState } from "react";
 import {
   query,
@@ -136,12 +136,12 @@ function HomeScreen() {
   };
 
   return (
-    <View
+    <SafeAreaView
       style={
         {
           flex: 1,
           backgroundColor: selectedTheme.background,
-        } as any
+        } as ViewStyle
       }
     >
       <StatusBar
@@ -176,7 +176,7 @@ function HomeScreen() {
       >
         <MaterialIcons name="add" size={30} color={selectedTheme.primary} />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

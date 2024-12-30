@@ -9,38 +9,6 @@ const TabLayout = () => {
   const { selectedTheme } = useTheme();
   const { unreadChats } = useAuth();
 
-  const TabIcon = ({
-    name,
-    focused,
-    size = 28,
-  }: {
-    name: any;
-    focused: boolean;
-    size?: number;
-  }) => (
-    <View style={{ alignItems: "center" }}>
-      <MaterialIcons name={name} size={size} color={"black"} />
-      <View style={{ position: "absolute" }}>
-        {focused && (
-          <View
-            style={[
-              {
-                zIndex: -1,
-                height: 20,
-                width: 55,
-                top: 10,
-                alignSelf: "center",
-                position: "absolute",
-                borderRadius: 100,
-                backgroundColor: selectedTheme.primary,
-              },
-            ]}
-          />
-        )}
-      </View>
-    </View>
-  );
-
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
