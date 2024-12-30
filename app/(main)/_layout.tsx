@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { View } from "react-native";
 import { useAuth, useTheme } from "../../imports";
+import CustomTabBar from "../../components/CustomTabBar";
 
 const TabLayout = () => {
   const { selectedTheme } = useTheme();
@@ -31,7 +32,7 @@ const TabLayout = () => {
                 alignSelf: "center",
                 position: "absolute",
                 borderRadius: 100,
-                backgroundColor: "white",
+                backgroundColor: selectedTheme.primary,
               },
             ]}
           />
@@ -42,14 +43,16 @@ const TabLayout = () => {
 
   return (
     <Tabs
+      tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          height: 60,
-          paddingTop: 5,
-          paddingBottom: 10,
-          backgroundColor: selectedTheme.primary,
-        },
+        // tabBarStyle: {
+        //   height: 60,
+        //   marginTop: 50,
+        //   // paddingBottom: 10,
+        //   // backgroundColor: selectedTheme.primary,
+        //   borderTopWidth: 1,
+        // },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: "bold",
@@ -60,20 +63,29 @@ const TabLayout = () => {
       <Tabs.Screen
         name="(homeStack)"
         options={{
-          tabBarBadge: unreadChats.length as any> 0 ? unreadChats.length as any : null,
+          tabBarBadge:
+            (unreadChats.length as any) > 0
+              ? (unreadChats.length as any)
+              : null,
           title: "Chats",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} size={25} name={"chat"} />
-          ),
+          tabBarLabel: "Chats",
+          tabBarIcon: ({ focused }) => "chat",
         }}
       />
+      {/* <Tabs.Screen
+        name="calls"
+        options={{
+          title: "Calls",
+          tabBarLabel: "Calls",
+          tabBarIcon: ({ focused }) => "call",
+        }}
+      /> */}
       <Tabs.Screen
         name="(profileStack)"
         options={{
           title: "Profile",
-          tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} name={"person"} />
-          ),
+          tabBarLabel: "Profile",
+          tabBarIcon: ({ focused }) => (focused ? "person" : "person-outline"),
         }}
       />
     </Tabs>
