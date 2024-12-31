@@ -24,7 +24,7 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
     const { selectedTheme } = useTheme();
     const swipeableRef = useRef<any>(null);
 
-    console.log("Render Bubble for " + currentMessage._id);
+    // console.log("Render Bubble for " + currentMessage._id);
 
     const renderLeftActions = useCallback(
       (progress: any) => {
