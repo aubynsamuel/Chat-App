@@ -32,7 +32,7 @@ const InputToolBar = memo(
     replyToMessage,
     setReplyToMessage,
   }: InputToolBarProps) => {
-    const user = useAuth().user;
+    const { user } = useAuth();
 
     const getReplyPreview = (message: IMessage) => {
       if (message.type === "text") return message.text;
@@ -47,8 +47,7 @@ const InputToolBar = memo(
         {/* Reply to message UI */}
         {isReplying && replyToMessage && (
           <Animated.View
-            entering={FadeInDown.duration(300)}
-            exiting={FadeOutDown.duration(200)}
+            entering={FadeInDown.duration(200)}
             style={{
               flexDirection: "row",
               width: "100%",

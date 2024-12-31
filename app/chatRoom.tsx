@@ -69,6 +69,7 @@ import { useChatContext } from "../context/ChatContext";
 import AudioRecordingOverlay from "../components/AudioRecordingOverlay";
 import RenderMessageText from "../components/RenderMessageText";
 import RenderBubble from "@/components/RenderBubble";
+import { useHighlightStore } from "@/context/MessageHighlightStore";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -87,11 +88,8 @@ const ChatScreen = () => {
     setRecordedAudioUri,
     setImageModalVisibility,
     imageModalVisibility,
-    isReplying,
-    setIsReplying,
-    replyToMessage,
-    setReplyToMessage,
   } = useChatContext();
+  const highlightMessage = useHighlightStore((state) => state.highlightMessage);
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const roomId: any = getRoomId(user?.userId, userId);
@@ -104,6 +102,8 @@ const ChatScreen = () => {
     useState<React.SetStateAction<string | null>>("");
   const [sendingAudio, setSendingAudio] = useState<boolean>(false);
   const messageContainerRef = useRef<any>(null);
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
 
   useEffect(() => {
     return () => {
@@ -323,6 +323,9 @@ const ChatScreen = () => {
         animated: true,
         viewPosition: 0.5,
       });
+      if (messageId) {
+        highlightMessage(messageId as string);
+      }
     }
   };
 
@@ -424,7 +427,6 @@ const ChatScreen = () => {
                 setIsEditing(true);
                 setEditMessage(currentMessage);
                 setEditText(currentMessage.text);
-                // setShowActionButtons(false);
               }
               break;
             case 3:
@@ -437,7 +439,7 @@ const ChatScreen = () => {
         }
       );
     },
-    [user?.userId, handleDelete, isEditing]
+    [user?.userId, handleDelete, isEditing, isReplying]
   );
 
   const handleEditSave = async () => {
@@ -596,7 +598,11 @@ const ChatScreen = () => {
           renderCustomView={renderCustomView}
           renderMessageAudio={renderMessageAudio}
           renderBubble={(props: Readonly<BubbleProps<IMessage>>) => (
-            <RenderBubble props={props} />
+            <RenderBubble
+              props={props}
+              setIsReplying={setIsReplying}
+              setReplyToMessage={setReplyToMessage}
+            />
           )}
           renderAvatar={null}
           onInputTextChanged={(text) => {
