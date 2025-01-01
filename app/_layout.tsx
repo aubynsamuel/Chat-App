@@ -8,15 +8,11 @@ import {
   ExpoPushNotifications,
   ThemeContextProvider,
   useTheme,
-  useAuth,
 } from "../imports";
-import ScreenOverlay from "../components/ScreenOverlay";
 import { LogBox } from "react-native";
-import { ChatProvider } from "../context/ChatContext";
 
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
-  const { gettingLocationOverlay } = useAuth();
   LogBox.ignoreAllLogs();
   return (
     <>
@@ -48,10 +44,6 @@ const RootLayout = () => {
         />
       </Stack>
       <Toast />
-      {/* Loading spinner */}
-      {gettingLocationOverlay && (
-        <ScreenOverlay title={"Getting your location"} />
-      )}
     </>
   );
 };

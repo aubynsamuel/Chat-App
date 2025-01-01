@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
-// Define the store's state interface
 interface HighlightState {
   highlightedMessageId: string | null;
   highlightMessage: (messageId: string) => void;
@@ -9,7 +8,6 @@ interface HighlightState {
   clearHighlight: () => void;
 }
 
-// Create the store with the subscribeWithSelector middleware
 export const useHighlightStore = create<HighlightState>()(
   subscribeWithSelector((set, get) => ({
     highlightedMessageId: null,
@@ -17,7 +15,6 @@ export const useHighlightStore = create<HighlightState>()(
     highlightMessage: (messageId: string) => {
       set({ highlightedMessageId: messageId });
 
-      // Clear the highlight after 5 seconds
       setTimeout(() => {
         if (get().highlightedMessageId === messageId) {
           set({ highlightedMessageId: null });

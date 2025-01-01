@@ -14,6 +14,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { ExternalPathString, router } from "expo-router";
 import { useTheme, useAuth, db, getStyles } from "../../../imports";
+import { useProfileURlStore } from "@/context/ProfileUrlStore";
 
 interface User {
   userId: string;
@@ -22,7 +23,7 @@ interface User {
 }
 
 const SearchUsersScreen: React.FC = () => {
-  const { user, setProfileUrlLink } = useAuth();
+  const { user } = useAuth();
   const [searchText, setSearchText] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const inputRef = useRef<TextInput>(null);
@@ -30,6 +31,9 @@ const SearchUsersScreen: React.FC = () => {
   const styles = getStyles(selectedTheme);
   const [errorMessage, setErrorMessage] = useState("Search users");
   const [isLoading, setIsLoading] = useState(false);
+  const setProfileUrlLink = useProfileURlStore(
+    (state) => state.setProfileUrlLink
+  );
 
   const handleSearch = async (text: string) => {
     setIsLoading(true);

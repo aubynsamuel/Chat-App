@@ -6,12 +6,7 @@ import {
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "au-react-native-toast";
 import { auth, db } from "../env/firebaseConfig";
@@ -51,10 +46,6 @@ export interface AuthContextType {
   removeFromUnread: (roomId: string) => void;
   unreadChats: string[];
   setDeviceToken: React.Dispatch<React.SetStateAction<string>>;
-  setProfileUrlLink: React.Dispatch<React.SetStateAction<string>>;
-  profileUrl: string;
-  gettingLocationOverlay: boolean;
-  setGettingLocationOverlay: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -87,8 +78,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [unreadChats, setUnreadChats] = useState<string[]>([]);
   const [deviceToken, setDeviceToken] = useState<string>("");
-  const [profileUrl, setProfileUrlLink] = useState<string>("");
-  const [gettingLocationOverlay, setGettingLocationOverlay] = useState<boolean>(false);
+  // console.log("I re rendered");
 
   userDetails = user;
 
@@ -338,10 +328,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         removeFromUnread,
         unreadChats,
         setDeviceToken,
-        setProfileUrlLink,
-        profileUrl,
-        gettingLocationOverlay,
-        setGettingLocationOverlay,
       }}
     >
       {children}

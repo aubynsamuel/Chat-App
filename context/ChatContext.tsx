@@ -39,13 +39,11 @@ interface ChatContextType {
   isRecording: boolean;
   recordedAudioUri: string;
   setRecordedAudioUri: (value: string) => void;
-  getLocationAsync: (
-    handleSend: OnSendFunction,
-    user: User,
-    setGettingLocationOverlay: React.Dispatch<React.SetStateAction<boolean>>
-  ) => Promise<void>;
+  getLocationAsync: (handleSend: OnSendFunction, user: User) => Promise<void>;
   setRecording: React.Dispatch<React.SetStateAction<Audio.Recording | null>>;
   recording: Audio.Recording | null;
+  gettingLocationOverlay: boolean;
+  setGettingLocationOverlay: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface ChatProvider {
@@ -59,14 +57,15 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
   const [audioRecordingOverlay, setAudioRecordingOverlay] = useState(false);
   const [playbackTime, setPlaybackTime] = useState(0);
   const [recordedAudioUri, setRecordedAudioUri] = useState<string>("");
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [imageModalVisibility, setImageModalVisibility] =
     useState<boolean>(false);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [gettingLocationOverlay, setGettingLocationOverlay] =
+    useState<boolean>(false);
 
   async function getLocationAsync(
     handleSend: OnSendFunction,
-    user: User,
-    setGettingLocationOverlay: React.Dispatch<React.SetStateAction<boolean>>
+    user: User
   ): Promise<void> {
     setGettingLocationOverlay(true);
     const response = await Location.requestForegroundPermissionsAsync();
@@ -124,6 +123,8 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
     setImageModalVisibility,
     recording,
     setRecording,
+    gettingLocationOverlay,
+    setGettingLocationOverlay,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

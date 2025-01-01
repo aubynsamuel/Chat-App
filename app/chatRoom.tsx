@@ -70,12 +70,13 @@ import AudioRecordingOverlay from "../components/AudioRecordingOverlay";
 import RenderMessageText from "../components/RenderMessageText";
 import RenderBubble from "@/components/RenderBubble";
 import { useHighlightStore } from "@/context/MessageHighlightStore";
+import ScreenOverlay from "@/components/ScreenOverlay";
+import { useProfileURlStore } from "@/context/ProfileUrlStore";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
   const { userId, username, otherUserToken } = useLocalSearchParams();
-  const { user, profileUrl, setGettingLocationOverlay } =
-    useAuth() as AuthContextType;
+  const { user } = useAuth() as AuthContextType;
   const { selectedTheme, chatBackgroundPic }: ThemeContextType = useTheme();
   const {
     isRecording,
@@ -88,8 +89,11 @@ const ChatScreen = () => {
     setRecordedAudioUri,
     setImageModalVisibility,
     imageModalVisibility,
+    setGettingLocationOverlay,
+    gettingLocationOverlay,
   } = useChatContext();
   const highlightMessage = useHighlightStore((state) => state.highlightMessage);
+  const profileUrl = useProfileURlStore((state) => state.profileUrl);
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const roomId: any = getRoomId(user?.userId, userId);
@@ -773,6 +777,9 @@ const ChatScreen = () => {
             sendAudioMessage={sendAudioMessage}
             sendingAudio={sendingAudio}
           />
+        )}
+        {gettingLocationOverlay && (
+          <ScreenOverlay title={"Getting your location"} />
         )}
       </View>
     </View>

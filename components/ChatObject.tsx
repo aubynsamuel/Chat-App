@@ -6,12 +6,16 @@ import getStyles from "../styles/Component_Styles";
 import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
 import { RoomData } from "../app/(main)/(homeStack)/home";
 import { Theme } from "../context/ThemeContext";
+import { useProfileURlStore } from "@/context/ProfileUrlStore";
 const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
-  const { user, addToUnread, removeFromUnread, setProfileUrlLink } = useAuth();
+  const { user, addToUnread, removeFromUnread } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
   const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
+  const setProfileUrlLink = useProfileURlStore(
+    (state) => state.setProfileUrlLink
+  );
 
   useEffect(() => {
     const docRef = doc(db, "rooms", roomId);
