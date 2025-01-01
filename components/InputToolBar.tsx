@@ -139,7 +139,7 @@ const InputToolBar = memo(
           <InputToolbar
             {...props}
             containerStyle={{
-              width: isEditing || isReplying || !showActions ? "97%" : "85%",
+              width: isEditing || isReplying || !showActions ? "94.8%" : "85%",
               alignSelf: "flex-start",
               borderRadius: 30,
               marginBottom: 8,
