@@ -63,9 +63,7 @@ const App = () => {
         <AuthContextProvider>
           <ExpoPushNotifications>
             <MenuProvider>
-              <ChatProvider>
-                <RootLayout />
-              </ChatProvider>
+              <RootLayout />
             </MenuProvider>
           </ExpoPushNotifications>
         </AuthContextProvider>

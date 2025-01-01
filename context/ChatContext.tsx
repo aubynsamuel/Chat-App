@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from "react";
-import { useAuth, UserData } from "./AuthContext";
 import * as Location from "expo-location";
 import { Alert } from "react-native";
 import { Audio } from "expo-av";
@@ -38,7 +37,6 @@ interface ChatContextType {
   setPlaybackTime: React.Dispatch<React.SetStateAction<number>>;
   setIsRecording: (value: boolean) => void;
   isRecording: boolean;
-  user: UserData | null | User;
   recordedAudioUri: string;
   setRecordedAudioUri: (value: string) => void;
   getLocationAsync: (
@@ -57,7 +55,6 @@ interface ChatProvider {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
-  const { user } = useAuth();
   const [isRecording, setIsRecording] = useState(false);
   const [audioRecordingOverlay, setAudioRecordingOverlay] = useState(false);
   const [playbackTime, setPlaybackTime] = useState(0);
@@ -114,7 +111,6 @@ export const ChatProvider: React.FC<ChatProvider> = ({ children }) => {
   }
 
   const value = {
-    user,
     isRecording,
     setIsRecording,
     setAudioRecordingOverlay,

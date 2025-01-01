@@ -65,7 +65,7 @@ import { TextStyle } from "react-native";
 import { ThemeContextType } from "../context/ThemeContext";
 import purpleTheme from "../Themes/Purple";
 import { IMessage, FirebaseMessage } from "../Functions/types";
-import { useChatContext } from "../context/ChatContext";
+import { ChatProvider, useChatContext } from "../context/ChatContext";
 import AudioRecordingOverlay from "../components/AudioRecordingOverlay";
 import RenderMessageText from "../components/RenderMessageText";
 import RenderBubble from "@/components/RenderBubble";
@@ -241,7 +241,6 @@ const ChatScreen = () => {
 
   const handleSend = useCallback(
     async (newMessages: IMessage[] = []) => {
-      console.log("replyToMessage onSend: ", replyToMessage);
       const newMessage: IMessage = newMessages[0];
 
       const replyData = replyToMessage
@@ -281,8 +280,6 @@ const ChatScreen = () => {
 
       setReplyToMessage(null);
       setIsReplying(false);
-
-      // console.log("Replying to message: ", newMessage.replyTo);
 
       // Update local messages state
       setMessages((prevMessages: IMessage[]) =>
@@ -515,8 +512,6 @@ const ChatScreen = () => {
         return;
       }
 
-      console.log("Audio File Uploaded", downloadURL);
-
       const newMessage: IMessage = {
         _id: Math.random().toString(36).substring(7),
         text: "",
@@ -656,7 +651,7 @@ const ChatScreen = () => {
                     isEditing || isReplying || !showActions ? "96%" : "85%",
                   justifyContent: "center",
                   borderRadius: 10,
-                  marginLeft: 25,
+                  marginLeft: showActions ? 24 : 19.5,
                 }}
               />
             )
@@ -784,4 +779,12 @@ const ChatScreen = () => {
   );
 };
 
-export default ChatScreen;
+const ChatRoomWithContext = () => {
+  return (
+    <ChatProvider>
+      <ChatScreen />
+    </ChatProvider>
+  );
+};
+
+export default ChatRoomWithContext;
