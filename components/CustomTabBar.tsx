@@ -9,10 +9,18 @@ import Animated, {
   interpolate,
 } from "react-native-reanimated";
 import { useTheme } from "@/imports";
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs/src/types";
+import { useUnreadChatsStore } from "@/context/UnreadChatStore";
 
-const CustomTabBar = ({ state, descriptors, navigation }) => {
+const CustomTabBar = ({
+  state,
+  descriptors,
+  navigation,
+}: BottomTabBarProps) => {
   const { width } = Dimensions.get("window");
   const { selectedTheme } = useTheme();
+  const unreadChats = useUnreadChatsStore((state) => state.unreadChats);
+
   // Filter out system routes
   const visibleRoutes = state.routes.filter(
     (route) => !route.name.startsWith("_") && !route.name.startsWith("+")
@@ -67,7 +75,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
         const iconName =
           typeof options.tabBarIcon === "function"
-            ? options.tabBarIcon({ focused: isFocused })
+            ? options.tabBarIcon({ focused: isFocused } as any)
             : options.tabBarIcon;
 
         const animatedIconStyle = useAnimatedStyle(() => {
@@ -78,7 +86,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
               (width / visibleRoutes.length) * index,
               (width / visibleRoutes.length) * (index + 1),
             ],
-            [0.8, 1, 0.8],
+            [0.9, 1, 0.9],
             "clamp"
           );
 
@@ -110,8 +118,32 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             accessibilityLabel={options.tabBarAccessibilityLabel}
           >
             <Animated.View style={animatedIconStyle}>
+              {options.tabBarLabel === "Chats" && unreadChats.length > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    backgroundColor: "red",
+                    left: 15,
+                    top: -8,
+                    zIndex: 5,
+                    borderRadius: 50,
+                    paddingHorizontal: 8,
+                    flex: 1,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      fontWeight: "bold",
+                      fontSize: 15,
+                    }}
+                  >
+                    {unreadChats.length}
+                  </Text>
+                </View>
+              )}
               <MaterialIcons
-                name={iconName}
+                name={iconName as any}
                 size={26}
                 color={
                   isFocused ? selectedTheme.primary : selectedTheme.surface
@@ -128,7 +160,7 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
                 },
               ]}
             >
-              {label}
+              {label as any}
             </Text>
           </TouchableOpacity>
         );

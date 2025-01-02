@@ -42,10 +42,6 @@ export interface AuthContextType {
   ) => Promise<{ success: boolean; msg?: string }>;
   resetPassword: (email: string) => Promise<{ success: boolean; msg?: string }>;
   showToast: (message: string, containerStyles?: any, textStyles?: any) => void;
-  addToUnread: (roomId: string) => void;
-  removeFromUnread: (roomId: string) => void;
-  unreadChats: string[];
-  setDeviceToken: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -76,9 +72,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     undefined
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [unreadChats, setUnreadChats] = useState<string[]>([]);
   const [deviceToken, setDeviceToken] = useState<string>("");
-  // console.log("I re rendered");
 
   userDetails = user;
 
@@ -93,20 +87,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     textStyles: any = null
   ) => {
     showToastMessage(message, 3000, true, containerStyles, textStyles);
-  };
-
-  const addToUnread = (roomId: string) => {
-    if (unreadChats.includes(roomId)) {
-      return;
-    }
-    setUnreadChats((prev) => [...prev, roomId]);
-  };
-
-  const removeFromUnread = (roomId: string) => {
-    if (!unreadChats.includes(roomId)) {
-      return;
-    }
-    setUnreadChats((prev) => prev.filter((m) => m !== roomId));
   };
 
   // Initialize auth state from storage
@@ -324,10 +304,6 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         updateProfile,
         resetPassword,
         showToast,
-        addToUnread,
-        removeFromUnread,
-        unreadChats,
-        setDeviceToken,
       }}
     >
       {children}

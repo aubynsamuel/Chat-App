@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState, useMemo } from "react";
+import React, { memo, useEffect, useState } from "react";
 import {
   FlatList,
   View,
@@ -9,8 +9,8 @@ import {
 } from "react-native";
 import ChatObject from "./ChatObject";
 import getStyles from "../styles/Component_Styles";
-import { useAuth } from "../imports";
 import { Theme } from "../context/ThemeContext";
+import { useUnreadChatsStore } from "@/context/UnreadChatStore";
 
 const ChatList = memo(
   ({
@@ -25,12 +25,12 @@ const ChatList = memo(
     theme: Theme;
   }) => {
     const styles = getStyles(theme);
-    const { unreadChats } = useAuth();
     const [roomData, setRooms] = useState(rooms);
     const [filter, setFilter] = useState("all"); // Track active filter
     const [emptyListMessage, setEmptyListMessage] = useState<string | null>(
       "No chats available"
     );
+    const unreadChats = useUnreadChatsStore((state) => state.unreadChats);
 
     useEffect(() => {
       // Update the displayed list based on the filter
