@@ -1,21 +1,30 @@
 import React from "react";
 import { Stack } from "expo-router";
-import { useTheme } from "../../imports";
-
+import { darkTheme, useTheme } from "../../imports";
+import { View } from "react-native";
 
 const AuthLayout = () => {
   const { selectedTheme } = useTheme();
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        navigationBarColor: selectedTheme.background,
-      }}
+    <View
+      style={
+        {
+          backgroundColor: selectedTheme === darkTheme ? "black" : null,
+          flex: 1,
+        } as any
+      }
     >
-      <Stack.Screen name="login" />
-      <Stack.Screen name="signUp" />
-      <Stack.Screen name="setUserDetails" />
-    </Stack>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          navigationBarColor: selectedTheme.background,
+        }}
+      >
+        <Stack.Screen name="login" />
+        <Stack.Screen name="signUp" />
+        <Stack.Screen name="setUserDetails" />
+      </Stack>
+    </View>
   );
 };
 

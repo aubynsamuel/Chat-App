@@ -1,12 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-} from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import {
   GestureHandlerRootView,
   ScrollView,
@@ -53,7 +46,6 @@ const UserProfileScreen: React.FC = () => {
     { id: "0", color: "lightgreen", name: "Green Day" },
     { id: "1", color: "lightblue", name: "Sky Lander" },
     { id: "2", color: "black", name: "Dark Angel" },
-    { id: "3", color: "purple", name: "Nothing Much" },
   ];
 
   return (

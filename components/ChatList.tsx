@@ -11,6 +11,7 @@ import ChatObject from "./ChatObject";
 import getStyles from "../styles/Component_Styles";
 import { Theme } from "../context/ThemeContext";
 import { useUnreadChatsStore } from "@/context/UnreadChatStore";
+import { darkTheme } from "@/imports";
 
 const ChatList = memo(
   ({
@@ -26,11 +27,25 @@ const ChatList = memo(
   }) => {
     const styles = getStyles(theme);
     const [roomData, setRooms] = useState(rooms);
-    const [filter, setFilter] = useState("all"); // Track active filter
+    const [filter, setFilter] = useState("all");
     const [emptyListMessage, setEmptyListMessage] = useState<string | null>(
       "No chats available"
     );
     const unreadChats = useUnreadChatsStore((state) => state.unreadChats);
+
+    const chatListFilterContainer = (filterValue: string) => {
+      return {
+        backgroundColor:
+          filter === filterValue
+            ? theme === darkTheme
+              ? "#ffff"
+              : theme.surface
+            : theme === darkTheme
+            ? "lightgrey"
+            : "#0007",
+        color: filter === filterValue ? theme.primary : theme.background,
+      };
+    };
 
     useEffect(() => {
       // Update the displayed list based on the filter
@@ -62,29 +77,14 @@ const ChatList = memo(
         ListHeaderComponent={() => (
           <View style={headerStyles.container}>
             <TouchableOpacity onPress={() => setFilter("all")}>
-              <Text
-                style={[
-                  headerStyles.text,
-                  {
-                    backgroundColor: filter === "all" ? "#000" : "#0007",
-                    color: filter === "all" ? theme.primary : theme.background,
-                  },
-                ]}
-              >
+              <Text style={[headerStyles.text, chatListFilterContainer("all")]}>
                 All
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setFilter("unread")}>
               <Text
                 onPress={() => setFilter("unread")}
-                style={[
-                  headerStyles.text,
-                  {
-                    backgroundColor: filter === "unread" ? "#000" : "#0007",
-                    color:
-                      filter === "unread" ? theme.primary : theme.background,
-                  },
-                ]}
+                style={[headerStyles.text, chatListFilterContainer("unread")]}
               >
                 Unread
               </Text>

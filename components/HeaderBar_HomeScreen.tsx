@@ -56,7 +56,11 @@ const TopHeaderBar = memo(
           {/* Search button */}
           {searchButtonShown && (
             <TouchableOpacity onPress={() => router.navigate("/searchUsers")}>
-              <MaterialIcons name="search" size={22} />
+              <MaterialIcons
+                name="search"
+                size={22}
+                color={theme.text.primary}
+              />
             </TouchableOpacity>
           )}
 
@@ -78,7 +82,11 @@ const TopHeaderBar = memo(
                     onError={() => setImageFailed(true)}
                   />
                 )} */}
-                <MaterialIcons name="more-vert" size={24} color={"black"} />
+                <MaterialIcons
+                  name="more-vert"
+                  size={24}
+                  color={theme.text.primary}
+                />
               </MenuTrigger>
               <MenuOptions
                 customStyles={{

@@ -8,7 +8,7 @@ import Animated, {
   useSharedValue,
   interpolate,
 } from "react-native-reanimated";
-import { useTheme } from "@/imports";
+import { darkTheme, useTheme } from "@/imports";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs/src/types";
 import { useUnreadChatsStore } from "@/context/UnreadChatStore";
 
@@ -44,7 +44,9 @@ const CustomTabBar = ({
   });
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: selectedTheme.background }]}
+    >
       <Animated.View
         style={[
           styles.indicator,
@@ -62,7 +64,8 @@ const CustomTabBar = ({
               alignSelf: "center",
               position: "absolute",
               borderRadius: 100,
-              backgroundColor: selectedTheme.surface,
+              backgroundColor:
+                selectedTheme === darkTheme ? "grey" : selectedTheme.surface,
             },
           ]}
         ></View>
@@ -135,7 +138,7 @@ const CustomTabBar = ({
                     style={{
                       color: "white",
                       fontWeight: "bold",
-                      fontSize: 15,
+                      fontSize: 14,
                     }}
                   >
                     {unreadChats.length}
@@ -146,7 +149,11 @@ const CustomTabBar = ({
                 name={iconName as any}
                 size={26}
                 color={
-                  isFocused ? selectedTheme.primary : selectedTheme.surface
+                  selectedTheme === darkTheme
+                    ? "white"
+                    : isFocused
+                    ? selectedTheme.primary
+                    : selectedTheme.surface
                 }
               />
             </Animated.View>
@@ -154,9 +161,12 @@ const CustomTabBar = ({
               style={[
                 styles.label,
                 {
-                  color: isFocused
-                    ? selectedTheme.secondary
-                    : selectedTheme.surface,
+                  color:
+                    selectedTheme === darkTheme
+                      ? "white"
+                      : isFocused
+                      ? selectedTheme.secondary
+                      : selectedTheme.surface,
                 },
               ]}
             >
@@ -173,30 +183,22 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     height: 60,
-    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderTopColor: "#E5E5EA",
     position: "relative",
     paddingVertical: 3,
-    // alignItems: "center",
   },
   indicator: {
     position: "absolute",
-    // height: 20,
-    // borderRadius: 50,
-    // backgroundColor: "#000000",
-    // top: -20,
   },
   tab: {
     flex: 1,
-    // justifyContent: "center",
     alignItems: "center",
     paddingVertical: 8,
     zIndex: 2,
   },
   label: {
     fontSize: 13,
-    // marginTop: 4,
     fontWeight: "500",
   },
 });

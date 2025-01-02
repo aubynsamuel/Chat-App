@@ -21,7 +21,6 @@ export { ThemeContextProvider } from "./context/ThemeContext";
 export { default as darkTheme } from "./Themes/DarkMode";
 export { default as lightBlueTheme } from "./Themes/SkyLander";
 export { default as greenTheme } from "./Themes/Greenday";
-export { default as purpleTheme } from "./Themes/Purple";
 
 // Services
 export { default as ExpoPushNotifications } from "./services/ExpoPushNotifications";

@@ -2,10 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import React, { memo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Alert } from "react-native";
-import { useAuth } from "../imports";
 import { useChatContext } from "../context/ChatContext";
-
-// Define interfaces for type safety
 
 interface User {
   userId: string;
@@ -42,7 +39,6 @@ const Button: React.FC<ButtonProps> = memo(
 
 const ActionButtons: React.FC<ActionButtonsProps> = memo(
   ({ onSend, user, openPicker, recipient }) => {
-    const { setGettingLocationOverlay } = useAuth();
     const { getLocationAsync } = useChatContext();
 
     const confirmAndShareLocation = (
@@ -60,7 +56,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = memo(
           },
           {
             text: "Continue",
-            onPress: () => getLocationAsync(onSend, user, setGettingLocationOverlay),
+            onPress: () => getLocationAsync(onSend, user),
           },
         ],
         { cancelable: true }
@@ -81,7 +77,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = memo(
         name="camera-alt"
       /> */}
         <Button
-          onPress={() => confirmAndShareLocation(onSend, user, recipient)} // Pass the recipient's name
+          onPress={() => confirmAndShareLocation(onSend, user, recipient)}
           name="add-location-alt"
         />
       </View>

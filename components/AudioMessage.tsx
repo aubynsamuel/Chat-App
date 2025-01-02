@@ -25,10 +25,8 @@ const AudioPlayerComponent = memo(
     });
     const [isFinished, setIsFinished] = useState(false);
 
-    // Remove the playbackTimer as we'll rely solely on the native status updates
     useEffect(() => {
       return () => {
-        // Cleanup sound when component unmounts
         if (sound) {
           console.log("Cleaning up audio resources...");
           sound.unloadAsync();
@@ -73,7 +71,6 @@ const AudioPlayerComponent = memo(
         const { sound: newSound } = await Audio.Sound.createAsync(
           { uri: currentAudio },
           { shouldPlay: true },
-          // Add progress update callback directly in the creation options
           (status) => {
             if (status.isLoaded) {
               // Update position and duration

@@ -21,12 +21,12 @@ const greenTheme = {
   },
   message: {
     user: {
-      background: "lightgrey",
+      background: "lightgreen",
       text: "#000000",
       time: "#000000",
     },
     other: {
-      background: "lightgreen",
+      background: "lightgrey",
       text: "#000000",
       time: "#000000",
     },

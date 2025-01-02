@@ -8,10 +8,16 @@ import {
 } from "react-native";
 import React, { useRef, useState } from "react";
 import LottieView from "lottie-react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import { useTheme, useAuth, getStyles, OnlineChat, darkTheme } from "../../imports";
+import {
+  useTheme,
+  useAuth,
+  getStyles,
+  OnlineChat,
+  darkTheme,
+} from "../../imports";
 
 const LoginScreen = () => {
   const { login, resetPassword, showToast } = useAuth();
@@ -20,9 +26,6 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordReveal, setPasswordReveal] = useState(true);
   const { selectedTheme } = useTheme();
-  const [color, setColor] = useState(
-    selectedTheme === darkTheme ? "white" : "black"
-  );
   const styles = getStyles(selectedTheme);
 
   const handleForgotPassword = async () => {
@@ -60,14 +63,16 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        paddingTop: 24,
-        backgroundColor:
-          selectedTheme === darkTheme ? selectedTheme.background : null,
-      } as any}
+      style={
+        {
+          flex: 1,
+          paddingTop: 24,
+          backgroundColor:
+            selectedTheme === darkTheme ? selectedTheme.background : null,
+        } as any
+      }
     >
-      <StatusBar style={`${selectedTheme.Statusbar.style}` as any} animated={true} />
+      <StatusBar style={selectedTheme.Statusbar.style as any} animated={true} />
       <LottieView
         source={OnlineChat}
         autoPlay
@@ -87,7 +92,11 @@ const LoginScreen = () => {
       <View style={styles.lsForm}>
         {/* Email */}
         <View style={styles.lsInputField}>
-          <MaterialIcons name="email" size={25} />
+          <MaterialIcons
+            name="email"
+            size={25}
+            color={selectedTheme.text.primary}
+          />
           <TextInput
             placeholder="Email"
             style={styles.lsInputText}
@@ -98,7 +107,11 @@ const LoginScreen = () => {
 
         {/* Password */}
         <View style={styles.lsInputField}>
-          <MaterialIcons name="lock" size={25} />
+          <MaterialIcons
+            name="lock"
+            size={25}
+            color={selectedTheme.text.primary}
+          />
           <View
             style={{
               flexDirection: "row",
@@ -117,10 +130,21 @@ const LoginScreen = () => {
             <TouchableOpacity
               onPress={() => {
                 setPasswordReveal((prev) => !prev);
-                setColor(passwordReveal ? "grey" : "black");
               }}
             >
-              <MaterialIcons name="remove-red-eye" color={color} size={25} />
+              {passwordReveal ? (
+                <MaterialIcons
+                  name="remove-red-eye"
+                  color={selectedTheme === darkTheme ? "white" : "black"}
+                  size={25}
+                />
+              ) : (
+                <Feather
+                  name="eye-off"
+                  color={selectedTheme === darkTheme ? "white" : "black"}
+                  size={22}
+                />
+              )}
             </TouchableOpacity>
           </View>
         </View>

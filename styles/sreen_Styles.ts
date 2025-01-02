@@ -4,7 +4,7 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
-import purpleTheme from "../Themes/Purple";
+import darkTheme from "../Themes/DarkMode";
 
 const getStyles = (theme: Theme) => {
   return StyleSheet.create({
@@ -34,7 +34,7 @@ const getStyles = (theme: Theme) => {
       flex: 1,
       height: 40,
       paddingHorizontal: 10,
-      color: theme.text.primary,
+      color: theme === darkTheme ? "black" : theme.text.primary,
     },
     editButton: {
       backgroundColor: theme.surface,
@@ -65,7 +65,7 @@ const getStyles = (theme: Theme) => {
       alignSelf: "center",
     },
     epChangePicText: {
-      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
       fontWeight: "bold",
       marginBottom: 20,
       alignSelf: "center",
@@ -86,7 +86,7 @@ const getStyles = (theme: Theme) => {
       marginLeft: 10,
       fontSize: 16,
       flex: 1,
-      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     epSaveButton: {
       backgroundColor: theme.primary,
@@ -113,7 +113,7 @@ const getStyles = (theme: Theme) => {
       position: "absolute",
       bottom: 50,
       right: 20,
-      backgroundColor: theme.surface,
+      backgroundColor: theme === darkTheme ? "white" : theme.surface,
       borderRadius: 50,
       width: 50,
       height: 50,
@@ -128,7 +128,7 @@ const getStyles = (theme: Theme) => {
       fontWeight: "bold",
       marginBottom: 15,
       alignSelf: "center",
-      color: theme == purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     lsForm: {
       width: wp("80%"),
@@ -149,7 +149,7 @@ const getStyles = (theme: Theme) => {
       marginLeft: 10,
       fontSize: 16,
       flex: 1,
-      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     lsLoginButton: {
       backgroundColor: theme.primary,
@@ -176,7 +176,7 @@ const getStyles = (theme: Theme) => {
       marginTop: 5,
       fontSize: 15,
       fontWeight: "bold",
-      color: theme == purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     lsSignUp: {
       marginTop: 5,
@@ -199,7 +199,7 @@ const getStyles = (theme: Theme) => {
       backgroundColor: theme.input.background,
       borderRadius: 8,
       fontSize: 16,
-      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme === darkTheme ? "black" : theme.text.primary,
     },
     userItem: {
       padding: 5,
@@ -212,7 +212,7 @@ const getStyles = (theme: Theme) => {
     },
     username: {
       fontSize: 18,
-      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
       marginLeft: 10,
     },
     noResults: {
@@ -229,7 +229,7 @@ const getStyles = (theme: Theme) => {
       fontWeight: "bold",
       marginBottom: 15,
       alignSelf: "center",
-      color: theme == purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     suForm: {
       width: wp("80%"),
@@ -250,7 +250,7 @@ const getStyles = (theme: Theme) => {
       marginLeft: 10,
       fontSize: 16,
       flex: 1,
-      color: theme == purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     suSignUpButton: {
       backgroundColor: theme.primary,
@@ -271,7 +271,7 @@ const getStyles = (theme: Theme) => {
       marginTop: 5,
       fontSize: 15,
       fontWeight: "bold",
-      color: theme == purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     suLoginText: {
       marginTop: 5,
@@ -300,7 +300,7 @@ const getStyles = (theme: Theme) => {
     upUsername: {
       fontSize: 24,
       fontWeight: "bold",
-      color: theme === purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
     },
     upOptionsContainer: {
       marginVertical: 15,

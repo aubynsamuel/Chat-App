@@ -14,15 +14,7 @@ import NotificationTokenManager from "../../../Functions/NotificationTokenManage
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
-import {
-  useTheme,
-  useAuth,
-  db,
-  usersRef,
-  getStyles,
-  darkTheme,
-  purpleTheme,
-} from "../../../imports";
+import { useTheme, useAuth, db, usersRef, getStyles } from "../../../imports";
 import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
 import ChatList from "../../../components/ChatList";
 
@@ -145,13 +137,7 @@ function HomeScreen() {
       }
     >
       <StatusBar
-        style={
-          `${
-            selectedTheme === purpleTheme
-              ? "light"
-              : selectedTheme.Statusbar.style
-          }` as any
-        }
+        style={selectedTheme.Statusbar.style as any}
         backgroundColor={selectedTheme.primary}
         animated={true}
       />

@@ -8,7 +8,6 @@ import {
 import greenTheme from "../Themes/Greenday";
 import darkTheme from "../Themes/DarkMode";
 import lightBlueTheme from "../Themes/SkyLander";
-import purpleTheme from "../Themes/Purple";
 import storage from "../Functions/Storage";
 
 // Define a type for the theme structure
@@ -65,7 +64,7 @@ export const useTheme = (): ThemeContextType => {
   return context;
 };
 
-const themes: Theme[] = [greenTheme, lightBlueTheme, darkTheme, purpleTheme];
+const themes: Theme[] = [greenTheme, lightBlueTheme, darkTheme];
 
 interface ThemeContextProviderProps {
   children: ReactNode;

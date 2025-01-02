@@ -2,7 +2,7 @@ import { StyleSheet, Text, Animated, View } from "react-native";
 import React, { memo, useCallback, useRef } from "react";
 import { Bubble, BubbleProps } from "react-native-gifted-chat";
 import { IMessage } from "@/Functions/types";
-import { useAuth } from "@/imports";
+import { darkTheme, useAuth } from "@/imports";
 import { useTheme } from "@/imports";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -46,7 +46,9 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
             <MaterialIcons
               name="reply"
               size={24}
-              color={selectedTheme.background}
+              color={
+                selectedTheme === darkTheme ? "white" : selectedTheme.background
+              }
             />
           </Animated.View>
         );
@@ -70,7 +72,10 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
           <Text
             style={{
               fontSize: 12,
-              color: selectedTheme.secondary,
+              color:
+                selectedTheme === darkTheme
+                  ? selectedTheme.surface
+                  : selectedTheme.secondary,
               paddingRight: 5,
             }}
           >
@@ -82,7 +87,10 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
           <Text
             style={{
               fontSize: 12,
-              color: selectedTheme.secondary,
+              color:
+                selectedTheme === darkTheme
+                  ? selectedTheme.surface
+                  : selectedTheme.secondary,
               paddingRight: 5,
             }}
           >
@@ -111,7 +119,6 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
                 backgroundColor: selectedTheme.secondary,
                 maxWidth: "85%",
                 borderRadius: 15,
-                opacity: 0.9,
               } as any)
         }
       >
@@ -131,13 +138,13 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
             renderTicks={() => ticks}
             wrapperStyle={{
               left: {
-                backgroundColor: selectedTheme.message.user.background,
+                backgroundColor: selectedTheme.message.other.background,
                 marginLeft: 5,
                 marginBottom: 3,
                 maxWidth: "80%",
               },
               right: {
-                backgroundColor: selectedTheme.message.other.background,
+                backgroundColor: selectedTheme.message.user.background,
                 marginRight: 5,
                 marginBottom: 3,
                 maxWidth: "80%",

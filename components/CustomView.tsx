@@ -7,14 +7,7 @@ import {
   ViewStyle,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-// import { BubbleProps, IMessage } from "react-native-gifted-chat";
 import { IMessage } from "../Functions/types";
-
-// Define interfaces for type safety
-// interface Location {
-//   latitude?: number;
-//   longitude?: number;
-// }
 
 interface CustomViewProps {
   currentMessage: IMessage;
@@ -45,7 +38,6 @@ const CustomView: React.FC<CustomViewProps> = memo(
     if (currentMessage.location) {
       const { latitude, longitude } = currentMessage.location;
 
-      // Add some validation
       if (!latitude || !longitude) {
         console.error("Invalid location data", currentMessage.location);
         return null;

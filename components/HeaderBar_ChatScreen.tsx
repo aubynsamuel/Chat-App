@@ -15,13 +15,6 @@ import getStyles from "../styles/Component_Styles";
 import { router } from "expo-router";
 import { Theme } from "../context/ThemeContext";
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window");
-const { width: IMAGE_WIDTH } = Dimensions.get("window");
-const MAX_IMAGE_WIDTH = IMAGE_WIDTH;
-
-const MAX_HEADER_HEIGHT = SCREEN_HEIGHT * 0.6;
-const MIN_HEADER_HEIGHT = 55;
-
 const TopHeaderBar = memo(
   ({
     title,
@@ -32,11 +25,16 @@ const TopHeaderBar = memo(
     profileUrl: string;
     theme: Theme;
   }) => {
-    // console.log("profileUrl from TopBar: ",profileUrl)
     const [imageFailed, setImageFailed] = useState(false);
     const styles = getStyles(theme);
     const AnimatedTouchableOpacity =
       Animated.createAnimatedComponent(TouchableOpacity);
+    const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+    const { width: IMAGE_WIDTH } = Dimensions.get("window");
+    const MAX_IMAGE_WIDTH = IMAGE_WIDTH;
+
+    const MAX_HEADER_HEIGHT = SCREEN_HEIGHT * 0.6;
+    const MIN_HEADER_HEIGHT = 55;
 
     const gestureProgress = useSharedValue(0);
 
@@ -123,9 +121,6 @@ const TopHeaderBar = memo(
             </Animated.Text>
           </Animated.View>
           {/* </TouchableOpacity> */}
-
-          {/* Help view to help with alignment */}
-          {/* <View styles={{width:25}}></View> */}
 
           {/* Profile Image */}
           <View style={styles.hcProfileContainer}>

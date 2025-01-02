@@ -63,7 +63,7 @@ import AudioPlayerComponent from "../components/AudioMessage";
 import { AuthContextType } from "../context/AuthContext";
 import { TextStyle } from "react-native";
 import { ThemeContextType } from "../context/ThemeContext";
-import purpleTheme from "../Themes/Purple";
+import darkTheme from "../Themes/DarkMode";
 import { IMessage, FirebaseMessage } from "../Functions/types";
 import { ChatProvider, useChatContext } from "../context/ChatContext";
 import AudioRecordingOverlay from "../components/AudioRecordingOverlay";
@@ -568,14 +568,8 @@ const ChatScreen = () => {
     <View style={{ flex: 1 }}>
       <ChatRoomBackground source={chatBackgroundPic} />
       <StatusBar
-        style={
-          `${
-            selectedTheme === purpleTheme
-              ? "light"
-              : selectedTheme.Statusbar.style
-          }` as StatusBarStyle | undefined
-        }
-        backgroundColor={"white"}
+        style={selectedTheme.Statusbar.style as StatusBarStyle | undefined}
+        backgroundColor={selectedTheme.Statusbar.backgroundColor}
         animated={true}
       />
       <View style={{ position: "absolute", zIndex: 5, width: "100%" }}>
@@ -650,12 +644,15 @@ const ChatScreen = () => {
               <Composer
                 {...props}
                 textInputStyle={{
-                  color: selectedTheme.text.primary,
+                  color:
+                    selectedTheme === darkTheme
+                      ? "black"
+                      : selectedTheme.text.primary,
                   width:
                     isEditing || isReplying || !showActions ? "96%" : "85%",
                   justifyContent: "center",
                   borderRadius: 10,
-                  marginLeft: showActions ? 24 : 19.5,
+                  marginLeft: showActions ? 24 : 19.3,
                 }}
               />
             )
@@ -750,7 +747,11 @@ const ChatScreen = () => {
             >
               <MaterialIcons
                 name="send"
-                color={selectedTheme.text.primary}
+                color={
+                  selectedTheme === darkTheme
+                    ? "black"
+                    : selectedTheme.text.primary
+                }
                 size={25}
                 style={{ transform: [{ rotate: "-40deg" }], bottom: 4 }}
               />

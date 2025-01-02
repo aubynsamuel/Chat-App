@@ -49,10 +49,7 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
   };
   return (
     <ScrollView style={styles.upContainer}>
-      <StatusBar
-        style={`${selectedTheme.Statusbar.style}` as any}
-        animated={true}
-      />
+      <StatusBar style={selectedTheme.Statusbar.style as any} animated={true} />
       {/* User Profile Info */}
       <View style={styles.upProfileContainer}>
         {imageFailed || profileUrl == "" ? (

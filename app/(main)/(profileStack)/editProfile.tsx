@@ -123,7 +123,11 @@ const EditProfileScreen = () => {
       />
       {/* back icon */}
       <TouchableOpacity onPress={() => router.navigate("..")}>
-        <MaterialIcons name="arrow-back" size={25} />
+        <MaterialIcons
+          name="arrow-back"
+          size={25}
+          color={selectedTheme.text.primary}
+        />
       </TouchableOpacity>
 
       <View style={{ justifyContent: "center", alignItems: "center", flex: 1 }}>
@@ -142,7 +146,11 @@ const EditProfileScreen = () => {
 
         {/* Username */}
         <View style={styles.epInputField}>
-          <MaterialIcons name="person" size={25} />
+          <MaterialIcons
+            name="person"
+            size={25}
+            color={selectedTheme.text.primary}
+          />
           <TextInput
             placeholder="Username"
             style={styles.epInputText}

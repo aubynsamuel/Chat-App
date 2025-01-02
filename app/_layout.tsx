@@ -5,17 +5,25 @@ import { MenuProvider } from "react-native-popup-menu";
 import { Toast } from "au-react-native-toast";
 import {
   AuthContextProvider,
+  darkTheme,
   ExpoPushNotifications,
   ThemeContextProvider,
   useTheme,
 } from "../imports";
-import { LogBox } from "react-native";
+import { LogBox, View } from "react-native";
 
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
   LogBox.ignoreAllLogs();
   return (
-    <>
+    <View
+      style={
+        {
+          backgroundColor: selectedTheme === darkTheme ? "black" : null,
+          flex: 1,
+        } as any
+      }
+    >
       <Stack
         initialRouteName="index"
         screenOptions={{
@@ -44,7 +52,7 @@ const RootLayout = () => {
         />
       </Stack>
       <Toast />
-    </>
+    </View>
   );
 };
 

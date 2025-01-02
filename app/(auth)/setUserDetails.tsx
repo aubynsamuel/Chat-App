@@ -19,6 +19,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { useTheme, getStyles, useAuth } from "../../imports";
+import darkTheme from "../../Themes/DarkMode";
 
 const EditProfileScreen = () => {
   const { user, updateProfile, showToast } = useAuth();
@@ -129,12 +130,13 @@ const EditProfileScreen = () => {
         style={`${selectedTheme.Statusbar.style}` as any}
         animated={true}
       />
-      <View style={{marginBottom:60}}>
+      <View style={{ marginBottom: 60 }}>
         <Text
           style={{
             fontSize: 23,
             fontWeight: "bold",
-            color: selectedTheme.secondary,
+            color:
+              selectedTheme === darkTheme ? "white" : selectedTheme.secondary,
             textAlign: "center",
             marginBottom: 10,
           }}
@@ -170,7 +172,11 @@ const EditProfileScreen = () => {
 
         {/* Username */}
         <View style={styles.epInputField}>
-          <MaterialIcons name="person" size={25} />
+          <MaterialIcons
+            name="person"
+            size={25}
+            color={selectedTheme.text.primary}
+          />
           <TextInput
             placeholder="Username*"
             style={styles.epInputText}

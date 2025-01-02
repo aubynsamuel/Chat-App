@@ -5,13 +5,14 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { InputToolbar } from "react-native-gifted-chat";
 import RenderAudioButton from "./RecordAudioButton";
 import { IMessage } from "../Functions/types";
-import { useAuth } from "../imports";
-import Animated, { FadeInDown, FadeOutDown } from "react-native-reanimated";
+import { darkTheme, useAuth } from "../imports";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { Theme } from "@/context/ThemeContext";
 
 interface InputToolBarProps {
   isReplying: boolean;
   setIsReplying: (value: boolean) => void;
-  selectedTheme: any;
+  selectedTheme: Theme;
   showActions: boolean;
   isEditing: boolean;
   props: any;
@@ -52,7 +53,10 @@ const InputToolBar = memo(
               flexDirection: "row",
               width: "100%",
               justifyContent: "space-between",
-              backgroundColor: selectedTheme.primary,
+              backgroundColor:
+                selectedTheme === darkTheme
+                  ? selectedTheme.background
+                  : selectedTheme.primary,
               alignItems: "center",
               paddingHorizontal: 15,
               paddingTop: 5,
@@ -128,18 +132,24 @@ const InputToolBar = memo(
 
         {/* Input toolbar and microphone */}
         <View
-          style={{
-            backgroundColor: isReplying ? selectedTheme.primary : null,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 5,
-          }}
+          style={
+            {
+              backgroundColor: isReplying
+                ? selectedTheme === darkTheme
+                  ? selectedTheme.background
+                  : selectedTheme.primary
+                : null,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 5,
+            } as any
+          }
         >
           <InputToolbar
             {...props}
             containerStyle={{
-              width: isEditing || isReplying || !showActions ? "94.8%" : "85%",
+              width: isEditing || isReplying || !showActions ? "97.5%" : "85%",
               alignSelf: "flex-start",
               borderRadius: 30,
               marginBottom: 8,

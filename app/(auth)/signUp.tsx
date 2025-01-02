@@ -9,7 +9,7 @@ import {
 import React, { useRef, useState } from "react";
 import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import { useTheme, useAuth, getStyles, SignUp, darkTheme } from "../../imports";
@@ -21,9 +21,6 @@ const SignUpScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { selectedTheme } = useTheme();
   const [passwordReveal, setPasswordReveal] = useState(true);
-  const [color, setColor] = useState(
-    selectedTheme === darkTheme ? "white" : "black"
-  );
 
   const styles = getStyles(selectedTheme);
 
@@ -59,10 +56,7 @@ const SignUpScreen = () => {
     }
 
     try {
-      let response = await signUp(
-        email.current,
-        password.current,
-      );
+      let response = await signUp(email.current, password.current);
 
       if (response.success) {
         router.replace("/setUserDetails");
@@ -79,14 +73,19 @@ const SignUpScreen = () => {
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        paddingTop: 24,
-        backgroundColor:
-          selectedTheme === darkTheme ? selectedTheme.background : null,
-      } as any}
+      style={
+        {
+          flex: 1,
+          paddingTop: 24,
+          backgroundColor:
+            selectedTheme === darkTheme ? selectedTheme.background : null,
+        } as any
+      }
     >
-      <StatusBar style={`${selectedTheme.Statusbar.style}` as any} animated={true} />
+      <StatusBar
+        style={`${selectedTheme.Statusbar.style}` as any}
+        animated={true}
+      />
 
       <LottieView
         source={SignUp}
@@ -101,7 +100,11 @@ const SignUpScreen = () => {
       <View style={styles.suForm}>
         {/* Email field */}
         <View style={styles.suInputField}>
-          <MaterialIcons name="email" size={25} />
+          <MaterialIcons
+            name="email"
+            size={25}
+            color={selectedTheme.text.primary}
+          />
           <TextInput
             placeholder="Email*"
             style={styles.suInputText}
@@ -112,7 +115,11 @@ const SignUpScreen = () => {
 
         {/* Password */}
         <View style={styles.suInputField}>
-          <MaterialIcons name="lock" size={25} />
+          <MaterialIcons
+            name="lock"
+            size={25}
+            color={selectedTheme.text.primary}
+          />
           <View
             style={{
               flexDirection: "row",
@@ -131,10 +138,21 @@ const SignUpScreen = () => {
             <TouchableOpacity
               onPress={() => {
                 setPasswordReveal((prev) => !prev);
-                setColor(passwordReveal ? "grey" : "black");
               }}
             >
-              <MaterialIcons name="remove-red-eye" color={color} size={25} />
+              {passwordReveal ? (
+                <MaterialIcons
+                  name="remove-red-eye"
+                  color={selectedTheme === darkTheme ? "white" : "black"}
+                  size={25}
+                />
+              ) : (
+                <Feather
+                  name="eye-off"
+                  color={selectedTheme === darkTheme ? "white" : "black"}
+                  size={22}
+                />
+              )}
             </TouchableOpacity>
           </View>
         </View>

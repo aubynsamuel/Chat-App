@@ -1,6 +1,5 @@
 import { Theme } from "../context/ThemeContext";
 import { StyleSheet } from "react-native";
-import purpleTheme from "../Themes/Purple";
 
 const getStyles = (theme: Theme) => {
   return StyleSheet.create({
@@ -31,7 +30,7 @@ const getStyles = (theme: Theme) => {
     name: {
       fontSize: 18,
       fontWeight: "600",
-      color: theme == purpleTheme ? theme.text.inverse : theme.text.primary,
+      color: theme.text.primary,
       marginVertical: 0,
     },
     lastMessage: {
@@ -60,7 +59,7 @@ const getStyles = (theme: Theme) => {
       flexDirection: "row",
       alignItems: "center",
       // padding: 10,
-      backgroundColor: "white",
+      backgroundColor: theme.background,
       elevation: 10,
       justifyContent: "space-between",
       overflow: "hidden",
