@@ -408,10 +408,41 @@ const ChatScreen = () => {
       options.push("Cancel");
       const cancelButtonIndex = options.length - 1;
 
+      const title = `Message: ${
+        currentMessage.text.length > 80
+          ? currentMessage.text.substring(0, 80) + "..."
+          : currentMessage.text
+      }`;
+      const textStyle: TextStyle = {
+        textAlign: "center",
+        alignSelf: "center",
+        width: "100%",
+        fontWeight: "500",
+      };
+      const destructiveColor = "red";
+      const destructiveButtonIndex = 3;
+      const titleTextStyle: TextStyle = {
+        fontWeight: "bold",
+        textAlign: "center",
+        color: "#5c5c5c",
+      };
+      const containerStyle: ViewStyle = {
+        alignItems: "center",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      };
+      const showSeparators = true;
       context.actionSheet().showActionSheetWithOptions(
         {
           options,
           cancelButtonIndex,
+          title,
+          titleTextStyle,
+          containerStyle,
+          textStyle,
+          destructiveColor,
+          destructiveButtonIndex,
+          showSeparators,
         },
         (buttonIndex: number) => {
           switch (buttonIndex) {

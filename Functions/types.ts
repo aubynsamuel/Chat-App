@@ -9,15 +9,15 @@ export interface replyData {
   _id: string | number;
   text: string;
   user: {
-      _id: string;
-      name: string;
+    _id: string;
+    name: string;
   };
   type: string | undefined;
   image: string | null;
   audio: string | null;
   location: {
-      latitude?: number;
-      longitude?: number;
+    latitude?: number;
+    longitude?: number;
   } | null;
 }
 
@@ -42,7 +42,7 @@ export interface IMessage {
   duration?: string | null;
 }
 export interface FirebaseMessage {
-  roomId? : any
+  roomId?: any;
   content: any;
   senderId: string | undefined;
   senderName: string | undefined;

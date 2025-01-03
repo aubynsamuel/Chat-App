@@ -29,7 +29,7 @@ const getStyles = (theme: Theme) => {
     },
     name: {
       fontSize: 18,
-      fontWeight: "600",
+      fontWeight: "400",
       color: theme.text.primary,
       marginVertical: 0,
     },

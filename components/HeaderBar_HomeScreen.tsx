@@ -68,20 +68,6 @@ const TopHeaderBar = memo(
           {profilePicShown && (
             <Menu>
               <MenuTrigger>
-                {/* {user?.profileUrl == "" ||
-                user?.profileUrl == null ||
-                imageFailed ? (
-                  <Image
-                    source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
-                    style={{ width: 45, height: 45, borderRadius: 30 }}
-                  />
-                ) : (
-                  <Image
-                    source={{ uri: user?.profileUrl }}
-                    style={{ width: 45, height: 45, borderRadius: 30 }}
-                    onError={() => setImageFailed(true)}
-                  />
-                )} */}
                 <MaterialIcons
                   name="more-vert"
                   size={24}
@@ -94,8 +80,7 @@ const TopHeaderBar = memo(
                     elevation: 5,
                     borderRadius: 10,
                     borderCurve: "circular",
-                    marginTop: 40,
-                    marginLeft: -30,
+                    marginTop: 30,
                   },
                   optionsWrapper: {
                     backgroundColor: theme.primary,
