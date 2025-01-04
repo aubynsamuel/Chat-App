@@ -52,16 +52,12 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
       <StatusBar style={selectedTheme.Statusbar.style as any} animated={true} />
       {/* User Profile Info */}
       <View style={styles.upProfileContainer}>
-        {imageFailed || profileUrl == "" ? (
-          <Image
-            style={styles.upAvatar}
-            source={require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
-          />
+        {profileUrl ? (
+          <Image source={{ uri: profileUrl }} style={styles.upAvatar} />
         ) : (
           <Image
+            source={require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
             style={styles.upAvatar}
-            source={{ uri: profileUrl }}
-            onError={() => setImageFailed(true)}
           />
         )}
         <Text style={styles.upUsername}>{user?.username || "User Name"}</Text>

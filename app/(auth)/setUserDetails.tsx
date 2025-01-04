@@ -57,7 +57,6 @@ const EditProfileScreen = () => {
     try {
       let downloadURL = profileUrl;
 
-      // If profileUrl is a local URI (starts with file://), upload it to Firebase Storage
       if (profileUrl && profileUrl.startsWith("file://")) {
         const storage = getStorage();
         const storageRef = ref(storage, `profilePictures/${user?.uid}`);
@@ -87,7 +86,7 @@ const EditProfileScreen = () => {
 
             const response = await updateProfile({
               username,
-              profileUrl: downloadURL, // Use Firebase Storage URL
+              profileUrl: downloadURL,
             });
 
             if (response.success) {

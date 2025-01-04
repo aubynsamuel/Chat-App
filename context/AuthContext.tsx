@@ -214,7 +214,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
         username: userData.username,
-        profileUrl: userData.profileUrl,
+        profileUrl: userData.profileUrl || null,
       });
 
       // Update the local user state in the context
