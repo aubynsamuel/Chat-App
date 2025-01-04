@@ -16,7 +16,7 @@ import { MessageImageProps } from "react-native-gifted-chat";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { UserData } from "@/context/AuthContext";
 import { IMessage } from "@/Functions/types";
-
+import { useTheme } from "../context/ThemeContext";
 // Define interfaces for type safety
 
 interface RenderMessageImageProps {
@@ -49,6 +49,7 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
     const [modalVisible, setModalVisible] = useState<boolean>(false);
     const { showActionSheetWithOptions } = useActionSheet();
     const { currentMessage } = props;
+    const { selectedTheme } = useTheme();
 
     if (!currentMessage.image) return null;
 
@@ -72,6 +73,7 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
         alignSelf: "center",
         width: "100%",
         fontWeight: "500",
+        color: selectedTheme.text.primary,
       };
       const destructiveColor = "red";
       const destructiveButtonIndex = options.includes("Delete Picture")
@@ -80,12 +82,13 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
       const titleTextStyle: TextStyle = {
         fontWeight: "400",
         textAlign: "center",
-        color: "#000",
+        color: selectedTheme.text.primary,
       };
       const containerStyle: ViewStyle = {
         alignItems: "center",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+        backgroundColor: selectedTheme.background,
       };
       const showSeparators = true;
       showActionSheetWithOptions(

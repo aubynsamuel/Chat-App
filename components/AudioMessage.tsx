@@ -136,6 +136,7 @@ const AudioPlayerComponent = memo(
         alignSelf: "center",
         width: "100%",
         fontWeight: "500",
+        color: selectedTheme.text.primary,
       };
       const destructiveColor = "red";
       const destructiveButtonIndex = options.includes("Delete Audio")
@@ -144,12 +145,13 @@ const AudioPlayerComponent = memo(
       const titleTextStyle: TextStyle = {
         fontWeight: "400",
         textAlign: "center",
-        color: "#000",
+        color: selectedTheme.text.primary,
       };
       const containerStyle: ViewStyle = {
         alignItems: "center",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
+        backgroundColor: selectedTheme.background,
       };
       const showSeparators = true;
       showActionSheetWithOptions(
