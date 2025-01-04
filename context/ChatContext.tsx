@@ -3,7 +3,6 @@ import * as Location from "expo-location";
 import { Alert } from "react-native";
 import { Audio } from "expo-av";
 
-// Define interfaces for type safety
 interface User {
   userId: string;
   username: string;

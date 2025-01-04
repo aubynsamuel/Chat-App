@@ -138,7 +138,7 @@ const SearchUsersScreen: React.FC = () => {
                 source={
                   item.profileUrl
                     ? { uri: item.profileUrl }
-                    : require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")
+                    : require("../../../myAssets/Images/profile-picture-placeholder.webp")
                 }
                 style={{ width: 50, height: 50, borderRadius: 25 }}
               />

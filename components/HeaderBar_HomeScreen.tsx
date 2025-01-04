@@ -15,20 +15,17 @@ import { Theme } from "../context/ThemeContext";
 interface HeaderBarProp {
   title: string;
   theme: Theme;
-  backButtonShown: boolean;
-  profilePicShown?: boolean;
+  menuButtonShown?: boolean;
   searchButtonShown?: boolean;
 }
 const TopHeaderBar = memo(
   ({
     title,
     theme,
-    backButtonShown,
-    profilePicShown = true,
+    menuButtonShown = true,
     searchButtonShown,
   }: HeaderBarProp) => {
     const { logout } = useAuth();
-    // const [imageFailed, setImageFailed] = useState(false);
     const styles = getStyles(theme);
 
     const handleLogout = () => {
@@ -38,20 +35,9 @@ const TopHeaderBar = memo(
 
     return (
       <View style={styles.hhHeaderContainer}>
-        {/* Back Button */}
-        {backButtonShown && (
-          <TouchableOpacity onPress={() => router.navigate("..")}>
-            <MaterialIcons
-              name="arrow-back"
-              style={styles.hhHeaderBarIcon}
-              color={"black"}
-              size={25}
-            />
-          </TouchableOpacity>
-        )}
-
         {/* HeaderTitle */}
         <Text style={styles.hhHeaderTitle}>{title}</Text>
+
         <View style={{ flexDirection: "row", alignItems: "center", gap: 15 }}>
           {/* Search button */}
           {searchButtonShown && (
@@ -64,8 +50,8 @@ const TopHeaderBar = memo(
             </TouchableOpacity>
           )}
 
-          {/* User Profile Picture */}
-          {profilePicShown && (
+          {/*Context Menu Button */}
+          {menuButtonShown && (
             <Menu>
               <MenuTrigger>
                 <MaterialIcons

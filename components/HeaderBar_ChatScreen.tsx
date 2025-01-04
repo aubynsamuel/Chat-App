@@ -114,13 +114,11 @@ const TopHeaderBar = memo(
           </Animated.View>
 
           {/* Header Title */}
-          {/* <TouchableOpacity onPress={() => {}}> */}
           <Animated.View>
             <Animated.Text style={[styles.hcHeaderTitle, animatedTitleStyle]}>
               {title}
             </Animated.Text>
           </Animated.View>
-          {/* </TouchableOpacity> */}
 
           {/* Profile Image */}
           <View style={styles.hcProfileContainer}>
@@ -131,7 +129,7 @@ const TopHeaderBar = memo(
                     <Animated.View style={[animatedImageContainerStyle]}>
                       <Animated.Image
                         style={[styles.hcAvatar, animatedImageStyle]}
-                        source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+                        source={require("../myAssets/Images/profile-picture-placeholder.webp")}
                       />
                     </Animated.View>
                   ) : (

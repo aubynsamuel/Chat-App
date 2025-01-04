@@ -69,13 +69,8 @@ const ActionButtons: React.FC<ActionButtonsProps> = memo(
           onPress={() => {
             openPicker("images");
           }}
-          // onPress={() => pickImageAsync(onSend, user, uploadMediaFile)}
           name="image"
         />
-        {/* <Button
-        onPress={() => takePictureAsync(onSend, user, uploadMediaFile)}
-        name="camera-alt"
-      /> */}
         <Button
           onPress={() => confirmAndShareLocation(onSend, user, recipient)}
           name="add-location-alt"

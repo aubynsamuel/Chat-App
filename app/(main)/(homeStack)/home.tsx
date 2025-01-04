@@ -144,9 +144,9 @@ function HomeScreen() {
 
       <TopHeaderBar
         title={"Flash Send"}
-        backButtonShown={false}
         theme={selectedTheme}
         searchButtonShown={true}
+        menuButtonShown={true}
       />
       <View style={styles.hsContainer}>
         <ChatList

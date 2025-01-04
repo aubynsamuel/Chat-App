@@ -13,7 +13,6 @@ export const useProfileURlStore = create<StoreState>((set) => ({
   profileUrl: "",
 
   setProfileUrlLink: (url: string) => {
-    // console.log("Profile set from store");
     set({ profileUrl: url });
   },
 }));

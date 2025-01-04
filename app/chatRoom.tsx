@@ -72,10 +72,7 @@ import RenderBubble from "@/components/RenderBubble";
 import { useHighlightStore } from "@/context/MessageHighlightStore";
 import ScreenOverlay from "@/components/ScreenOverlay";
 import { useProfileURlStore } from "@/context/ProfileUrlStore";
-import {
-  ActionSheetProvider,
-  useActionSheet,
-} from "@expo/react-native-action-sheet";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -112,7 +109,6 @@ const ChatScreen = () => {
   const messageContainerRef = useRef<any>(null);
   const [isReplying, setIsReplying] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
-  const { showActionSheetWithOptions } = useActionSheet();
 
   useEffect(() => {
     return () => {

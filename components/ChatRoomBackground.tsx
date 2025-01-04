@@ -25,7 +25,7 @@ const ChatRoomBackground = memo(({ source }: { source: any }) => {
       <View
         style={{
           ...StyleSheet.absoluteFillObject,
-          backgroundColor: "rgba(0, 0, 0, 0.6)", // Adjust opacity to control brightness
+          backgroundColor: "rgba(0, 0, 0, 0.6)",
         }}
       />
     </View>

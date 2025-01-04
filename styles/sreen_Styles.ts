@@ -19,8 +19,6 @@ const getStyles = (theme: Theme) => {
     crScrollToEndButton: {
       transform: [{ rotate: "90deg" }],
     },
-
-    // new styles for editing
     editContainer: {
       flexDirection: "row",
       alignItems: "center",

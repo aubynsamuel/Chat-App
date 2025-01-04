@@ -56,7 +56,7 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
           <Image source={{ uri: profileUrl }} style={styles.upAvatar} />
         ) : (
           <Image
-            source={require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+            source={require("../../../myAssets/Images/profile-picture-placeholder.webp")}
             style={styles.upAvatar}
           />
         )}

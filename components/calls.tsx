@@ -69,9 +69,8 @@ const CallsScreen = () => {
     <View style={styles.container}>
       <TopHeaderBar
         title="Calls"
-        backButtonShown={false}
         theme={selectedTheme}
-        profilePicShown={false}
+        menuButtonShown={false}
         searchButtonShown={false}
       />
       <FlatList

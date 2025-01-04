@@ -14,7 +14,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export let userDetails: UserData | null;
 
-// Define interfaces for type safety
 export interface UserData {
   userId: string;
   username?: string;

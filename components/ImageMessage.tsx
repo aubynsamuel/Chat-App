@@ -17,14 +17,12 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { UserData } from "@/context/AuthContext";
 import { IMessage } from "@/Functions/types";
 import { useTheme } from "../context/ThemeContext";
-// Define interfaces for type safety
 
 interface RenderMessageImageProps {
   imageStyle?: ImageStyle;
   setReplyToMessage: React.Dispatch<React.SetStateAction<IMessage | null>>;
   setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
   handleDelete: (message: IMessage) => Promise<void>;
-
   props: MessageImageProps<IMessage>;
   user: UserData | null;
   setEditText: React.Dispatch<React.SetStateAction<string>>;

@@ -71,7 +71,7 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
           room?.otherParticipant.profileUrl == null ? (
             <Image
               style={{ width: 50, height: 50, borderRadius: 30 }}
-              source={require("../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+              source={require("../myAssets/Images/profile-picture-placeholder.webp")}
             />
           ) : (
             <Image

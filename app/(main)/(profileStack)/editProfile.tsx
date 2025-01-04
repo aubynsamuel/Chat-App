@@ -135,7 +135,7 @@ const EditProfileScreen = () => {
           <Image source={{ uri: profileUrl }} style={styles.epProfileImage} />
         ) : (
           <Image
-            source={require("../../../myAssets/Images/default-profile-picture-avatar-photo-600nw-1681253560.webp")}
+            source={require("../../../myAssets/Images/profile-picture-placeholder.webp")}
             style={styles.epProfileImage}
           />
         )}

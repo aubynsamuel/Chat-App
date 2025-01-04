@@ -10,7 +10,6 @@ import darkTheme from "../Themes/DarkMode";
 import lightBlueTheme from "../Themes/SkyLander";
 import storage from "../Functions/Storage";
 
-// Define a type for the theme structure
 export interface Theme {
   primary: string;
   secondary: string;
