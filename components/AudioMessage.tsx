@@ -1,22 +1,43 @@
 import React, { useState, useEffect, memo } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextStyle,
+  ViewStyle,
+} from "react-native";
 import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "react-native";
 import { Theme } from "../context/ThemeContext";
+import { IMessage } from "@/Functions/types";
+import { MessageAudioProps } from "react-native-gifted-chat";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { UserData } from "@/context/AuthContext";
 
+interface AudioPlayerComponentProps {
+  selectedTheme: Theme;
+  profileUrl?: string;
+  playBackDuration?: string | null;
+  props: MessageAudioProps<IMessage>;
+  setReplyToMessage: React.Dispatch<React.SetStateAction<IMessage | null>>;
+  setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
+  handleDelete: (message: IMessage) => Promise<void>;
+  user: UserData | null;
+}
 const AudioPlayerComponent = memo(
   ({
-    currentAudio,
     selectedTheme,
     profileUrl,
     playBackDuration,
-  }: {
-    currentAudio: any;
-    selectedTheme: Theme;
-    profileUrl?: string;
-    playBackDuration?: string | null;
-  }) => {
+    props,
+    setReplyToMessage,
+    setIsReplying,
+    handleDelete,
+    user,
+  }: AudioPlayerComponentProps) => {
+    const currentAudio = props.currentMessage.audio;
     const [sound, setSound] = useState<Audio.Sound | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [playbackStatus, setPlaybackStatus] = useState({
@@ -24,6 +45,7 @@ const AudioPlayerComponent = memo(
       position: 0,
     });
     const [isFinished, setIsFinished] = useState(false);
+    const { showActionSheetWithOptions } = useActionSheet();
 
     useEffect(() => {
       return () => {
@@ -99,8 +121,70 @@ const AudioPlayerComponent = memo(
       }
     };
 
+    const handleMessagePress = (currentMessage: IMessage) => {
+      const options = ["Reply"];
+
+      if (currentMessage.user._id === user?.userId) {
+        options.push("Delete Audio");
+      }
+      options.push("Cancel");
+      const cancelButtonIndex = options.length - 1;
+
+      const title = `Audio: 🔉 ${props.currentMessage.duration}`;
+      const textStyle: TextStyle = {
+        textAlign: "center",
+        alignSelf: "center",
+        width: "100%",
+        fontWeight: "500",
+      };
+      const destructiveColor = "red";
+      const destructiveButtonIndex = 1;
+      const titleTextStyle: TextStyle = {
+        fontWeight: "400",
+        textAlign: "center",
+        color: "#000",
+      };
+      const containerStyle: ViewStyle = {
+        alignItems: "center",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      };
+      const showSeparators = true;
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+          title,
+          titleTextStyle,
+          containerStyle,
+          textStyle,
+          destructiveColor,
+          destructiveButtonIndex,
+          showSeparators,
+        },
+        (buttonIndex: number | undefined) => {
+          switch (buttonIndex) {
+            case 0: {
+              setReplyToMessage(currentMessage);
+              setIsReplying(true);
+              break;
+            }
+            case 1:
+              if (currentMessage.user._id === user?.userId)
+                handleDelete(currentMessage);
+              break;
+            default:
+              break;
+          }
+        }
+      );
+    };
+
     return (
-      <View style={styles.audioContainer}>
+      <TouchableOpacity
+        style={styles.audioContainer}
+        onLongPress={() => handleMessagePress(props.currentMessage)}
+      >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Image
             source={{ uri: profileUrl }}
@@ -125,7 +209,7 @@ const AudioPlayerComponent = memo(
             {playBackDuration || formatTime(playbackStatus.duration)}
           </Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 );

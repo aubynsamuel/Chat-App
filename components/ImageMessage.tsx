@@ -7,31 +7,127 @@ import {
   StyleSheet,
   Text,
   ImageStyle,
+  TextStyle,
+  ViewStyle,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
+import { MessageImageProps } from "react-native-gifted-chat";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { UserData } from "@/context/AuthContext";
+import { IMessage } from "@/Functions/types";
 
 // Define interfaces for type safety
-interface Message {
-  image?: string;
-  text?: string;
-}
 
 interface RenderMessageImageProps {
-  currentMessage: Message;
   imageStyle?: ImageStyle;
+  setReplyToMessage: React.Dispatch<React.SetStateAction<IMessage | null>>;
+  setIsReplying: React.Dispatch<React.SetStateAction<boolean>>;
+  handleDelete: (message: IMessage) => Promise<void>;
+
+  props: MessageImageProps<IMessage>;
+  user: UserData | null;
+  setEditText: React.Dispatch<React.SetStateAction<string>>;
+  setEditMessage: React.Dispatch<
+    React.SetStateAction<IMessage | null | undefined>
+  >;
+  setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
-  ({ currentMessage, imageStyle }) => {
+  ({
+    imageStyle,
+    props,
+    setReplyToMessage,
+    setIsReplying,
+    handleDelete,
+    setEditText,
+    setEditMessage,
+    setIsEditing,
+    user,
+  }) => {
     const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const { showActionSheetWithOptions } = useActionSheet();
+    const { currentMessage } = props;
 
     if (!currentMessage.image) return null;
+
+    const handleMessagePress = (currentMessage: IMessage) => {
+      const options = ["Reply"];
+
+      if (currentMessage.user._id === user?.userId) {
+        options.push("Edit Caption");
+        options.push("Delete Picture");
+      }
+      options.push("Cancel");
+      const cancelButtonIndex = options.length - 1;
+
+      const title = `📷 Caption: ${
+        currentMessage.text.length > 80
+          ? currentMessage.text.substring(0, 80) + "..."
+          : currentMessage.text
+      }`;
+      const textStyle: TextStyle = {
+        textAlign: "center",
+        alignSelf: "center",
+        width: "100%",
+        fontWeight: "500",
+      };
+      const destructiveColor = "red";
+      const destructiveButtonIndex = 2;
+      const titleTextStyle: TextStyle = {
+        fontWeight: "400",
+        textAlign: "center",
+        color: "#000",
+      };
+      const containerStyle: ViewStyle = {
+        alignItems: "center",
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      };
+      const showSeparators = true;
+      showActionSheetWithOptions(
+        {
+          options,
+          cancelButtonIndex,
+          title,
+          titleTextStyle,
+          containerStyle,
+          textStyle,
+          destructiveColor,
+          destructiveButtonIndex,
+          showSeparators,
+        },
+        (buttonIndex: number | undefined) => {
+          switch (buttonIndex) {
+            case 0: {
+              setReplyToMessage(currentMessage);
+              setIsReplying(true);
+              break;
+            }
+            case 1:
+              if (currentMessage.user._id === user?.userId) {
+                setIsEditing(true);
+                setEditMessage(currentMessage);
+                setEditText(currentMessage.text);
+              }
+              break;
+            case 2:
+              if (currentMessage.user._id === user?.userId)
+                handleDelete(currentMessage);
+              break;
+            default:
+              break;
+          }
+        }
+      );
+    };
 
     return (
       <>
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
+          onLongPress={() => handleMessagePress(currentMessage)}
           activeOpacity={0.8}
         >
           <Image

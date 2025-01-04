@@ -72,6 +72,10 @@ import RenderBubble from "@/components/RenderBubble";
 import { useHighlightStore } from "@/context/MessageHighlightStore";
 import ScreenOverlay from "@/components/ScreenOverlay";
 import { useProfileURlStore } from "@/context/ProfileUrlStore";
+import {
+  ActionSheetProvider,
+  useActionSheet,
+} from "@expo/react-native-action-sheet";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -108,6 +112,7 @@ const ChatScreen = () => {
   const messageContainerRef = useRef<any>(null);
   const [isReplying, setIsReplying] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
+  const { showActionSheetWithOptions } = useActionSheet();
 
   useEffect(() => {
     return () => {
@@ -399,11 +404,11 @@ const ChatScreen = () => {
       const options = ["Reply"];
 
       if (currentMessage.user._id === user?.userId) {
-        options.push("Copy text");
+        options.push("Copy Text");
         options.push("Edit Message");
-        options.push("Delete message");
+        options.push("Delete Message");
       } else {
-        options.push("Copy text");
+        options.push("Copy Text");
       }
       options.push("Cancel");
       const cancelButtonIndex = options.length - 1;
@@ -422,9 +427,9 @@ const ChatScreen = () => {
       const destructiveColor = "red";
       const destructiveButtonIndex = 3;
       const titleTextStyle: TextStyle = {
-        fontWeight: "bold",
+        fontWeight: "400",
         textAlign: "center",
-        color: "#5c5c5c",
+        color: "#000",
       };
       const containerStyle: ViewStyle = {
         alignItems: "center",
@@ -444,7 +449,7 @@ const ChatScreen = () => {
           destructiveButtonIndex,
           showSeparators,
         },
-        (buttonIndex: number) => {
+        (buttonIndex: number | undefined) => {
           switch (buttonIndex) {
             case 0: {
               setReplyToMessage(currentMessage);
@@ -580,7 +585,7 @@ const ChatScreen = () => {
     if (currentMessage.type === "audio" && currentMessage.audio) {
       return (
         <AudioPlayerComponent
-          currentAudio={currentMessage.audio}
+          props={props}
           selectedTheme={selectedTheme}
           profileUrl={
             currentMessage.user._id === user?.userId
@@ -588,6 +593,10 @@ const ChatScreen = () => {
               : profileUrl
           }
           playBackDuration={currentMessage.duration}
+          setReplyToMessage={setReplyToMessage}
+          setIsReplying={setIsReplying}
+          handleDelete={handleDelete}
+          user={user}
         />
       );
     }
@@ -615,7 +624,7 @@ const ChatScreen = () => {
           messageContainerRef={messageContainerRef}
           messagesContainerStyle={styles.crMessages as ViewStyle}
           messages={messages as IMessage[] | undefined}
-          onPress={handleMessagePress}
+          onLongPress={handleMessagePress}
           scrollToBottom={true}
           keyboardShouldPersistTaps="always"
           alwaysShowSend={false}
@@ -761,7 +770,14 @@ const ChatScreen = () => {
                     props.currentMessage.user._id === user?.userId ? 0 : 13,
                 } as any
               }
-              {...props}
+              props={props as any}
+              setReplyToMessage={setReplyToMessage}
+              setIsReplying={setIsReplying}
+              handleDelete={handleDelete}
+              setEditText={setEditText}
+              setEditMessage={setEditMessage}
+              setIsEditing={setIsEditing}
+              user={user}
             />
           )}
           renderSend={(props) => (
@@ -820,9 +836,11 @@ const ChatScreen = () => {
 
 const ChatRoomWithContext = () => {
   return (
-    <ChatProvider>
-      <ChatScreen />
-    </ChatProvider>
+    <ActionSheetProvider>
+      <ChatProvider>
+        <ChatScreen />
+      </ChatProvider>
+    </ActionSheetProvider>
   );
 };
 
