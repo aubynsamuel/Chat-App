@@ -45,7 +45,13 @@ const CustomTabBar = ({
 
   return (
     <View
-      style={[styles.container, { backgroundColor: selectedTheme.background }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: selectedTheme.background,
+          borderTopColor: selectedTheme === darkTheme ? "#252525" : "#E5E5EA",
+        },
+      ]}
     >
       <Animated.View
         style={[
@@ -65,7 +71,9 @@ const CustomTabBar = ({
               position: "absolute",
               borderRadius: 100,
               backgroundColor:
-                selectedTheme === darkTheme ? "grey" : selectedTheme.surface,
+                selectedTheme === darkTheme
+                  ? selectedTheme.primary
+                  : selectedTheme.surface,
             },
           ]}
         ></View>
@@ -184,7 +192,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: 60,
     borderTopWidth: 1,
-    borderTopColor: "#E5E5EA",
     position: "relative",
     paddingVertical: 3,
   },
