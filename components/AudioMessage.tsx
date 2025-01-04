@@ -138,7 +138,9 @@ const AudioPlayerComponent = memo(
         fontWeight: "500",
       };
       const destructiveColor = "red";
-      const destructiveButtonIndex = 1;
+      const destructiveButtonIndex = options.includes("Delete Audio")
+        ? options.indexOf("Delete Audio")
+        : options.indexOf("Cancel");
       const titleTextStyle: TextStyle = {
         fontWeight: "400",
         textAlign: "center",

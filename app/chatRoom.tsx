@@ -425,7 +425,9 @@ const ChatScreen = () => {
         fontWeight: "500",
       };
       const destructiveColor = "red";
-      const destructiveButtonIndex = 3;
+      const destructiveButtonIndex = options.includes("Delete Message")
+        ? options.indexOf("Delete Message")
+        : options.indexOf("Cancel");
       const titleTextStyle: TextStyle = {
         fontWeight: "400",
         textAlign: "center",

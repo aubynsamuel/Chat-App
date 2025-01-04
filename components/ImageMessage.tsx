@@ -74,7 +74,9 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
         fontWeight: "500",
       };
       const destructiveColor = "red";
-      const destructiveButtonIndex = 2;
+      const destructiveButtonIndex = options.includes("Delete Picture")
+        ? options.indexOf("Delete Picture")
+        : options.indexOf("Cancel");
       const titleTextStyle: TextStyle = {
         fontWeight: "400",
         textAlign: "center",
