@@ -15,6 +15,7 @@ import { IMessage } from "@/Functions/types";
 import { MessageAudioProps } from "react-native-gifted-chat";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { UserData } from "@/context/AuthContext";
+import { darkTheme } from "@/imports";
 
 interface AudioPlayerComponentProps {
   selectedTheme: Theme;
@@ -199,14 +200,21 @@ const AudioPlayerComponent = memo(
             name={isPlaying ? "pause" : "play-arrow"}
             size={35}
             onPress={playAudio}
-            color={selectedTheme.text.primary}
+            color={
+              selectedTheme === darkTheme ? "black" : selectedTheme.text.primary
+            }
           />
         </View>
         <View style={styles.audioTextContainer}>
           <Text
             style={[
               styles.audioTimeText,
-              { color: selectedTheme.text.primary },
+              {
+                color:
+                  selectedTheme === darkTheme
+                    ? "black"
+                    : selectedTheme.text.primary,
+              },
             ]}
           >
             {formatTime(playbackStatus.position)} /{" "}
