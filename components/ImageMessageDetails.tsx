@@ -16,7 +16,6 @@ import { IMessage } from "../Functions/types";
 import ScreenOverlay from "./ScreenOverlay";
 import { useChatContext } from "../context/ChatContext";
 
-// Define types for the message and upload file
 export interface MediaFile {
   uri: string;
 }
@@ -183,6 +182,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
     gap: 5,
+    alignSelf: "center",
+    paddingHorizontal: 10,
   },
   captionContainer: {
     width: "88%",
@@ -199,7 +200,6 @@ const styles = StyleSheet.create({
     color: "white",
   },
   sendButton: {
-    // backgroundColor: "#4CAF50",
     borderRadius: 5,
     padding: 10,
     justifyContent: "center",
