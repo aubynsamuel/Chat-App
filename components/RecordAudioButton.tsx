@@ -22,7 +22,7 @@ interface RecordingButtonProps {
   handleSend: (messages: AudioMessage[]) => void;
 }
 
-const RecordAudioButton: React.FC<RecordingButtonProps> = memo(() => {
+const RecordAudioButton: React.FC<RecordingButtonProps> = () => {
   const [isRecordingAllowed, setIsRecordingAllowed] = useState<boolean>(false);
   const {
     setAudioRecordingOverlay,
@@ -97,7 +97,7 @@ const RecordAudioButton: React.FC<RecordingButtonProps> = memo(() => {
       setAudioRecordingOverlay(true);
 
       playbackTimer.current = setInterval(() => {
-        setPlaybackTime((time) => time + 1);
+        setPlaybackTime((time: number) => time + 1);
       }, 1000);
 
       recordingTimer.current = setTimeout(async () => {
@@ -174,7 +174,7 @@ const RecordAudioButton: React.FC<RecordingButtonProps> = memo(() => {
       )}
     </TouchableOpacity>
   );
-});
+};
 
 const styles = StyleSheet.create({
   recordButton: {

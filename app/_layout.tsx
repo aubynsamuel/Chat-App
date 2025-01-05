@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { MenuProvider } from "react-native-popup-menu";
@@ -11,6 +11,7 @@ import {
   useTheme,
 } from "../imports";
 import { LogBox, View } from "react-native";
+import { AudioCacheManager } from "@/Functions/AudioCacheManager";
 
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
@@ -57,6 +58,9 @@ const RootLayout = () => {
 };
 
 const App = () => {
+  useEffect(() => {
+    AudioCacheManager.getInstance();
+  }, []);
   return (
     <GestureHandlerRootView>
       <ThemeContextProvider>

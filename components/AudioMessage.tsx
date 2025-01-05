@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect, memo, useRef } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TextStyle,
   ViewStyle,
+  Alert,
 } from "react-native";
 import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -16,6 +17,7 @@ import { MessageAudioProps } from "react-native-gifted-chat";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { UserData } from "@/context/AuthContext";
 import { darkTheme } from "@/imports";
+import { AudioCacheManager } from "../Functions/AudioCacheManager";
 
 interface AudioPlayerComponentProps {
   selectedTheme: Theme;
@@ -27,6 +29,7 @@ interface AudioPlayerComponentProps {
   handleDelete: (message: IMessage) => Promise<void>;
   user: UserData | null;
 }
+
 const AudioPlayerComponent = memo(
   ({
     selectedTheme,
@@ -46,16 +49,40 @@ const AudioPlayerComponent = memo(
       position: 0,
     });
     const [isFinished, setIsFinished] = useState(false);
+    const [localAudioUri, setLocalAudioUri] = useState<
+      string | null | undefined
+    >(null);
     const { showActionSheetWithOptions } = useActionSheet();
 
     useEffect(() => {
+      loadAudioFromCache();
       return () => {
         if (sound) {
           console.log("Cleaning up audio resources...");
           sound.unloadAsync();
         }
       };
-    }, []);
+    }, [currentAudio]);
+
+    const loadAudioFromCache = async () => {
+      if (!currentAudio) return;
+
+      try {
+        // If this is a local recording (temporary URI), use it directly
+        if (currentAudio.startsWith("file://")) {
+          setLocalAudioUri(currentAudio);
+          return;
+        }
+
+        const cacheManager = await AudioCacheManager.getInstance();
+        const audioUri = await cacheManager.getAudioUri(currentAudio);
+        setLocalAudioUri(audioUri);
+      } catch (error) {
+        console.error("Error loading audio from cache:", error);
+        // Fallback to original URL if cache fails
+        setLocalAudioUri(currentAudio);
+      }
+    };
 
     const formatTime = (ms: number) => {
       const totalSeconds = Math.floor(ms / 1000);
@@ -66,13 +93,8 @@ const AudioPlayerComponent = memo(
 
     const playAudio = async () => {
       try {
-        console.log("PlayAudio called. Current state:", {
-          isPlaying,
-          isFinished,
-        });
-
-        if (!currentAudio) {
-          console.warn("No audio URL provided");
+        if (!localAudioUri) {
+          console.warn("No audio URI available");
           return;
         }
 
@@ -92,11 +114,10 @@ const AudioPlayerComponent = memo(
 
         console.log("Creating new sound instance...");
         const { sound: newSound } = await Audio.Sound.createAsync(
-          { uri: currentAudio },
+          { uri: localAudioUri },
           { shouldPlay: true },
           (status) => {
             if (status.isLoaded) {
-              // Update position and duration
               setPlaybackStatus({
                 duration: status.durationMillis || 0,
                 position: status.positionMillis || 0,
@@ -108,7 +129,7 @@ const AudioPlayerComponent = memo(
                 setIsFinished(true);
                 setPlaybackStatus({
                   duration: status.durationMillis || 0,
-                  position: 0, // Set to 0 duration when finished
+                  position: 0,
                 });
               }
             }
@@ -117,8 +138,15 @@ const AudioPlayerComponent = memo(
 
         setSound(newSound);
         setIsPlaying(true);
+        setIsFinished(false);
       } catch (error) {
+        Alert.alert("Error playing audio", "Audio has not been downloading");
         console.error("Error playing audio:", error);
+        // If cached file fails, try original URL
+        if (localAudioUri !== currentAudio) {
+          setLocalAudioUri(currentAudio);
+          console.log("Falling back to original URL...");
+        }
       }
     };
 
@@ -196,14 +224,17 @@ const AudioPlayerComponent = memo(
             resizeMode="cover"
             style={{ height: 40, width: 40, borderRadius: 100 }}
           />
-          <MaterialIcons
-            name={isPlaying ? "pause" : "play-arrow"}
-            size={35}
-            onPress={playAudio}
-            color={
-              selectedTheme === darkTheme ? "black" : selectedTheme.text.primary
-            }
-          />
+          <TouchableOpacity onPress={playAudio}>
+            <MaterialIcons
+              name={isPlaying ? "pause" : "play-arrow"}
+              size={35}
+              color={
+                selectedTheme === darkTheme
+                  ? "black"
+                  : selectedTheme.text.primary
+              }
+            />
+          </TouchableOpacity>
         </View>
         <View style={styles.audioTextContainer}>
           <Text

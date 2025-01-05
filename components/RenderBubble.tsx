@@ -128,8 +128,8 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
           onSwipeableOpen={() => {
             handleSwipe(currentMessage) as any;
           }}
-          leftThreshold={40}
-          friction={1}
+          leftThreshold={currentMessage.user.name === user?.username ? 40 : 50}
+          friction={2}
           overshootLeft={false}
           useNativeAnimations={true}
         >

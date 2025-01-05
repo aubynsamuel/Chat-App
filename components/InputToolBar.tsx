@@ -1,5 +1,5 @@
-import { Text, View } from "react-native";
-import React, { memo } from "react";
+import { Text, View, ViewStyle } from "react-native";
+import React, { memo, useCallback, useMemo } from "react";
 import { TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { InputToolbar } from "react-native-gifted-chat";
@@ -21,6 +21,117 @@ interface InputToolBarProps {
   setReplyToMessage: React.Dispatch<React.SetStateAction<IMessage | null>>;
 }
 
+const ReplyPreview = memo(
+  ({
+    message,
+    selectedTheme,
+    username,
+    onClose,
+  }: {
+    message: IMessage;
+    selectedTheme: Theme;
+    username: string | undefined;
+    onClose: () => void;
+  }) => {
+    const getReplyPreview = useCallback((message: IMessage) => {
+      switch (message.type) {
+        case "text":
+          return message.text;
+        case "image":
+          return "📷 Image";
+        case "audio":
+          return "🔊 Audio";
+        case "location":
+          return "📍 Location";
+        default:
+          return "";
+      }
+    }, []);
+
+    const preview = useMemo(
+      () => getReplyPreview(message),
+      [message, getReplyPreview]
+    );
+    const displayName = useMemo(
+      () => (message.user.name === username ? "Yourself" : message.user.name),
+      [message.user.name, username]
+    );
+
+    return (
+      <Animated.View
+        entering={FadeInDown.duration(200)}
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          justifyContent: "space-between",
+          backgroundColor:
+            selectedTheme === darkTheme
+              ? selectedTheme.background
+              : selectedTheme.primary,
+          alignItems: "center",
+          paddingHorizontal: 15,
+          paddingTop: 5,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 10,
+            width: "94%",
+          }}
+        >
+          <TouchableOpacity style={{ alignSelf: "center" }}>
+            <MaterialIcons
+              name="reply"
+              size={28}
+              color={selectedTheme.text.primary}
+            />
+          </TouchableOpacity>
+          <Text
+            style={{
+              fontSize: 35,
+              alignSelf: "flex-start",
+              bottom: 5,
+              color: selectedTheme.text.primary,
+            }}
+          >
+            |
+          </Text>
+          <View style={{ height: 50, gap: 3 }}>
+            <Text
+              style={{
+                fontSize: 10,
+                fontWeight: "bold",
+                color: selectedTheme.text.primary,
+              }}
+            >
+              Replying to {displayName}
+            </Text>
+            <Text
+              numberOfLines={1}
+              style={{
+                color: selectedTheme.text.secondary,
+                maxWidth: "90%",
+              }}
+            >
+              {preview}
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity style={{ alignSelf: "center" }} onPress={onClose}>
+          <MaterialIcons
+            name="close"
+            size={24}
+            color={selectedTheme.text.primary}
+            style={{ marginRight: 5 }}
+          />
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }
+);
+
 const InputToolBar = memo(
   ({
     isReplying,
@@ -35,127 +146,50 @@ const InputToolBar = memo(
   }: InputToolBarProps) => {
     const { user } = useAuth();
 
-    const getReplyPreview = (message: IMessage) => {
-      if (message.type === "text") return message.text;
-      if (message.type === "image") return "📷 Image";
-      if (message.type === "audio") return "🔊 Audio";
-      if (message.type === "location") return "📍 Location";
-      return "";
-    };
+    const handleCloseReply = useCallback(() => {
+      setIsReplying(false);
+      setReplyToMessage?.(null);
+    }, [isReplying]);
+
+    const containerStyle = useMemo(
+      () => ({
+        backgroundColor: isReplying
+          ? selectedTheme === darkTheme
+            ? selectedTheme.background
+            : selectedTheme.primary
+          : null,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 5,
+      }),
+      [isReplying, selectedTheme]
+    );
+
+    const toolbarStyle = useMemo(
+      () => ({
+        width: isEditing || isReplying || !showActions ? "97.5%" : "85%",
+        alignSelf: "flex-start",
+        borderRadius: 30,
+        marginBottom: 8,
+        marginTop: 0,
+      }),
+      [isEditing, isReplying, showActions]
+    );
 
     return (
       <View>
-        {/* Reply to message UI */}
         {isReplying && replyToMessage && (
-          <Animated.View
-            entering={FadeInDown.duration(200)}
-            style={{
-              flexDirection: "row",
-              width: "100%",
-              justifyContent: "space-between",
-              backgroundColor:
-                selectedTheme === darkTheme
-                  ? selectedTheme.background
-                  : selectedTheme.primary,
-              alignItems: "center",
-              paddingHorizontal: 15,
-              paddingTop: 5,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                gap: 10,
-                width: "94%",
-              }}
-            >
-              <TouchableOpacity style={{ alignSelf: "center" }}>
-                <MaterialIcons
-                  name="reply"
-                  size={28}
-                  color={selectedTheme.text.primary}
-                />
-              </TouchableOpacity>
-              <Text
-                style={{
-                  fontSize: 35,
-                  alignSelf: "flex-start",
-                  bottom: 5,
-                  color: selectedTheme.text.primary,
-                }}
-              >
-                |
-              </Text>
-              <View style={{ height: 50, gap: 3 }}>
-                <Text
-                  style={{
-                    fontSize: 10,
-                    fontWeight: "bold",
-                    color: selectedTheme.text.primary,
-                  }}
-                >
-                  Replying to{" "}
-                  {replyToMessage.user.name === user?.username
-                    ? "Yourself"
-                    : replyToMessage.user.name}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    color: selectedTheme.text.secondary,
-                    maxWidth: "90%",
-                  }}
-                >
-                  {getReplyPreview(replyToMessage)}
-                </Text>
-              </View>
-            </View>
-
-            <TouchableOpacity
-              style={{ alignSelf: "center" }}
-              onPress={() => {
-                setIsReplying(false);
-                setReplyToMessage?.(null);
-              }}
-            >
-              <MaterialIcons
-                name="close"
-                size={24}
-                color={selectedTheme.text.primary}
-                style={{
-                  marginRight: 5,
-                }}
-              />
-            </TouchableOpacity>
-          </Animated.View>
+          <ReplyPreview
+            message={replyToMessage}
+            selectedTheme={selectedTheme}
+            username={user?.username}
+            onClose={handleCloseReply}
+          />
         )}
 
-        {/* Input toolbar and microphone */}
-        <View
-          style={
-            {
-              backgroundColor: isReplying
-                ? selectedTheme === darkTheme
-                  ? selectedTheme.background
-                  : selectedTheme.primary
-                : null,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 5,
-            } as any
-          }
-        >
-          <InputToolbar
-            {...props}
-            containerStyle={{
-              width: isEditing || isReplying || !showActions ? "97.5%" : "85%",
-              alignSelf: "flex-start",
-              borderRadius: 30,
-              marginBottom: 8,
-              marginTop: 0,
-            }}
-          />
+        <View style={containerStyle as ViewStyle}>
+          <InputToolbar {...props} containerStyle={toolbarStyle} />
           {!isEditing && !isReplying && showActions && (
             <RenderAudioButton handleSend={handleSend} />
           )}

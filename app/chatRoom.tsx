@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useMemo,
+} from "react";
 import {
   View,
   Text,
@@ -15,6 +21,10 @@ import {
   BubbleProps,
   MessageAudioProps,
   MessageTextProps,
+  ComposerProps,
+  InputToolbarProps,
+  MessageImageProps,
+  SendProps,
 } from "react-native-gifted-chat";
 import {
   collection,
@@ -73,6 +83,7 @@ import { useHighlightStore } from "@/context/MessageHighlightStore";
 import ScreenOverlay from "@/components/ScreenOverlay";
 import { useProfileURlStore } from "@/context/ProfileUrlStore";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
+import { AudioCacheManager } from "@/Functions/AudioCacheManager";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -97,7 +108,7 @@ const ChatScreen = () => {
   const profileUrl = useProfileURlStore((state) => state.profileUrl);
 
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const roomId: any = getRoomId(user?.userId, userId);
+  const roomId: any = useMemo(() => getRoomId(user?.userId, userId), [userId]);
   const styles = getStyles(selectedTheme);
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState<IMessage | null | undefined>();
@@ -105,7 +116,6 @@ const ChatScreen = () => {
   const [showActions, setShowActionButtons] = useState(true);
   const [imageUrl, setImageUrl] =
     useState<React.SetStateAction<string | null>>("");
-  const [sendingAudio, setSendingAudio] = useState<boolean>(false);
   const messageContainerRef = useRef<any>(null);
   const [isReplying, setIsReplying] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
@@ -314,7 +324,7 @@ const ChatScreen = () => {
         console.error("Failed to send message:", error);
       }
     },
-    [roomId, user, otherUserToken, replyToMessage]
+    [isReplying]
   );
 
   const scrollToMessage = (messageId?: string | number) => {
@@ -476,7 +486,7 @@ const ChatScreen = () => {
         }
       );
     },
-    [user?.userId, handleDelete, isEditing, isReplying]
+    [handleDelete, isEditing, isReplying]
   );
 
   const handleEditSave = async () => {
@@ -505,21 +515,18 @@ const ChatScreen = () => {
   };
 
   const uploadAudioFile = async (
-    audio: string | null,
+    audioUri: string,
     username: string | null | undefined
   ): Promise<string | null> => {
-    let downloadURL: string | null = null;
     try {
-      if (audio) {
-        const response = await fetch(audio);
-        const blob = await response.blob();
-        const storageRef = ref(
-          storage,
-          `chatAudio/${username}_${Date.now()}.m4a`
-        );
-        await uploadBytes(storageRef, blob);
-        downloadURL = await getDownloadURL(storageRef);
-      }
+      const response = await fetch(audioUri);
+      const blob = await response.blob();
+      const storageRef = ref(
+        storage,
+        `chatAudio/${username}_${Date.now()}.m4a`
+      );
+      await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
       return downloadURL;
     } catch (error) {
       console.error("Error uploading audio:", error);
@@ -540,22 +547,12 @@ const ChatScreen = () => {
         Alert.alert("Error", "No audio file found");
         return;
       }
-      setSendingAudio(true);
-      const downloadURL = await uploadAudioFile(
-        recordedAudioUri,
-        user.username
-      );
 
-      if (!downloadURL) {
-        Alert.alert("Error", "Failed to upload audio");
-        setSendingAudio(false);
-        return;
-      }
-
-      const newMessage: IMessage = {
+      // Create message with local URI first
+      const tempMessage: IMessage = {
         _id: Math.random().toString(36).substring(7),
         text: "",
-        audio: downloadURL,
+        audio: recordedAudioUri, // Use local URI initially
         createdAt: new Date(),
         user: {
           _id: user.userId,
@@ -563,10 +560,32 @@ const ChatScreen = () => {
         },
         type: "audio",
         delivered: true,
+        duration: formatTime(playbackTime),
       };
 
-      handleSend([{ ...newMessage, duration: formatTime(playbackTime) }]);
-      setSendingAudio(false);
+      // Add to messages immediately for instant feedback
+      setMessages((prevMessages) =>
+        GiftedChat.append(prevMessages, [tempMessage])
+      );
+
+      // Upload the audio file
+      const downloadURL = await uploadAudioFile(
+        recordedAudioUri,
+        user.username
+      );
+      if (!downloadURL) {
+        Alert.alert("Error", "Failed to upload audio");
+        return;
+      }
+
+      // Update cache manager with the mapping
+      const cacheManager = await AudioCacheManager.getInstance();
+      await cacheManager.updateRecordedAudioUri(recordedAudioUri, downloadURL);
+
+      // Send the message with the Firebase URL
+      const finalMessage = { ...tempMessage, audio: downloadURL };
+      handleSend([finalMessage]);
+
       resetRecording();
     } catch (error) {
       console.error("Error sending audio message:", error);
@@ -574,35 +593,38 @@ const ChatScreen = () => {
     }
   };
 
-  const renderCustomView = (props: any) => {
+  const renderCustomView = useCallback((props: any) => {
     return <CustomView {...props} />;
-  };
+  }, []);
 
-  const renderMessageAudio = (props: MessageAudioProps<IMessage>) => {
-    const { currentMessage } = props;
+  const renderMessageAudio = useCallback(
+    (props: MessageAudioProps<IMessage>) => {
+      const { currentMessage } = props;
 
-    // Only render if it's an audio message
-    if (currentMessage.type === "audio" && currentMessage.audio) {
-      return (
-        <AudioPlayerComponent
-          props={props}
-          selectedTheme={selectedTheme}
-          profileUrl={
-            currentMessage.user._id === user?.userId
-              ? user?.profileUrl
-              : profileUrl
-          }
-          playBackDuration={currentMessage.duration}
-          setReplyToMessage={setReplyToMessage}
-          setIsReplying={setIsReplying}
-          handleDelete={handleDelete}
-          user={user}
-        />
-      );
-    }
+      // Only render if it's an audio message
+      if (currentMessage.type === "audio" && currentMessage.audio) {
+        return (
+          <AudioPlayerComponent
+            props={props}
+            selectedTheme={selectedTheme}
+            profileUrl={
+              currentMessage.user._id === user?.userId
+                ? user?.profileUrl
+                : profileUrl
+            }
+            playBackDuration={currentMessage.duration}
+            setReplyToMessage={setReplyToMessage}
+            setIsReplying={setIsReplying}
+            handleDelete={handleDelete}
+            user={user}
+          />
+        );
+      }
 
-    return null;
-  };
+      return null;
+    },
+    [isReplying, handleDelete]
+  );
 
   return (
     <View style={{ flex: 1 }}>
@@ -624,79 +646,82 @@ const ChatScreen = () => {
           messageContainerRef={messageContainerRef}
           messagesContainerStyle={styles.crMessages as ViewStyle}
           messages={messages as IMessage[] | undefined}
-          onLongPress={handleMessagePress}
+          onPress={handleMessagePress}
           scrollToBottom={true}
           keyboardShouldPersistTaps="always"
           alwaysShowSend={false}
           renderCustomView={renderCustomView}
           renderMessageAudio={renderMessageAudio}
-          renderBubble={(props: Readonly<BubbleProps<IMessage>>) => (
-            <RenderBubble
-              props={props}
-              setIsReplying={setIsReplying}
-              setReplyToMessage={setReplyToMessage}
-            />
+          renderBubble={useCallback(
+            (props: Readonly<BubbleProps<IMessage>>) => (
+              <RenderBubble
+                props={props}
+                setIsReplying={setIsReplying}
+                setReplyToMessage={setReplyToMessage}
+              />
+            ),
+            [isReplying]
           )}
           renderAvatar={null}
-          onInputTextChanged={(text) => {
-            if (text.length > 0) {
-              setShowActionButtons(false);
-            } else {
-              setShowActionButtons(true);
-            }
-          }}
-          renderComposer={(props) =>
-            isEditing ? (
-              <View style={styles.editContainer as ViewStyle}>
-                <TextInput
-                  value={editText}
-                  onChangeText={setEditText}
-                  style={styles.editInput as TextStyle}
-                  autoFocus
-                  multiline={true}
-                  numberOfLines={5}
-                />
-                <TouchableOpacity
-                  onPress={() => {
-                    setIsEditing(false);
-                    // setShowActionButtons(true);
-                    handleEditSave();
-                  }}
-                  style={styles.editButton as ViewStyle}
-                >
-                  <Text style={styles.editButtonText as TextStyle}>✓</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    setIsEditing(false);
-                    // setShowActionButtons(true);
-                  }}
-                  style={styles.editButton as ViewStyle}
-                >
-                  <MaterialIcons
-                    name="close"
-                    size={20}
-                    style={styles.editButtonText as TextStyle}
+          // onInputTextChanged={(text: string | any[]) => {
+          //   if (text.length > 0) {
+          //     setShowActionButtons(false);
+          //   } else {
+          //     setShowActionButtons(true);
+          //   }
+          // }}
+          renderComposer={useCallback(
+            (props: ComposerProps) =>
+              isEditing ? (
+                <View style={styles.editContainer as ViewStyle}>
+                  <TextInput
+                    value={editText}
+                    onChangeText={setEditText}
+                    style={styles.editInput as TextStyle}
+                    autoFocus
+                    multiline={true}
+                    numberOfLines={5}
                   />
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <Composer
-                {...props}
-                textInputStyle={{
-                  color:
-                    selectedTheme === darkTheme
-                      ? "black"
-                      : selectedTheme.text.primary,
-                  width:
-                    isEditing || isReplying || !showActions ? "96%" : "85%",
-                  justifyContent: "center",
-                  borderRadius: 10,
-                  marginLeft: showActions ? 24 : 19.3,
-                }}
-              />
-            )
-          }
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsEditing(false);
+                      handleEditSave();
+                    }}
+                    style={styles.editButton as ViewStyle}
+                  >
+                    <Text style={styles.editButtonText as TextStyle}>✓</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsEditing(false);
+                    }}
+                    style={styles.editButton as ViewStyle}
+                  >
+                    <MaterialIcons
+                      name="close"
+                      size={20}
+                      style={styles.editButtonText as TextStyle}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <Composer
+                  {...props}
+                  textInputStyle={{
+                    color:
+                      selectedTheme === darkTheme
+                        ? "black"
+                        : selectedTheme.text.primary,
+                    width:
+                      isEditing || isReplying || !showActions ? "96%" : "85%",
+                    justifyContent: "center",
+                    borderRadius: 10,
+                    marginLeft: showActions ? 24 : 19.3,
+                  }}
+                />
+              ),
+            [isEditing, showActions, handleEditSave]
+          )}
           onSend={(newMessages: IMessage[]) => {
             handleSend(newMessages);
           }}
@@ -706,103 +731,123 @@ const ChatScreen = () => {
               name: user?.username,
             } as any
           }
-          renderMessageText={(props: MessageTextProps<IMessage>) => (
-            <RenderMessageText
-              props={props}
-              scrollToMessage={scrollToMessage}
-              selectedTheme={selectedTheme}
-              user={user}
-            />
+          renderMessageText={useCallback(
+            (props: MessageTextProps<IMessage>) => (
+              <RenderMessageText
+                props={props}
+                scrollToMessage={scrollToMessage}
+                selectedTheme={selectedTheme}
+                user={user}
+              />
+            ),
+            [scrollToMessage]
           )}
-          renderInputToolbar={(props) => (
-            <InputToolBar
-              isReplying={isReplying}
-              setIsReplying={setIsReplying}
-              selectedTheme={selectedTheme}
-              showActions={showActions}
-              isEditing={isEditing}
-              props={props}
-              handleSend={handleSend}
-              replyToMessage={replyToMessage}
-              setReplyToMessage={setReplyToMessage}
-            />
+          renderInputToolbar={useCallback(
+            (props: InputToolbarProps<IMessage>) => (
+              <InputToolBar
+                isReplying={isReplying}
+                setIsReplying={setIsReplying}
+                selectedTheme={selectedTheme}
+                showActions={showActions}
+                isEditing={isEditing}
+                props={props}
+                handleSend={handleSend}
+                replyToMessage={replyToMessage}
+                setReplyToMessage={setReplyToMessage}
+              />
+            ),
+            [isReplying, isEditing, showActions]
           )}
           timeTextStyle={{
             left: { color: selectedTheme.message.other.time },
             right: { color: selectedTheme.message.user.time },
           }}
-          renderActions={() =>
-            !isEditing ? (
-              <ActionButtons
-                recipient={username as string | null}
-                onSend={handleSend}
-                openPicker={openPicker}
-                user={user as any}
-                uploadMediaFile={uploadMediaFile}
-              />
-            ) : null
-          }
-          renderChatEmpty={() => (
-            <View
-              style={{
-                transform: [{ rotate: "180deg" }],
-                top: Dimensions.get("window").height / 4,
-              }}
-            >
-              <EmptyChatRoomList />
-            </View>
+          renderActions={useCallback(
+            () =>
+              !isEditing ? (
+                <ActionButtons
+                  recipient={username as string | null}
+                  onSend={handleSend}
+                  openPicker={openPicker}
+                  user={user as any}
+                  uploadMediaFile={uploadMediaFile}
+                />
+              ) : null,
+            [isEditing]
           )}
-          scrollToBottomComponent={() => (
-            <MaterialIcons
-              style={[styles.crScrollToEndButton as any]}
-              name="double-arrow"
-              color={"#000"}
-              size={30}
-            />
+          renderChatEmpty={useCallback(
+            () => (
+              <View
+                style={{
+                  transform: [{ rotate: "180deg" }],
+                  top: Dimensions.get("window").height / 4,
+                }}
+              >
+                <EmptyChatRoomList />
+              </View>
+            ),
+            []
           )}
-          renderMessageImage={(props) => (
-            <RenderMessageImage
-              imageStyle={
-                {
-                  borderTopLeftRadius:
-                    props.currentMessage.user._id === user?.userId ? 13 : 0,
-                  borderTopRightRadius:
-                    props.currentMessage.user._id === user?.userId ? 0 : 13,
-                } as any
-              }
-              props={props as any}
-              setReplyToMessage={setReplyToMessage}
-              setIsReplying={setIsReplying}
-              handleDelete={handleDelete}
-              setEditText={setEditText}
-              setEditMessage={setEditMessage}
-              setIsEditing={setIsEditing}
-              user={user}
-            />
-          )}
-          renderSend={(props) => (
-            <Send
-              {...props}
-              disabled={!props.text}
-              containerStyle={{
-                width: 44,
-                height: 44,
-                alignItems: "center",
-                justifyContent: "center",
-                marginHorizontal: 4,
-              }}
-            >
+          scrollToBottomComponent={useCallback(
+            () => (
               <MaterialIcons
-                name="send"
-                color={
-                  selectedTheme === darkTheme
-                    ? "black"
-                    : selectedTheme.text.primary
-                }
-                size={25}
-                style={{ transform: [{ rotate: "-40deg" }], bottom: 4 }}
+                style={[styles.crScrollToEndButton as any]}
+                name="double-arrow"
+                color={"#000"}
+                size={30}
               />
-            </Send>
+            ),
+            []
+          )}
+          renderMessageImage={useCallback(
+            (props: MessageImageProps<IMessage>) => (
+              <RenderMessageImage
+                imageStyle={
+                  {
+                    borderTopLeftRadius:
+                      props.currentMessage.user._id === user?.userId ? 13 : 0,
+                    borderTopRightRadius:
+                      props.currentMessage.user._id === user?.userId ? 0 : 13,
+                  } as any
+                }
+                props={props as any}
+                setReplyToMessage={setReplyToMessage}
+                setIsReplying={setIsReplying}
+                handleDelete={handleDelete}
+                setEditText={setEditText}
+                setEditMessage={setEditMessage}
+                setIsEditing={setIsEditing}
+                user={user}
+              />
+            ),
+            [isReplying, isEditing]
+          )}
+          renderSend={useCallback(
+            (props: SendProps<IMessage>) => (
+              <Send
+                {...props}
+                disabled={!props.text}
+                containerStyle={{
+                  width: 44,
+                  height: 44,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginHorizontal: 4,
+                }}
+              >
+                <MaterialIcons
+                  name="send"
+                  color={
+                    selectedTheme === darkTheme
+                      ? "black"
+                      : selectedTheme.text.primary
+                  }
+                  size={25}
+                  style={{ transform: [{ rotate: "-40deg" }], bottom: 4 }}
+                />
+              </Send>
+            ),
+            []
           )}
         />
         {imageModalVisibility && (
@@ -823,7 +868,6 @@ const ChatScreen = () => {
             playbackTime={playbackTime}
             resetRecording={resetRecording}
             sendAudioMessage={sendAudioMessage}
-            sendingAudio={sendingAudio}
           />
         )}
         {gettingLocationOverlay && (

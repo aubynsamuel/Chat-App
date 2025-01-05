@@ -18,16 +18,9 @@ interface AudioRecordingOverlayProps {
   playbackTime: number;
   resetRecording: () => void;
   sendAudioMessage: () => Promise<void>;
-  sendingAudio: boolean;
 }
 const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
-  ({
-    isRecording,
-    playbackTime,
-    resetRecording,
-    sendAudioMessage,
-    sendingAudio,
-  }) => {
+  ({ isRecording, playbackTime, resetRecording, sendAudioMessage }) => {
     return (
       <ScreenOverlay
         containerStyles={{ bottom: 54, height: null, paddingBottom: 50 }}
@@ -49,7 +42,7 @@ const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
             </Text>
 
             {/* Recording Controls */}
-            {!isRecording && !sendingAudio && (
+            {!isRecording && (
               <View style={styles.controlsContainer as ViewStyle}>
                 <TouchableOpacity
                   style={[
@@ -67,15 +60,15 @@ const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
                     styles.controlButton as any,
                     styles.sendButton as any,
                   ]}
-                  onPress={sendAudioMessage}
+                  onPress={() => {
+                    sendAudioMessage();
+                    resetRecording();
+                  }}
                 >
                   <MaterialIcons name="send" size={24} color="white" />
                   <Text style={styles.buttonText as TextStyle}>Send</Text>
                 </TouchableOpacity>
               </View>
-            )}
-            {!isRecording && sendingAudio && (
-              <ActivityIndicator size={"large"} color={"white"} />
             )}
           </View>
         }
