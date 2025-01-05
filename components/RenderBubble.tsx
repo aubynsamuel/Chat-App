@@ -128,7 +128,7 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
           onSwipeableOpen={() => {
             handleSwipe(currentMessage) as any;
           }}
-          leftThreshold={currentMessage.user.name === user?.username ? 40 : 50}
+          leftThreshold={currentMessage.user.name === user?.username ? 30 : 50}
           friction={2}
           overshootLeft={false}
           useNativeAnimations={true}
@@ -139,13 +139,13 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
             wrapperStyle={{
               left: {
                 backgroundColor: selectedTheme.message.other.background,
-                marginLeft: 5,
+                marginLeft: 7,
                 marginBottom: 3,
                 maxWidth: "80%",
               },
               right: {
                 backgroundColor: selectedTheme.message.user.background,
-                marginRight: 5,
+                marginRight: 7,
                 marginBottom: 3,
                 maxWidth: "80%",
               },

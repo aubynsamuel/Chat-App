@@ -486,7 +486,7 @@ const ChatScreen = () => {
         }
       );
     },
-    [handleDelete, isEditing, isReplying]
+    [handleDelete, isEditing, isReplying, replyToMessage, editMessage, editText]
   );
 
   const handleEditSave = async () => {
@@ -623,7 +623,7 @@ const ChatScreen = () => {
 
       return null;
     },
-    [isReplying, handleDelete]
+    [isReplying, handleDelete, replyToMessage]
   );
 
   return (
@@ -660,7 +660,7 @@ const ChatScreen = () => {
                 setReplyToMessage={setReplyToMessage}
               />
             ),
-            [isReplying]
+            [isReplying, replyToMessage]
           )}
           renderAvatar={null}
           // onInputTextChanged={(text: string | any[]) => {
@@ -720,7 +720,7 @@ const ChatScreen = () => {
                   }}
                 />
               ),
-            [isEditing, showActions, handleEditSave]
+            [isEditing, showActions, handleEditSave, editText]
           )}
           onSend={(newMessages: IMessage[]) => {
             handleSend(newMessages);
@@ -756,7 +756,7 @@ const ChatScreen = () => {
                 setReplyToMessage={setReplyToMessage}
               />
             ),
-            [isReplying, isEditing, showActions]
+            [isReplying, isEditing, showActions, replyToMessage, handleSend]
           )}
           timeTextStyle={{
             left: { color: selectedTheme.message.other.time },
@@ -820,7 +820,14 @@ const ChatScreen = () => {
                 user={user}
               />
             ),
-            [isReplying, isEditing]
+            [
+              isReplying,
+              isEditing,
+              replyToMessage,
+              editText,
+              handleDelete,
+              editMessage,
+            ]
           )}
           renderSend={useCallback(
             (props: SendProps<IMessage>) => (

@@ -92,6 +92,10 @@ const RenderMessageText = memo(
             left: { color: selectedTheme.message.other.text, fontSize: 15 },
             right: { color: selectedTheme.message.user.text, fontSize: 15 },
           }}
+          linkStyle={{
+            left: { color: selectedTheme.text.primary },
+            right: { color: selectedTheme.text.primary },
+          }}
         />
       </View>
     );

@@ -17,6 +17,7 @@ import { router } from "expo-router";
 import { useTheme, useAuth, db, usersRef, getStyles } from "../../../imports";
 import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
 import ChatList from "../../../components/ChatList";
+import { deviceToken } from "@/services/RegisterForPushNotifications";
 
 export interface RoomData {
   roomId: any;
@@ -40,7 +41,7 @@ function HomeScreen() {
 
   useEffect(() => {
     NotificationTokenManager.initializeAndUpdateToken(user?.userId as string);
-  }, [user]);
+  }, [user, deviceToken]);
 
   useEffect(() => {
     if (user?.uid) {
