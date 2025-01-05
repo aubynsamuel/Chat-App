@@ -2,7 +2,7 @@ import React from "react";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { MenuProvider } from "react-native-popup-menu";
-import { Toast } from "au-react-native-toast";
+import Toast from "@/components/Toast";
 import {
   AuthContextProvider,
   darkTheme,

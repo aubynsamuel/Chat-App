@@ -8,7 +8,7 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import storage from "../Functions/Storage";
-import { showToast as showToastMessage } from "au-react-native-toast";
+import { showToast as showToastMessage } from "@/components/Toast";
 import { auth, db } from "../env/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
