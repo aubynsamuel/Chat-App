@@ -49,6 +49,7 @@ const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
                     styles.controlButton as any,
                     styles.discardButton as any,
                   ]}
+                  activeOpacity={0.7}
                   onPress={resetRecording}
                 >
                   <MaterialIcons name="delete" size={24} color="white" />
@@ -60,6 +61,7 @@ const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
                     styles.controlButton as any,
                     styles.sendButton as any,
                   ]}
+                  activeOpacity={0.7}
                   onPress={() => {
                     sendAudioMessage();
                     resetRecording();

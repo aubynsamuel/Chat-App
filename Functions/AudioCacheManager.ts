@@ -85,7 +85,7 @@ export class AudioCacheManager {
         timestamp: Date.now(),
       };
       await this.saveCacheMap();
-      // console.log("Audio downloaded and cached");
+      console.log("Audio downloaded and cached");
       return localUri;
     } catch (error) {
       console.error("Error downloading audio:", error);

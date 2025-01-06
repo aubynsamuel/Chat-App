@@ -1,5 +1,5 @@
 import { Text, View, ViewStyle } from "react-native";
-import React, { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback, useMemo, MutableRefObject } from "react";
 import { TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { InputToolbar } from "react-native-gifted-chat";
@@ -13,7 +13,7 @@ interface InputToolBarProps {
   isReplying: boolean;
   setIsReplying: (value: boolean) => void;
   selectedTheme: Theme;
-  showActions: boolean;
+  showActions: MutableRefObject<boolean>;
   isEditing: boolean;
   props: any;
   handleSend: (newMessages?: IMessage[]) => Promise<void>;
@@ -168,13 +168,14 @@ const InputToolBar = memo(
 
     const toolbarStyle = useMemo(
       () => ({
-        width: isEditing || isReplying || !showActions ? "97.5%" : "85%",
+        width:
+          isEditing || isReplying || !showActions.current ? "97.5%" : "85%",
         alignSelf: "flex-start",
         borderRadius: 30,
         marginBottom: 8,
         marginTop: 0,
       }),
-      [isEditing, isReplying, showActions]
+      [isEditing, isReplying, showActions.current]
     );
 
     return (
@@ -190,9 +191,19 @@ const InputToolBar = memo(
 
         <View style={containerStyle as ViewStyle}>
           <InputToolbar {...props} containerStyle={toolbarStyle} />
-          {!isEditing && !isReplying && showActions && (
-            <RenderAudioButton handleSend={handleSend} />
-          )}
+          <View
+            style={{
+              position:
+                showActions.current && !isEditing && !isReplying
+                  ? "relative"
+                  : "absolute",
+              opacity: showActions.current && !isEditing && !isReplying ? 1 : 0,
+              top:
+                showActions.current && !isEditing && !isReplying ? null : 100,
+            }}
+          >
+            <RenderAudioButton />
+          </View>
         </View>
       </View>
     );

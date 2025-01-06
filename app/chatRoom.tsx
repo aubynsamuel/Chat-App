@@ -113,7 +113,7 @@ const ChatScreen = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState<IMessage | null | undefined>();
   const [editText, setEditText] = useState("");
-  const [showActions, setShowActionButtons] = useState(true);
+  const showActions = useRef(true);
   const [imageUrl, setImageUrl] =
     useState<React.SetStateAction<string | null>>("");
   const messageContainerRef = useRef<any>(null);
@@ -665,13 +665,13 @@ const ChatScreen = () => {
             [isReplying, replyToMessage]
           )}
           renderAvatar={null}
-          // onInputTextChanged={(text: string | any[]) => {
-          //   if (text.length > 0) {
-          //     setShowActionButtons(false);
-          //   } else {
-          //     setShowActionButtons(true);
-          //   }
-          // }}
+          onInputTextChanged={(text: string | any[]) => {
+            if (text.length > 0) {
+              showActions.current = false;
+            } else {
+              showActions.current = true;
+            }
+          }}
           renderComposer={useCallback(
             (props: ComposerProps) =>
               isEditing ? (
@@ -714,15 +714,13 @@ const ChatScreen = () => {
                       selectedTheme === darkTheme
                         ? "black"
                         : selectedTheme.text.primary,
-                    width:
-                      isEditing || isReplying || !showActions ? "96%" : "85%",
                     justifyContent: "center",
                     borderRadius: 10,
-                    marginLeft: showActions ? 24 : 19.3,
+                    marginLeft: showActions.current ? 24 : 19.3,
                   }}
                 />
               ),
-            [isEditing, showActions, handleEditSave, editText]
+            [isEditing, showActions.current, handleEditSave, editText]
           )}
           onSend={(newMessages: IMessage[]) => {
             handleSend(newMessages);
@@ -758,7 +756,13 @@ const ChatScreen = () => {
                 setReplyToMessage={setReplyToMessage}
               />
             ),
-            [isReplying, isEditing, showActions, replyToMessage, handleSend]
+            [
+              isReplying,
+              isEditing,
+              showActions.current,
+              replyToMessage,
+              handleSend,
+            ]
           )}
           timeTextStyle={{
             left: { color: selectedTheme.message.other.time },

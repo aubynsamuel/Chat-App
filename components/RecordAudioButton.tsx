@@ -5,24 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { useChatContext } from "../context/ChatContext";
 
-interface AudioMessage {
-  _id: string;
-  text: string;
-  audio: string;
-  createdAt: Date;
-  user: {
-    _id: string;
-    name: string;
-  };
-  type: string;
-  delivered: boolean;
-}
-
-interface RecordingButtonProps {
-  handleSend: (messages: AudioMessage[]) => void;
-}
-
-const RecordAudioButton: React.FC<RecordingButtonProps> = () => {
+const RecordAudioButton = () => {
   const [isRecordingAllowed, setIsRecordingAllowed] = useState<boolean>(false);
   const {
     setAudioRecordingOverlay,
@@ -156,6 +139,7 @@ const RecordAudioButton: React.FC<RecordingButtonProps> = () => {
       style={[styles.recordButton, recording && styles.recordingButton]}
       onPressIn={startRecording}
       onPressOut={stopRecording}
+      activeOpacity={0.7}
     >
       {!isRecording ? (
         <MaterialIcons
