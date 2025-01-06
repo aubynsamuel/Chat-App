@@ -61,7 +61,7 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
       options.push("Cancel");
       const cancelButtonIndex = options.length - 1;
 
-      const title = `📷 Caption: ${
+      const title = `📷 Image: ${
         currentMessage.text.length > 80
           ? currentMessage.text.substring(0, 80) + "..."
           : currentMessage.text

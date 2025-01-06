@@ -79,7 +79,9 @@ const RenderMessageText = memo(
                 : currentMessage.replyTo.type === "image"
                 ? "📷 Image"
                 : currentMessage.replyTo.type === "audio"
-                ? "🔊 Audio"
+                ? `🔊 ${
+                    currentMessage.duration ? currentMessage.duration : "audio"
+                  }`
                 : "Unknown Content"}
             </Text>
           </TouchableOpacity>

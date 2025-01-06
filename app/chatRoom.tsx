@@ -324,7 +324,7 @@ const ChatScreen = () => {
         console.error("Failed to send message:", error);
       }
     },
-    [isReplying]
+    [isReplying, replyToMessage]
   );
 
   const scrollToMessage = (messageId?: string | number) => {
@@ -359,7 +359,7 @@ const ChatScreen = () => {
     if (newMessage.type === "image") {
       return "📷 Sent an image";
     } else if (newMessage.type === "audio") {
-      return "🔉 Sent an audio";
+      return `🔉 ${newMessage.duration}` || `🔉 Sent an audio`;
     } else if (newMessage.type === "location") {
       return "🌍 Shared a location";
     } else {
@@ -419,7 +419,9 @@ const ChatScreen = () => {
       options.push("Cancel");
       const cancelButtonIndex = options.length - 1;
 
-      const title = `Message: ${
+      const title = ` ${
+        currentMessage.type === "location" ? "Location: " : "Message: "
+      } ${
         currentMessage.text.length > 80
           ? currentMessage.text.substring(0, 80) + "..."
           : currentMessage.text

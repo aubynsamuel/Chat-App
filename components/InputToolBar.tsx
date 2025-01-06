@@ -40,9 +40,9 @@ const ReplyPreview = memo(
         case "image":
           return "📷 Image";
         case "audio":
-          return "🔊 Audio";
+          return `🔊 ${message.duration}` || "🔊 Audio";
         case "location":
-          return "📍 Location";
+          return "🌍 Location";
         default:
           return "";
       }

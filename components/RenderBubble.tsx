@@ -160,7 +160,9 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
       prevProps.props.currentMessage._id ===
         nextProps.props.currentMessage._id &&
       prevProps.props.currentMessage.text ===
-        nextProps.props.currentMessage.text
+        nextProps.props.currentMessage.text &&
+      prevProps.props.currentMessage.read ===
+        nextProps.props.currentMessage.read
     );
   }
 );
