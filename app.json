@@ -44,6 +44,13 @@
         {
           "microphonePermission": "Allow expo-av to access your microphone."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "mode": "production"
+        }
       ]
     ],
     "experiments": {
