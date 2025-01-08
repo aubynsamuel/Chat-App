@@ -9,27 +9,27 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { getCurrentTime } from "../Functions/Commons";
-import { deviceToken } from "./RegisterForPushNotifications";
+import { deviceToken as currentUsersDeviceToken } from "./RegisterForPushNotifications";
 import { UserData } from "@/context/AuthContext";
 
 async function sendNotification(
-  expoPushToken: string,
+  expoPushTokenOfOtherUser: string,
   title: string,
   body: string,
   roomId: string
 ) {
-  // if (!expoPushToken) {
+  // if (!expoPushTokenOfOtherUser) {
   //   console.warn("No device token provided for notification");
   //   return;
   // }
 
   const message = {
-    to: expoPushToken,
+    to: expoPushTokenOfOtherUser,
     sound: "default",
     title: title,
     body: body.length < 100 ? body : body.substring(0, 100) + "...",
     data: {
-      tokenToReplyTo: deviceToken || null,
+      tokenToReplyTo: currentUsersDeviceToken || null,
       replyToRoomId: roomId || null,
     },
     channelId: "default",
@@ -61,11 +61,11 @@ async function handleReplyAction(
   replyText: string,
   user: UserData | null,
   roomId: string,
-  deviceToken: string
+  currentUsersDeviceToken: string
 ) {
   // if (!user?.userId || !roomId || !replyText) {
   //   console.error("Missing required parameters for reply action");
-  //   console.log(user, roomId, replyText, deviceToken);
+  //   console.log(user, roomId, replyText, currentUsersDeviceToken);
   //   // return;
   // }
 
@@ -95,9 +95,9 @@ async function handleReplyAction(
     );
 
     // Send a notification to the room's owner
-    if (deviceToken) {
+    if (currentUsersDeviceToken) {
       await sendNotification(
-        deviceToken,
+        currentUsersDeviceToken,
         `New message from ${user?.username}`,
         replyText,
         roomId
