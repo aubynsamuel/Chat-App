@@ -105,22 +105,22 @@ const AudioPlayerComponent = memo(
             "No audio URI available locally, downloading from firebase"
           );
           setDownloading(true);
-          try {
-            const audioUri = await audioCacheManager?.downloadAudioUrl(
-              currentAudio as any
-            );
+          const audioUri = await audioCacheManager?.downloadAudioUrl(
+            currentAudio as any
+          );
+          if ((audioUri?.length as any) > 0) {
             setLocalAudioUri(audioUri);
             setDownloading(false);
             // console.log("Audio Downloaded For Message Component: ", audioUri);
-          } catch (error) {
-            // Fallback to original URL if download fails
-            console.log("Falling back to original URL");
-            setLocalAudioUri(currentAudio);
+          } else {
+            setLocalAudioUri(null);
             setDownloading(false);
+            Alert.alert(
+              "Error downloading audio",
+              "Please check your internet connection"
+            );
           }
-          // if ((audioUri?.length as any) > 0) {
-          // } else {
-          // }
+          return;
         }
 
         if (isPlaying && sound) {
@@ -165,13 +165,15 @@ const AudioPlayerComponent = memo(
         setIsPlaying(true);
         setIsFinished(false);
       } catch (error) {
-        // Alert.alert("Error playing audio", "Audio has not been downloaded");
         console.error("Error playing audio:", error);
-        // If cached file fails, try original URL
-        if (localAudioUri !== currentAudio) {
-          setLocalAudioUri(currentAudio);
-          console.log("Falling back to original URL...");
-        }
+        Alert.alert(
+          "Error playing audio",
+          "Audio could not be played, Please try again"
+        );
+        // if (localAudioUri !== currentAudio) {
+        //   setLocalAudioUri(currentAudio);
+        //   console.log("Falling back to original URL...");
+        // }
       }
     };
 

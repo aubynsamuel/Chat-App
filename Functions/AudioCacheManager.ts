@@ -25,11 +25,6 @@ export class AudioCacheManager {
       await AudioCacheManager.instance.loadCacheMap();
       console.log("Audio Cache Initialized");
     }
-    //  else if (AudioCacheManager.instance) {
-    //   console.log("Audio Cache Already Initialized");
-    // } else {
-    //   console.log("Error initializing Audio Cache");
-    // }
     return AudioCacheManager.instance;
   }
 
@@ -78,7 +73,6 @@ export class AudioCacheManager {
   }
 
   async downloadAudioUrl(firebaseUrl: string): Promise<string> {
-    // Download and cache if not found
     const filename = `${Date.now()}_${Math.random()
       .toString(36)
       .substring(7)}.m4a`;
@@ -95,7 +89,7 @@ export class AudioCacheManager {
       return localUri;
     } catch (error) {
       console.error("Error downloading audio:", error);
-      return firebaseUrl; // Fallback to original URL if download fails
+      return "";
     }
   }
 
