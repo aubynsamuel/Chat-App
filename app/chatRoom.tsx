@@ -59,7 +59,7 @@ import {
 import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import EmptyChatRoomList from "../components/EmptyChatRoomList";
 import ChatRoomBackground from "../components/ChatRoomBackground";
-import { sendNotification } from "../services/NotificationActions";
+import sendNotification from "../services/NotificationActions";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import ActionButtons from "../components/ActionButtons";
