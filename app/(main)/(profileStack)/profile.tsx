@@ -15,7 +15,7 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import UserProfileContent from "./userProfileContent";
-import { useTheme, getStyles } from "../../../imports";
+import { useTheme, getStyles, darkTheme } from "../../../imports";
 
 interface ThemeOption {
   id: string;
@@ -70,7 +70,14 @@ const UserProfileScreen: React.FC = () => {
           ref={bottomSheetModalRef}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
-          backgroundStyle={{ backgroundColor: "white" }}
+          backgroundStyle={{
+            backgroundColor:
+              selectedTheme === darkTheme ? selectedTheme.background : "white",
+          }}
+          handleIndicatorStyle={{
+            backgroundColor:
+              selectedTheme === darkTheme ? "lightgrey" : "black",
+          }}
           backdropComponent={(props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop
               {...props}
@@ -80,8 +87,22 @@ const UserProfileScreen: React.FC = () => {
             />
           )}
         >
-          <BottomSheetView style={stylesSheet.contentContainer as any}>
-            <Text style={{ fontSize: 16, margin: 10 }}>
+          <BottomSheetView
+            style={[
+              stylesSheet.contentContainer as any,
+              {
+                backgroundColor:
+                  selectedTheme === darkTheme ? "black" : "white",
+              },
+            ]}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                margin: 10,
+                color: selectedTheme === darkTheme ? "lightgrey" : "black",
+              }}
+            >
               Select Your Preferred Theme
             </Text>
             <ScrollView
@@ -97,10 +118,27 @@ const UserProfileScreen: React.FC = () => {
                     onPress={() => changeTheme(parseInt(item.id, 10))}
                     style={[
                       stylesSheet.colorBox as any,
-                      { backgroundColor: item.color },
+                      {
+                        borderWidth:
+                          item.id === "2" && selectedTheme === darkTheme
+                            ? 10
+                            : null,
+                        borderColor:
+                          item.id === "2" && selectedTheme === darkTheme
+                            ? "white"
+                            : null,
+                        backgroundColor: item.color,
+                      },
                     ]}
                   />
-                  <Text>{item.name}</Text>
+                  <Text
+                    style={{
+                      color:
+                        selectedTheme === darkTheme ? "lightgrey" : "black",
+                    }}
+                  >
+                    {item.name}
+                  </Text>
                 </View>
               ))}
             </ScrollView>
@@ -114,7 +152,6 @@ const UserProfileScreen: React.FC = () => {
 const stylesSheet = StyleSheet.create({
   contentContainer: {
     alignItems: "center",
-    backgroundColor: "white",
     flexDirection: "column",
     justifyContent: "space-evenly",
   },

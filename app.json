@@ -20,7 +20,7 @@
       "androidCollapsedTitle": "New Messages"
     },
     "android": {
-      "permissions": ["CAMERA", "RECORD_AUDIO"],
+      "permissions": ["CAMERA", "RECORD_AUDIO", "NOTIFICATIONS"],
       "config": {
         "googleMaps": { "apiKey": "" }
       },
@@ -48,7 +48,6 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/icon.png",
           "mode": "production"
         }
       ]

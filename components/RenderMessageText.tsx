@@ -4,6 +4,7 @@ import { IMessage } from "../Functions/types";
 import { UserData } from "../context/AuthContext";
 import { Theme } from "../context/ThemeContext";
 import { memo } from "react";
+import { darkTheme } from "@/imports";
 
 const RenderMessageText = memo(
   ({
@@ -30,7 +31,11 @@ const RenderMessageText = memo(
               {
                 backgroundColor:
                   currentMessage.user._id === user?.userId
-                    ? selectedTheme.background
+                    ? selectedTheme === darkTheme
+                      ? selectedTheme.secondary
+                      : selectedTheme.background
+                    : selectedTheme === darkTheme
+                    ? "#121212"
                     : selectedTheme.background,
                 borderTopRightRadius:
                   currentMessage.user._id === user?.userId ? null : 10,
@@ -46,7 +51,9 @@ const RenderMessageText = memo(
                   currentMessage.user._id === user?.userId ? 0 : 4,
                 borderColor:
                   currentMessage.user._id === user?.userId
-                    ? selectedTheme.secondary
+                    ? selectedTheme === darkTheme
+                      ? selectedTheme.background
+                      : selectedTheme.secondary
                     : selectedTheme.secondary,
               } as any
             }
@@ -55,7 +62,10 @@ const RenderMessageText = memo(
             <Text
               style={{
                 fontSize: 11,
-                color: selectedTheme.secondary,
+                color:
+                  selectedTheme === darkTheme
+                    ? "white"
+                    : selectedTheme.secondary,
                 fontWeight: "bold",
                 // fontStyle: "italic",
               }}
@@ -91,7 +101,13 @@ const RenderMessageText = memo(
         <MessageText
           {...props}
           textStyle={{
-            left: { color: selectedTheme.message.other.text, fontSize: 15 },
+            left: {
+              color:
+                selectedTheme === darkTheme
+                  ? "white"
+                  : selectedTheme.message.other.text,
+              fontSize: 15,
+            },
             right: { color: selectedTheme.message.user.text, fontSize: 15 },
           }}
           linkStyle={{

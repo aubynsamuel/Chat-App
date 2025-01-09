@@ -80,7 +80,7 @@ const ReplyPreview = memo(
             width: "94%",
           }}
         >
-          <TouchableOpacity style={{ alignSelf: "center" }}>
+          <TouchableOpacity style={{ alignSelf: "center", bottom: 5 }}>
             <MaterialIcons
               name="reply"
               size={28}
@@ -119,7 +119,11 @@ const ReplyPreview = memo(
           </View>
         </View>
 
-        <TouchableOpacity style={{ alignSelf: "center" }} onPress={onClose}>
+        <TouchableOpacity
+          style={{ alignSelf: "center" }}
+          onPress={onClose}
+          activeOpacity={0.5}
+        >
           <MaterialIcons
             name="close"
             size={24}
@@ -140,7 +144,6 @@ const InputToolBar = memo(
     showActions,
     isEditing,
     props,
-    handleSend,
     replyToMessage,
     setReplyToMessage,
   }: InputToolBarProps) => {
@@ -166,7 +169,7 @@ const InputToolBar = memo(
       [isReplying, selectedTheme]
     );
 
-    const toolbarStyle = useMemo(
+    const toolbarStyle: ViewStyle = useMemo(
       () => ({
         width:
           isEditing || isReplying || !showActions.current ? "97.5%" : "85%",
@@ -174,6 +177,10 @@ const InputToolBar = memo(
         borderRadius: 30,
         marginBottom: 8,
         marginTop: 0,
+        borderTopColor:
+          selectedTheme === darkTheme ? selectedTheme.surface : "white",
+        backgroundColor:
+          selectedTheme === darkTheme ? selectedTheme.surface : "white",
       }),
       [isEditing, isReplying, showActions.current]
     );

@@ -138,7 +138,10 @@ const RenderBubble: React.FC<RenderBubbleProps> = memo(
             renderTicks={() => ticks}
             wrapperStyle={{
               left: {
-                backgroundColor: selectedTheme.message.other.background,
+                backgroundColor:
+                  selectedTheme === darkTheme
+                    ? selectedTheme.surface
+                    : selectedTheme.message.other.background,
                 marginLeft: 7,
                 marginBottom: 3,
                 maxWidth: "80%",

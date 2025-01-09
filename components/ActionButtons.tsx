@@ -3,6 +3,8 @@ import React, { memo } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { Alert } from "react-native";
 import { useChatContext } from "../context/ChatContext";
+import { darkTheme } from "@/imports";
+import { useTheme } from "@/context/ThemeContext";
 
 interface User {
   userId: string;
@@ -40,6 +42,7 @@ const Button: React.FC<ButtonProps> = memo(
 const ActionButtons: React.FC<ActionButtonsProps> = memo(
   ({ onSend, user, openPicker, recipient }) => {
     const { getLocationAsync } = useChatContext();
+    const { selectedTheme } = useTheme();
 
     const confirmAndShareLocation = (
       onSend: (messages: any[]) => void,
@@ -69,10 +72,12 @@ const ActionButtons: React.FC<ActionButtonsProps> = memo(
           onPress={() => {
             openPicker("images");
           }}
+          color={selectedTheme === darkTheme ? "white" : "black"}
           name="image"
         />
         <Button
           onPress={() => confirmAndShareLocation(onSend, user, recipient)}
+          color={selectedTheme === darkTheme ? "white" : "black"}
           name="add-location-alt"
         />
       </View>

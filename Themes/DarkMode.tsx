@@ -36,7 +36,7 @@ const darkTheme = {
 
 export default darkTheme;
 
-// Green Theme Version of darkTheme
+// // Green Theme Version of darkTheme
 // const darkTheme = {
 //   primary: "green",
 //   secondary: "darkgreen",

@@ -46,7 +46,7 @@ const NotificationTokenManager = {
       });
 
       await AsyncStorage.setItem("deviceToken", token);
-      console.log("FCM token updated and cached successfully.");
+      console.log("Expo Push token updated and cached successfully.");
     } catch (error) {
       console.error("Error updating user token:", error);
     }
