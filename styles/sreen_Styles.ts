@@ -189,6 +189,7 @@ const getStyles = (theme: Theme) => {
       flexDirection: "row",
       alignItems: "center",
       padding: 10,
+      height: 70,
       backgroundColor: theme.primary,
     },
     searchInput: {
@@ -206,6 +207,7 @@ const getStyles = (theme: Theme) => {
       borderBottomColor: theme.border,
       marginLeft: 10,
       marginRight: 10,
+      marginVertical: 5,
       flexDirection: "row",
       alignItems: "center",
     },
