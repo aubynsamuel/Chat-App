@@ -111,10 +111,10 @@ const ReplyPreview = memo(
               numberOfLines={1}
               style={{
                 color: selectedTheme.text.secondary,
-                maxWidth: "90%",
+                width: "100%",
               }}
             >
-              {preview}
+              {preview.length > 38 ? preview.substring(0, 38) + "..." : preview}
             </Text>
           </View>
         </View>
