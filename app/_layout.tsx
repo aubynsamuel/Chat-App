@@ -11,7 +11,7 @@ import {
   useTheme,
 } from "../imports";
 import { LogBox, View } from "react-native";
-import { AudioCacheManager } from "@/Functions/AudioCacheManager";
+import { useAudioManager } from "@/Functions/AudioCacheManager";
 
 const RootLayout = () => {
   const { selectedTheme } = useTheme();
@@ -58,8 +58,9 @@ const RootLayout = () => {
 };
 
 const App = () => {
+  const { getAudioCacheInstance } = useAudioManager();
   useEffect(() => {
-    AudioCacheManager.getInstance();
+    getAudioCacheInstance();
   }, []);
   return (
     <GestureHandlerRootView>

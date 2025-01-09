@@ -1,5 +1,6 @@
 import * as FileSystem from "expo-file-system";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "zustand";
 
 const AUDIO_CACHE_DIR = `${FileSystem.cacheDirectory}audio_cache/`;
 const AUDIO_CACHE_MAP_KEY = "audio_cache_map";
@@ -62,16 +63,21 @@ export class AudioCacheManager {
     }
   }
 
-  async getAudioUri(firebaseUrl: string): Promise<string> {
+  async getAudioUriFromStorage(firebaseUrl: string): Promise<string> {
     const cached = this.cacheMap[firebaseUrl];
 
     if (cached) {
       const fileInfo = await FileSystem.getInfoAsync(cached.localUri);
       if (fileInfo.exists) {
+        console.log("Audio loaded from cache: ", fileInfo.uri);
         return cached.localUri;
       }
     }
+    console.log("Audio cannot be found in cache");
+    return "";
+  }
 
+  async downloadAudioUrl(firebaseUrl: string): Promise<string> {
     // Download and cache if not found
     const filename = `${Date.now()}_${Math.random()
       .toString(36)
@@ -121,3 +127,15 @@ export class AudioCacheManager {
     // console.log("Old cache cleaned");
   }
 }
+
+interface AudioCacheStore {
+  audioCacheManager: AudioCacheManager | null;
+  getAudioCacheInstance: () => Promise<void>;
+}
+
+export const useAudioManager = create<AudioCacheStore>((set) => ({
+  audioCacheManager: null,
+  getAudioCacheInstance: async () => {
+    set({ audioCacheManager: await AudioCacheManager.getInstance() });
+  },
+}));

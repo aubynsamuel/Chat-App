@@ -83,7 +83,7 @@ import { useHighlightStore } from "@/context/MessageHighlightStore";
 import ScreenOverlay from "@/components/ScreenOverlay";
 import { useProfileURlStore } from "@/context/ProfileUrlStore";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import { AudioCacheManager } from "@/Functions/AudioCacheManager";
+import { useAudioManager } from "@/Functions/AudioCacheManager";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
@@ -119,6 +119,7 @@ const ChatScreen = () => {
   const messageContainerRef = useRef<any>(null);
   const [isReplying, setIsReplying] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
+  const { audioCacheManager } = useAudioManager();
 
   useEffect(() => {
     return () => {
@@ -576,13 +577,15 @@ const ChatScreen = () => {
         user.username
       );
       if (!downloadURL) {
-        Alert.alert("Error", "Failed to upload audio");
+        Alert.alert("Error Sending Message", "No internet connection");
         return;
       }
 
       // Update cache manager with the mapping
-      const cacheManager = await AudioCacheManager.getInstance();
-      await cacheManager.updateRecordedAudioUri(recordedAudioUri, downloadURL);
+      await audioCacheManager?.updateRecordedAudioUri(
+        recordedAudioUri,
+        downloadURL
+      );
 
       // Send the message with the Firebase URL
       const finalMessage = { ...tempMessage, audio: downloadURL };
@@ -685,6 +688,7 @@ const ChatScreen = () => {
                     numberOfLines={5}
                   />
                   <TouchableOpacity
+                    activeOpacity={0.5}
                     onPress={() => {
                       setIsEditing(false);
                       handleEditSave();
@@ -694,6 +698,7 @@ const ChatScreen = () => {
                     <Text style={styles.editButtonText as TextStyle}>✓</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                    activeOpacity={0.5}
                     onPress={() => {
                       setIsEditing(false);
                     }}
@@ -710,10 +715,7 @@ const ChatScreen = () => {
                 <Composer
                   {...props}
                   textInputStyle={{
-                    color:
-                      selectedTheme === darkTheme
-                        ? "black"
-                        : selectedTheme.text.primary,
+                    color: selectedTheme.text.primary,
                     justifyContent: "center",
                     borderRadius: 10,
                     marginLeft: showActions.current ? 24 : 19.3,
@@ -765,7 +767,12 @@ const ChatScreen = () => {
             ]
           )}
           timeTextStyle={{
-            left: { color: selectedTheme.message.other.time },
+            left: {
+              color:
+                selectedTheme === darkTheme
+                  ? "#ffffff"
+                  : selectedTheme.message.other.time,
+            },
             right: { color: selectedTheme.message.user.time },
           }}
           renderActions={useCallback(
@@ -852,7 +859,7 @@ const ChatScreen = () => {
                   name="send"
                   color={
                     selectedTheme === darkTheme
-                      ? "black"
+                      ? "white"
                       : selectedTheme.text.primary
                   }
                   size={25}
