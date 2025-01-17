@@ -116,11 +116,12 @@ The app uses Expo Router for file-based navigation, organizing routes in the `ap
 - `(main)`: Protected routes accessible after authentication
 - `chatRoom`: Dynamic chat room screen
 
-### Context Providers
+### Context Providers/State Management
 
 - `AuthContext`: Manages authentication state and user data
 - `ChatContext`: Handles chat-related state and functions
 - `ThemeContext`: Controls app theming and appearance
+- `Zustand Stores`: Used Zustand to optimize performance and prevent unnecessary component re-rendering
 
 ### Features Implementation
 
