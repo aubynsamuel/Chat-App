@@ -50,10 +50,10 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
     router.push({
       pathname: "/chatRoom",
       params: {
-        userId: room.otherParticipant.userId,
-        username: room.otherParticipant.username,
+        otherUsersUserId: room.otherParticipant.userId,
+        otherUsersUsername: room.otherParticipant.username,
         profileUrl: room.otherParticipant.profileUrl,
-        otherUserToken: room.otherParticipant.otherUsersDeviceToken,
+        otherUsersToken: room.otherParticipant.otherUsersDeviceToken,
       },
     });
   };

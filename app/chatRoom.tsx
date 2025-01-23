@@ -59,7 +59,7 @@ import {
 import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import EmptyChatRoomList from "../components/EmptyChatRoomList";
 import ChatRoomBackground from "../components/ChatRoomBackground";
-import sendNotification from "../services/NotificationActions";
+import { sendNotification } from "../services/NotificationActions";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import ActionButtons from "../components/ActionButtons";
@@ -87,7 +87,8 @@ import { useAudioManager } from "@/Functions/AudioCacheManager";
 // import { Vibration } from "react-native";
 
 const ChatScreen = () => {
-  const { userId, username, otherUserToken } = useLocalSearchParams();
+  const { otherUsersUserId, otherUsersUsername, otherUsersToken } =
+    useLocalSearchParams();
   const { user } = useAuth() as AuthContextType;
   const { selectedTheme, chatBackgroundPic }: ThemeContextType = useTheme();
   const {
@@ -108,7 +109,10 @@ const ChatScreen = () => {
   const profileUrl = useProfileURlStore((state) => state.profileUrl);
 
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const roomId: any = useMemo(() => getRoomId(user?.userId, userId), [userId]);
+  const roomId: any = useMemo(
+    () => getRoomId(user?.userId, otherUsersUserId),
+    [otherUsersUserId]
+  );
   const styles = getStyles(selectedTheme);
   const [isEditing, setIsEditing] = useState(false);
   const [editMessage, setEditMessage] = useState<IMessage | null | undefined>();
@@ -134,7 +138,7 @@ const ChatScreen = () => {
     return () => {
       if (unsubscribe) unsubscribe;
     };
-  }, [roomId, user, userId]);
+  }, [roomId, user, otherUsersUserId]);
 
   useEffect(() => {
     markMessagesAsRead();
@@ -151,7 +155,7 @@ const ChatScreen = () => {
         setMessages(cachedMessages);
       }
 
-      await createRoomIfItDoesNotExist(roomId, user, userId);
+      await createRoomIfItDoesNotExist(roomId, user, otherUsersUserId);
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
         // snapshot.docChanges().forEach((change) => {
@@ -313,12 +317,14 @@ const ChatScreen = () => {
         updateRoomLastMessage(newMessage);
 
         // Send notification if other user token exists
-        if (otherUserToken) {
+        if (otherUsersToken) {
           sendNotification(
-            otherUserToken as string,
-            `${user?.username}`,
+            otherUsersToken as string, //change to otherUsersToken
+            user?.username as string, //title of notification
             messageBody(newMessage),
-            roomId
+            roomId,
+            otherUsersUserId as string,
+            user?.userId as string
           );
         }
       } catch (error) {
@@ -642,7 +648,7 @@ const ChatScreen = () => {
       <View style={{ position: "absolute", zIndex: 5, width: "100%" }}>
         <TopHeaderBar
           theme={selectedTheme}
-          title={username as string}
+          title={otherUsersUsername as string}
           profileUrl={profileUrl}
         />
       </View>
@@ -779,7 +785,7 @@ const ChatScreen = () => {
             () =>
               !isEditing ? (
                 <ActionButtons
-                  recipient={username as string | null}
+                  recipient={otherUsersUsername as string | null}
                   onSend={handleSend}
                   openPicker={openPicker}
                   user={user as any}
