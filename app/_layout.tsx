@@ -63,17 +63,17 @@ const App = () => {
     getAudioCacheInstance();
   }, []);
   return (
-    <GestureHandlerRootView>
-      <ThemeContextProvider>
-        <AuthContextProvider>
-          <ExpoPushNotifications>
+    <ExpoPushNotifications>
+      <GestureHandlerRootView>
+        <ThemeContextProvider>
+          <AuthContextProvider>
             <MenuProvider>
               <RootLayout />
             </MenuProvider>
-          </ExpoPushNotifications>
-        </AuthContextProvider>
-      </ThemeContextProvider>
-    </GestureHandlerRootView>
+          </AuthContextProvider>
+        </ThemeContextProvider>
+      </GestureHandlerRootView>
+    </ExpoPushNotifications>
   );
 };
 
