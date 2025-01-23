@@ -1,6 +1,6 @@
 import { messageData } from "./ExpoPushNotifications";
 
-const API_URL = "localhost:3000/api";
+const API_URL = "https://chat-server-xet3.onrender.com/api";
 
 async function sendNotification(
   recipientsToken: string,
