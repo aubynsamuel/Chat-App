@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   StyleSheet,
   Text,
   TextStyle,

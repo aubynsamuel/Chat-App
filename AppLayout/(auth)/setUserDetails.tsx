@@ -17,11 +17,12 @@ import {
 } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
 import { useTheme, getStyles, useAuth } from "../../imports";
 import darkTheme from "../../Themes/DarkMode";
+import { useNavigation } from "@react-navigation/native";
 
-const EditProfileScreen = () => {
+const SetUserDetailsScreen = () => {
+  const navigation = useNavigation();
   const { user, updateProfile, showToast } = useAuth();
   const [username, setUsername] = useState(user?.username || "");
   const [profileUrl, setProfileUrl] = useState(
@@ -91,7 +92,10 @@ const EditProfileScreen = () => {
 
             if (response.success) {
               showToast("Profile updated successfully!");
-              router.replace("/home");
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "(main)" as never }],
+              });
             } else {
               showToast(response.msg as string);
             }
@@ -102,7 +106,7 @@ const EditProfileScreen = () => {
         const response = await updateProfile({ username, profileUrl });
         if (response.success) {
           showToast("Profile updated successfully!");
-          router.replace("/home");
+          navigation.reset({ index: 0, routes: [{ name: "(main)" as never }] });
         } else {
           showToast(response.msg as string);
         }
@@ -201,4 +205,4 @@ const EditProfileScreen = () => {
   );
 };
 
-export default EditProfileScreen;
+export default SetUserDetailsScreen;

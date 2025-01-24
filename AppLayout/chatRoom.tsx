@@ -42,7 +42,6 @@ import {
 import { StatusBar, StatusBarStyle } from "expo-status-bar";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
-import { useLocalSearchParams } from "expo-router";
 import {
   db,
   useAuth,
@@ -81,14 +80,13 @@ import RenderMessageText from "../components/RenderMessageText";
 import RenderBubble from "@/components/RenderBubble";
 import { useHighlightStore } from "@/context/MessageHighlightStore";
 import ScreenOverlay from "@/components/ScreenOverlay";
-import { useProfileURlStore } from "@/context/ProfileUrlStore";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useAudioManager } from "@/Functions/AudioCacheManager";
 // import { Vibration } from "react-native";
 
-const ChatScreen = () => {
-  const { otherUsersUserId, otherUsersUsername, otherUsersToken } =
-    useLocalSearchParams();
+const ChatScreen = ({ route }: any) => {
+  const { otherUsersUserId, otherUsersUsername, otherUsersToken, profileUrl } =
+    route.params;
   const { user } = useAuth() as AuthContextType;
   const { selectedTheme, chatBackgroundPic }: ThemeContextType = useTheme();
   const {
@@ -106,8 +104,6 @@ const ChatScreen = () => {
     gettingLocationOverlay,
   } = useChatContext();
   const highlightMessage = useHighlightStore((state) => state.highlightMessage);
-  const profileUrl = useProfileURlStore((state) => state.profileUrl);
-
   const [messages, setMessages] = useState<IMessage[]>([]);
   const roomId: any = useMemo(
     () => getRoomId(user?.userId, otherUsersUserId),
@@ -324,7 +320,8 @@ const ChatScreen = () => {
             messageBody(newMessage),
             roomId,
             otherUsersUserId as string,
-            user?.userId as string
+            user?.userId as string,
+            user?.profileUrl as string
           );
         }
       } catch (error) {
@@ -904,11 +901,11 @@ const ChatScreen = () => {
   );
 };
 
-const ChatRoomWithContext = () => {
+const ChatRoomWithContext = ({ route }: any) => {
   return (
     <ActionSheetProvider>
       <ChatProvider>
-        <ChatScreen />
+        <ChatScreen route={route} />
       </ChatProvider>
     </ActionSheetProvider>
   );

@@ -19,6 +19,7 @@ export interface messageData {
   recipientsUserId: string;
   sendersUserId: string;
   roomId: string;
+  profileUrl: string;
 }
 
 let notificationBody: messageData;
@@ -34,28 +35,30 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
     createHighImportanceChannel();
 
     messaging().setBackgroundMessageHandler(async (remoteMessage) => {
-      displayNotification(
-        remoteMessage.notification?.title as string,
-        remoteMessage.notification?.body as string
-      );
       const parsedData: messageData = JSON.parse(
         remoteMessage.data?.body as any
       );
-      console.log("Message handled in the background!", parsedData);
       notificationBody = parsedData;
+      displayNotification(
+        remoteMessage.notification?.title as string,
+        remoteMessage.notification?.body as string,
+        notificationBody.profileUrl
+      );
+      console.log("Message handled in the background!", parsedData);
     });
 
     const unsubscribeForegroundListener = messaging().onMessage(
       async (remoteMessage) => {
-        displayNotification(
-          remoteMessage.notification?.title as string,
-          remoteMessage.notification?.body as string
-        );
         const parsedData: messageData = JSON.parse(
           remoteMessage.data?.body as any
         );
-        console.log("Message handled in the foreground ", parsedData);
         notificationBody = parsedData;
+        displayNotification(
+          remoteMessage.notification?.title as string,
+          remoteMessage.notification?.body as string,
+          notificationBody.profileUrl
+        );
+        console.log("Message handled in the foreground ", parsedData);
       }
     );
 
@@ -66,16 +69,16 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
         sendersUserId: recipientsUserId,
       } = notificationBody;
       if (detail.pressAction?.id === "reply") {
+        console.log(`Reply button pressed in background ${detail.input}.`);
         sendReply(
           sendersUserId,
           recipientsUserId,
           roomId,
           detail.input as string
         );
-        console.log(`Reply button pressed in background ${detail.input}.`);
       } else if (detail.pressAction?.id === "mark-as-read") {
-        markAsRead(sendersUserId, roomId);
         console.log("Marked as read in the background.");
+        markAsRead(sendersUserId, roomId);
       } else {
         console.log("Notification pressed");
       }
@@ -84,6 +87,8 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
     const unsubscribeForegroundEvent = notifee.onForegroundEvent(
       handleForegroundEvent
     );
+
+    notifee.cancelDisplayedNotifications();
 
     return () => {
       console.log("Cleaning Up Notification set up");
@@ -108,16 +113,16 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
       sendersUserId: recipientsUserId,
     } = notificationBody;
     if (detail.pressAction?.id === "reply") {
+      console.log(`Reply button pressed in background ${detail.input}.`);
       sendReply(
         sendersUserId,
         recipientsUserId,
         roomId,
         detail.input as string
       );
-      console.log(`Reply button pressed in background ${detail.input}.`);
     } else if (detail.pressAction?.id === "mark-as-read") {
-      markAsRead(sendersUserId, roomId);
       console.log("Mark as Read button pressed in foreground.");
+      markAsRead(sendersUserId, roomId);
     } else {
       console.log("Notification pressed");
     }
@@ -157,7 +162,11 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const displayNotification = async (title: string, body: string) => {
+  const displayNotification = async (
+    title: string,
+    body: string,
+    profileUrl: string = require("../myAssets/Images/profile-picture-placeholder.webp")
+  ) => {
     try {
       await notifee.displayNotification({
         title: title,
@@ -170,6 +179,8 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
           autoCancel: true,
           showTimestamp: true,
           onlyAlertOnce: true,
+          largeIcon: profileUrl,
+          circularLargeIcon: true,
           // style: {
           //   type: AndroidStyle.MESSAGING,
           //   person: { name: title },

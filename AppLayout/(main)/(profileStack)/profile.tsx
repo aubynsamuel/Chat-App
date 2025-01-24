@@ -23,7 +23,7 @@ interface ThemeOption {
   name: string;
 }
 
-const UserProfileScreen: React.FC = () => {
+const UserProfileScreen = () => {
   const { selectedTheme, changeTheme } = useTheme();
   const styles = getStyles(selectedTheme);
 
@@ -92,7 +92,9 @@ const UserProfileScreen: React.FC = () => {
               stylesSheet.contentContainer as any,
               {
                 backgroundColor:
-                  selectedTheme === darkTheme ? "black" : "white",
+                  selectedTheme === darkTheme
+                    ? selectedTheme.background
+                    : "white",
               },
             ]}
           >

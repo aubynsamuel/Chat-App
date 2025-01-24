@@ -7,10 +7,10 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ExternalPathString, router } from "expo-router";
 import getStyles from "../styles/Component_Styles";
 import { useAuth } from "../imports";
 import { Theme } from "../context/ThemeContext";
+import { useNavigation } from "@react-navigation/native";
 
 interface HeaderBarProp {
   title: string;
@@ -25,12 +25,13 @@ const TopHeaderBar = memo(
     menuButtonShown = true,
     searchButtonShown,
   }: HeaderBarProp) => {
+    const navigation = useNavigation();
     const { logout } = useAuth();
     const styles = getStyles(theme);
 
     const handleLogout = () => {
       logout();
-      router.replace("/login" as ExternalPathString);
+      navigation.reset({ index: 0, routes: [{ name: "(auth)" }] } as any);
     };
 
     return (
@@ -41,7 +42,9 @@ const TopHeaderBar = memo(
         <View style={{ flexDirection: "row", alignItems: "center", gap: 15 }}>
           {/* Search button */}
           {searchButtonShown && (
-            <TouchableOpacity onPress={() => router.navigate("/searchUsers")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("searchUsers" as never)}
+            >
               <MaterialIcons
                 name="search"
                 size={22}
@@ -82,7 +85,7 @@ const TopHeaderBar = memo(
                     alignItems: "center",
                   }}
                   onSelect={() => {
-                    router.navigate("/profile" as ExternalPathString);
+                    navigation.navigate("(profileStack)" as never);
                   }}
                 >
                   <Text style={styles.hhMenuText}>Profile</Text>

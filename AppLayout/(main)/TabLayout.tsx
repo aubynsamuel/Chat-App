@@ -1,8 +1,12 @@
 import React from "react";
-import { Tabs } from "expo-router";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { darkTheme, useTheme } from "../../imports";
 import CustomTabBar from "../../components/CustomTabBar";
 import { View } from "react-native";
+import HomeLayout from "./(homeStack)/HomeNavigator";
+import ProfileLayout from "./(profileStack)/ProfileNavigator";
+
+const Tabs = createBottomTabNavigator();
 
 const TabLayout = () => {
   const { selectedTheme } = useTheme();
@@ -16,9 +20,10 @@ const TabLayout = () => {
         } as any
       }
     >
-      <Tabs
+      <Tabs.Navigator
         tabBar={(props) => <CustomTabBar {...props} />}
         screenOptions={{
+          tabBarHideOnKeyboard: true,
           headerShown: false,
           tabBarLabelStyle: {
             fontSize: 12,
@@ -29,6 +34,7 @@ const TabLayout = () => {
       >
         <Tabs.Screen
           name="(homeStack)"
+          component={HomeLayout}
           options={{
             title: "Chats",
             tabBarLabel: "Chats",
@@ -45,6 +51,7 @@ const TabLayout = () => {
       /> */}
         <Tabs.Screen
           name="(profileStack)"
+          component={ProfileLayout}
           options={{
             title: "Profile",
             tabBarLabel: "Profile",
@@ -52,7 +59,7 @@ const TabLayout = () => {
               focused ? "person" : "person-outline",
           }}
         />
-      </Tabs>
+      </Tabs.Navigator>
     </View>
   );
 };

@@ -12,17 +12,20 @@ import {
 import { getDocs, query, where, collection } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { ExternalPathString, router } from "expo-router";
 import { useTheme, useAuth, db, getStyles } from "../../../imports";
-import { useProfileURlStore } from "@/context/ProfileUrlStore";
+import { useNavigation } from "@react-navigation/native";
+// import { deviceToken } from "../../../services/RegisterForPushNotifications";
+import { NavigationRoute } from "@react-navigation/native";
 
 interface User {
   userId: string;
   username: string;
   profileUrl: string;
+  deviceToken: string;
 }
 
-const SearchUsersScreen: React.FC = () => {
+const SearchUsersScreen = () => {
+  const navigation = useNavigation();
   const { user } = useAuth();
   const [searchText, setSearchText] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -31,9 +34,9 @@ const SearchUsersScreen: React.FC = () => {
   const styles = getStyles(selectedTheme);
   const [errorMessage, setErrorMessage] = useState("Search users");
   const [isLoading, setIsLoading] = useState(false);
-  const setProfileUrlLink = useProfileURlStore(
-    (state) => state.setProfileUrlLink
-  );
+  // const setProfileUrlLink = useProfileURlStore(
+  //   (state) => state.setProfileUrlLink
+  // );
 
   const handleSearch = async (text: string) => {
     setIsLoading(true);
@@ -84,14 +87,12 @@ const SearchUsersScreen: React.FC = () => {
   }, []);
 
   const handleUserPress = (selectedUser: User) => {
-    setProfileUrlLink(selectedUser.profileUrl);
-    router.push({
-      pathname: "/chatRoom" as ExternalPathString,
-      params: {
-        userId: selectedUser.userId,
-        username: selectedUser.username,
-        profileUrl: selectedUser.profileUrl,
-      },
+    // setProfileUrlLink(selectedUser.profileUrl);
+    navigation.navigate("chatRoom", {
+      otherUsersUserId: selectedUser.userId,
+      otherUsersUsername: selectedUser.username,
+      profileUrl: selectedUser.profileUrl,
+      otherUsersToken: selectedUser.deviceToken,
     });
   };
 
@@ -113,7 +114,7 @@ const SearchUsersScreen: React.FC = () => {
           name="arrow-back"
           size={25}
           color={selectedTheme.text.primary}
-          onPress={() => router.push("..")}
+          onPress={() => navigation.goBack()}
         />
         <TextInput
           ref={inputRef}

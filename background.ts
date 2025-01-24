@@ -1,18 +1,28 @@
 import messaging from "@react-native-firebase/messaging";
 import notifee, { AndroidImportance } from "@notifee/react-native";
 import { messageData } from "./services/ExpoPushNotifications";
+import { markAsRead, sendReply } from "./services/NotificationActions";
 
 let notificationBody: messageData;
 
 const backgroundListener = notifee.onBackgroundEvent(
   async ({ type, detail }) => {
-    const { roomId, recipientsUserId, sendersUserId } = notificationBody;
+    const {
+      recipientsUserId: sendersUserId,
+      roomId,
+      sendersUserId: recipientsUserId,
+    } = notificationBody;
     if (detail.pressAction?.id === "reply") {
-      // TODO: make a server request to handle reply
-      console.log(`Reply button pressed in background ${detail.input}.`);
+      console.log(`Reply button pressed in killed state ${detail.input}.`);
+      sendReply(
+        sendersUserId,
+        recipientsUserId,
+        roomId,
+        detail.input as string
+      );
     } else if (detail.pressAction?.id === "mark-as-read") {
-      //TODO: make a server request to handle reply
-      console.log("Marked as read in the background.");
+      console.log("Marked as read in killed state.");
+      markAsRead(sendersUserId, roomId);
     } else {
       console.log("Notification pressed");
     }
@@ -22,16 +32,21 @@ const backgroundListener = notifee.onBackgroundEvent(
 // Register background handler
 export const backgroundListenerFireBase =
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
+    const parsedData: messageData = JSON.parse(remoteMessage.data?.body as any);
+    notificationBody = parsedData;
     displayNotification(
       remoteMessage.notification?.title as string,
-      remoteMessage.notification?.body as string
+      remoteMessage.notification?.body as string,
+      notificationBody.profileUrl as string
     );
-    const parsedData: messageData = JSON.parse(remoteMessage.data?.body as any);
     console.log("Message handled in the background!", parsedData);
-    notificationBody = parsedData;
   });
 
-const displayNotification = async (title: string, body: string) => {
+export const displayNotification = async (
+  title: string,
+  body: string,
+  profileUrl: string = require("./myAssets/Images/profile-picture-placeholder.webp")
+) => {
   try {
     const channelId = await notifee.createChannel({
       id: "high-importance-channel",
@@ -52,6 +67,8 @@ const displayNotification = async (title: string, body: string) => {
         autoCancel: true,
         showTimestamp: true,
         onlyAlertOnce: true,
+        largeIcon: profileUrl,
+        circularLargeIcon: true,
         // style: {
         //   type: AndroidStyle.MESSAGING,
         //   person: { name: title },

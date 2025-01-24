@@ -13,11 +13,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import NotificationTokenManager from "../../../Functions/NotificationTokenManager";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
 import { useTheme, useAuth, db, usersRef, getStyles } from "../../../imports";
 import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
 import ChatList from "../../../components/ChatList";
 import { deviceToken } from "@/services/RegisterForPushNotifications";
+import { useNavigation } from "@react-navigation/native";
 
 export interface RoomData {
   roomId: any;
@@ -33,6 +33,7 @@ export interface RoomData {
 }
 
 function HomeScreen() {
+  const navigation = useNavigation();
   const { user } = useAuth();
   const [rooms, setRooms] = useState<RoomData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -159,7 +160,7 @@ function HomeScreen() {
       </View>
       <TouchableOpacity
         style={styles.floatingButton}
-        onPress={() => router.navigate("/searchUsers")}
+        onPress={() => navigation.navigate("searchUsers" as never)}
       >
         <MaterialIcons name="add" size={30} color={selectedTheme.primary} />
       </TouchableOpacity>
