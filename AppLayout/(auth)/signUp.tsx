@@ -11,10 +11,11 @@ import { TextInput } from "react-native-gesture-handler";
 import LottieView from "lottie-react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
 import { useTheme, useAuth, getStyles, SignUp, darkTheme } from "../../imports";
+import { useNavigation } from "@react-navigation/native";
 
 const SignUpScreen = () => {
+  const navigation = useNavigation();
   const email = useRef("");
   const password = useRef("");
   const { signUp, showToast } = useAuth();
@@ -59,7 +60,7 @@ const SignUpScreen = () => {
       let response = await signUp(email.current, password.current);
 
       if (response.success) {
-        router.replace("/setUserDetails");
+        navigation.navigate("setUserDetails" as never);
       } else {
         showToast(response.msg || "An unexpected error occurred.");
       }
@@ -172,7 +173,9 @@ const SignUpScreen = () => {
           style={{ flexDirection: "row", alignSelf: "center", marginTop: 5 }}
         >
           <Text style={styles.suHaveAnAccount}>Already have an account? </Text>
-          <TouchableOpacity onPress={() => router.replace("/login")}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("login" as never)}
+          >
             <Text style={styles.suLoginText}>Login</Text>
           </TouchableOpacity>
         </View>

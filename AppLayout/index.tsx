@@ -1,20 +1,27 @@
 import { View } from "react-native";
 import React, { useEffect } from "react";
 import LottieView from "lottie-react-native";
-import { ExternalPathString, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useAuth, useTheme, Send } from "../imports";
+import { useNavigation } from "@react-navigation/native";
 
 const Index = () => {
+  const navigation = useNavigation();
   const { isLoading, isAuthenticated } = useAuth();
   const { selectedTheme } = useTheme();
 
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        router.replace("/home" as ExternalPathString);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "(main)" as never }],
+        });
       } else {
-        router.replace("/login" as ExternalPathString);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "(auth)" as never }],
+        });
       }
     }
   }, [isLoading, isAuthenticated]);

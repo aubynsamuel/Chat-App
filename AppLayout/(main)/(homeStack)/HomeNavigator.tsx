@@ -1,8 +1,12 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { darkTheme, useTheme } from "../../../imports";
 import { View } from "react-native";
+import HomeScreen from "./home";
+import SearchUsersScreen from "./searchUsers";
+
+const Stack = createNativeStackNavigator();
 
 const HomeLayout = () => {
   const { selectedTheme } = useTheme();
@@ -16,14 +20,14 @@ const HomeLayout = () => {
       }
     >
       <SafeAreaProvider>
-        <Stack
+        <Stack.Navigator
           screenOptions={{
             headerShown: false,
           }}
         >
-          <Stack.Screen name="home" />
-          <Stack.Screen name="searchUsers" />
-        </Stack>
+          <Stack.Screen name="home" component={HomeScreen} />
+          <Stack.Screen name="searchUsers" component={SearchUsersScreen} />
+        </Stack.Navigator>
       </SafeAreaProvider>
     </View>
   );

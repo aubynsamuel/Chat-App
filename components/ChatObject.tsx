@@ -1,22 +1,20 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { memo, useEffect, useState } from "react";
 import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
-import { router } from "expo-router";
 import getStyles from "../styles/Component_Styles";
 import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
-import { RoomData } from "../app/(main)/(homeStack)/home";
+import { RoomData } from "../AppLayout/(main)/(homeStack)/home";
 import { Theme } from "../context/ThemeContext";
-import { useProfileURlStore } from "@/context/ProfileUrlStore";
 import { useUnreadChatsStore } from "@/context/UnreadChatStore";
+import { useNavigation } from "@react-navigation/native";
+
 const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
+  const navigation = useNavigation();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
   const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
-  const setProfileUrlLink = useProfileURlStore(
-    (state) => state.setProfileUrlLink
-  );
   const { addToUnread, removeFromUnread } = useUnreadChatsStore();
 
   useEffect(() => {
@@ -45,16 +43,11 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
   }, [unreadCount]);
 
   const handlePress = () => {
-    setProfileUrlLink(room.otherParticipant.profileUrl);
-    // console.log("Navigating with profileUrl:", room.otherParticipant.profileUrl);
-    router.push({
-      pathname: "/chatRoom",
-      params: {
-        otherUsersUserId: room.otherParticipant.userId,
-        otherUsersUsername: room.otherParticipant.username,
-        profileUrl: room.otherParticipant.profileUrl,
-        otherUsersToken: room.otherParticipant.otherUsersDeviceToken,
-      },
+    navigation.navigate("chatRoom", {
+      otherUsersUserId: room.otherParticipant.userId,
+      otherUsersUsername: room.otherParticipant.username,
+      profileUrl: room.otherParticipant.profileUrl,
+      otherUsersToken: room.otherParticipant.otherUsersDeviceToken,
     });
   };
 

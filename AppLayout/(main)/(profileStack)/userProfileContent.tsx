@@ -10,20 +10,20 @@ import React, { ReactNode, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
-import { ExternalPathString, router } from "expo-router";
 import { useTheme, getStyles, useAuth } from "../../../imports";
+import { useNavigation } from "@react-navigation/native";
 
 const UserProfileContent = ({ children }: { children: ReactNode }) => {
+  const navigation = useNavigation();
   const { user, logout, showToast } = useAuth();
   const profileUrl = user?.profileUrl;
-  const [imageFailed, setImageFailed] = useState(false);
   const { selectedTheme, changeBackgroundPic } = useTheme();
   const styles = getStyles(selectedTheme);
 
   const [selected, setSelected] = useState<boolean>(true);
   const handleLogout = async () => {
     await logout();
-    router.replace("/login" as ExternalPathString);
+    navigation.reset({ index: 0, routes: [{ name: "(auth)" as never }] });
   };
 
   const selectImage = async () => {
@@ -68,7 +68,7 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
         {/* Edit profile */}
         <TouchableOpacity
           style={styles.upOption}
-          onPress={() => router.navigate("/editProfile" as ExternalPathString)}
+          onPress={() => navigation.navigate("editProfile" as never)}
         >
           <MaterialIcons
             name="edit"

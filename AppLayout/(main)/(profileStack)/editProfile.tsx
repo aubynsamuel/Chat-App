@@ -17,10 +17,11 @@ import {
 } from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
 import { useTheme, getStyles, useAuth } from "../../../imports";
+import { useNavigation } from "@react-navigation/native";
 
 const EditProfileScreen = () => {
+  const navigation = useNavigation();
   const { user, updateProfile, showToast } = useAuth();
   const [username, setUsername] = useState(user?.username || "");
   const [profileUrl, setProfileUrl] = useState(user?.profileUrl || null);
@@ -121,7 +122,7 @@ const EditProfileScreen = () => {
         animated={true}
       />
       {/* back icon */}
-      <TouchableOpacity onPress={() => router.navigate("..")}>
+      <TouchableOpacity onPress={() => navigation.goBack()}>
         <MaterialIcons
           name="arrow-back"
           size={25}

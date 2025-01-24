@@ -12,8 +12,8 @@ import Animated, {
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "../styles/Component_Styles";
-import { router } from "expo-router";
 import { Theme } from "../context/ThemeContext";
+import { useNavigation } from "@react-navigation/native";
 
 const TopHeaderBar = memo(
   ({
@@ -25,6 +25,7 @@ const TopHeaderBar = memo(
     profileUrl: string;
     theme: Theme;
   }) => {
+    const navigation = useNavigation();
     const [imageFailed, setImageFailed] = useState(false);
     const styles = getStyles(theme);
     const AnimatedTouchableOpacity =
@@ -101,7 +102,7 @@ const TopHeaderBar = memo(
             <AnimatedTouchableOpacity
               onPress={() => {
                 Keyboard.dismiss();
-                router.navigate("..");
+                navigation.goBack();
               }}
             >
               <MaterialIcons

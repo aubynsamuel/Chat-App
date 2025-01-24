@@ -10,7 +10,6 @@ import React, { useRef, useState } from "react";
 import LottieView from "lottie-react-native";
 import { MaterialIcons, Feather } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { router } from "expo-router";
 import {
   useTheme,
   useAuth,
@@ -18,8 +17,10 @@ import {
   OnlineChat,
   darkTheme,
 } from "../../imports";
+import { useNavigation } from "@react-navigation/native";
 
 const LoginScreen = () => {
+  const navigation = useNavigation();
   const { login, resetPassword, showToast } = useAuth();
   const email = useRef("");
   const password = useRef("");
@@ -57,7 +58,10 @@ const LoginScreen = () => {
       setIsLoading(false);
       return;
     }
-    router.replace("/home");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "(main)" as never }],
+    });
     setIsLoading(false);
   };
 
@@ -173,7 +177,9 @@ const LoginScreen = () => {
           <Text style={styles.lsDontHaveAnAccount}>
             Don't have an account?{" "}
           </Text>
-          <TouchableOpacity onPress={() => router.replace("/signUp")}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("signUp" as never)}
+          >
             <Text style={styles.lsSignUp}>Sign up</Text>
           </TouchableOpacity>
         </View>

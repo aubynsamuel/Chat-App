@@ -1,8 +1,11 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { darkTheme, useTheme } from "../../../imports";
 import { View } from "react-native";
+import UserProfileScreen from "./profile";
+import EditProfileScreen from "./editProfile";
 
+const Stack = createNativeStackNavigator();
 const ProfileLayout = () => {
   const { selectedTheme } = useTheme();
   return (
@@ -14,14 +17,14 @@ const ProfileLayout = () => {
         } as any
       }
     >
-      <Stack
+      <Stack.Navigator
         screenOptions={{
           headerShown: false,
         }}
       >
-        <Stack.Screen name="profile" />
-        <Stack.Screen name="editProfile" />
-      </Stack>
+        <Stack.Screen name="profile" component={UserProfileScreen} />
+        <Stack.Screen name="editProfile" component={EditProfileScreen} />
+      </Stack.Navigator>
     </View>
   );
 };

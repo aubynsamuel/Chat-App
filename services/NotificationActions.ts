@@ -8,7 +8,8 @@ async function sendNotification(
   body: string,
   roomId: string,
   recipientsUserId: string,
-  sendersUserId: string
+  sendersUserId: string,
+  profileUrl: string
 ) {
   const message = {
     to: recipientsToken,
@@ -18,6 +19,7 @@ async function sendNotification(
       recipientsUserId: recipientsUserId,
       sendersUserId: sendersUserId,
       roomId: roomId,
+      profileUrl: profileUrl,
     } as messageData,
     sound: "default",
     priority: "high",
