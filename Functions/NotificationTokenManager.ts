@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { db } from "../env/firebaseConfig";
-import { doc, updateDoc } from "firebase/firestore";
 import { deviceToken } from "../services/RegisterForPushNotifications";
+import firestore from "@react-native-firebase/firestore";
 
 const expoPushTokenRegex = /^ExponentPushToken\[[a-zA-Z0-9-_]+\]$/;
 
@@ -38,10 +37,10 @@ const NotificationTokenManager = {
         return;
       }
 
-      const userDocRef = doc(db, "users", userId);
+      const userDocRef = firestore().collection("users").doc(userId);
 
       // Update only the deviceToken field
-      await updateDoc(userDocRef, {
+      await userDocRef.update({
         deviceToken: token,
       });
 

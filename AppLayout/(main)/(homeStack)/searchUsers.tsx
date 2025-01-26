@@ -9,13 +9,11 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { getDocs, query, where, collection } from "firebase/firestore";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useTheme, useAuth, db, getStyles } from "../../../imports";
 import { useNavigation } from "@react-navigation/native";
-// import { deviceToken } from "../../../services/RegisterForPushNotifications";
-import { NavigationRoute } from "@react-navigation/native";
+import firestore from "@react-native-firebase/firestore";
 
 interface User {
   userId: string;
@@ -34,9 +32,6 @@ const SearchUsersScreen = () => {
   const styles = getStyles(selectedTheme);
   const [errorMessage, setErrorMessage] = useState("Search users");
   const [isLoading, setIsLoading] = useState(false);
-  // const setProfileUrlLink = useProfileURlStore(
-  //   (state) => state.setProfileUrlLink
-  // );
 
   const handleSearch = async (text: string) => {
     setIsLoading(true);
@@ -49,15 +44,13 @@ const SearchUsersScreen = () => {
     }
 
     try {
-      const usersRef = collection(db, "users");
-      const q = query(
-        usersRef,
-        where("username", "!=", user?.username),
-        where("username", ">=", text),
-        where("username", "<=", text + "\uf8ff")
-      );
+      const usersRef = firestore().collection("users");
+      const q = usersRef
+        .where("username", "!=", user?.username)
+        .where("username", ">=", text)
+        .where("username", "<=", text + "\uf8ff");
 
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await q.get();
       const userData: User[] = querySnapshot.docs.map(
         (doc) =>
           ({
@@ -87,7 +80,6 @@ const SearchUsersScreen = () => {
   }, []);
 
   const handleUserPress = (selectedUser: User) => {
-    // setProfileUrlLink(selectedUser.profileUrl);
     navigation.navigate("chatRoom", {
       otherUsersUserId: selectedUser.userId,
       otherUsersUsername: selectedUser.username,

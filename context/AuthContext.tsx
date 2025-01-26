@@ -1,16 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  User,
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-} from "firebase/auth";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import storage from "../Functions/Storage";
 import { showToast as showToastMessage } from "@/components/Toast";
-import { auth, db } from "../env/firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
 
 export let userDetails: UserData | null;
 
@@ -27,12 +19,20 @@ export interface AuthContextType {
   login: (
     email: string,
     password: string
-  ) => Promise<{ success: boolean; data?: User; msg?: string }>;
+  ) => Promise<{
+    success: boolean;
+    data?: FirebaseAuthTypes.User;
+    msg?: string;
+  }>;
   logout: () => Promise<void>;
   signUp: (
     email: string,
     password: string
-  ) => Promise<{ success: boolean; data?: User; msg?: string }>;
+  ) => Promise<{
+    success: boolean;
+    data?: FirebaseAuthTypes.User;
+    msg?: string;
+  }>;
   user: UserData | null;
   isAuthenticated: boolean | undefined;
   isLoading: boolean;
@@ -71,14 +71,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     undefined
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [deviceToken, setDeviceToken] = useState<string>("");
 
   userDetails = user;
-
-  const getDeviceToken = async () => {
-    const cachedToken = await AsyncStorage.getItem("deviceToken");
-    setDeviceToken(cachedToken || "");
-  };
 
   const showToast = (
     message: string,
@@ -91,45 +85,51 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   // Initialize auth state from storage
   useEffect(() => {
     initializeAuthState();
-    getDeviceToken();
   }, []);
 
   const initializeAuthState = async () => {
     try {
-      // Load cached auth state from MMKV
+      // Load cached user and auth state from MMKV
       const cachedUser = storage.getString(STORAGE_KEYS.USER);
       const cachedAuthState = storage.getString(STORAGE_KEYS.AUTH_STATE);
 
-      if (cachedUser) {
+      if (cachedUser && cachedAuthState) {
         setUser(JSON.parse(cachedUser));
-        setIsAuthenticated(cachedAuthState === "true");
-        setIsLoading(false);
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        setUser(null);
       }
+      setIsLoading(false);
 
-      // Set up Firebase auth listener
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // authenticate and update userDetails
+      const unsubscribe = auth().onAuthStateChanged(async (firebaseUser) => {
         if (firebaseUser) {
-          await handleUserAuthenticated(firebaseUser);
+          await handleUserAuthentication(firebaseUser);
+          console.log("User authenticated:", firebaseUser.email);
         } else {
           await handleUserSignedOut();
+          console.log("User signed out.");
         }
         setIsLoading(false);
       });
 
-      return unsubscribe;
+      return unsubscribe();
     } catch (error) {
       console.error("Error initializing auth state:", error);
       setIsLoading(false);
     }
   };
 
-  const handleUserAuthenticated = async (firebaseUser: User) => {
+  const handleUserAuthentication = async (
+    firebaseUser: FirebaseAuthTypes.User
+  ) => {
     try {
       const userData = await updateUserData(firebaseUser.uid);
       const enhancedUser = {
         ...firebaseUser,
         ...userData,
-      } as User & UserData;
+      } as FirebaseAuthTypes.User & UserData;
 
       setUser(enhancedUser);
       setIsAuthenticated(true);
@@ -138,7 +138,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       storage.set(STORAGE_KEYS.USER, JSON.stringify(enhancedUser));
       storage.set(STORAGE_KEYS.AUTH_STATE, "true");
 
-      console.log(`User ${firebaseUser.email} has logged in.`);
+      // console.log(`User ${firebaseUser.email} has logged in.`);
     } catch (error) {
       console.error("Error handling user authentication:", error);
     }
@@ -146,14 +146,13 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const resetPassword = async (email: string) => {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await auth().sendPasswordResetEmail(email);
       return { success: true };
     } catch (error: any) {
       let msg = error.message;
-      if (msg.includes("(auth/invalid-email)")) msg = "Invalid Email";
-      if (msg.includes("(auth/invalid-credential)"))
-        msg = "Invalid Credentials";
-      if (msg.includes("(auth/network-request-failed)"))
+      if (msg.includes("auth/invalid-email")) msg = "Invalid Email";
+      if (msg.includes("auth/invalid-credential")) msg = "Invalid Credentials";
+      if (msg.includes("auth/network-request-failed"))
         msg = "No internet connection";
       return { success: false, msg };
     }
@@ -174,11 +173,12 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const updateUserData = async (userId: string): Promise<UserData | null> => {
     try {
-      const docRef = doc(db, "users", userId);
-      const docSnap = await getDoc(docRef);
+      const docRef = firestore().collection("users").doc(userId);
+      const docSnap = await docRef.get();
 
-      if (docSnap.exists()) {
+      if (docSnap.exists) {
         const data = docSnap.data() as UserData;
+        console.log("Fetched user data from Firestore:", data.email);
         return {
           username: data.username,
           userId: data.userId,
@@ -187,21 +187,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
           email: data.email,
         };
       }
+      console.warn("User document not found in Firestore for ID:", userId);
       return null;
     } catch (error) {
       console.error("Error updating user data:", error);
-      // If offline, try to get data from storage
-      const cachedUser = storage.getString(STORAGE_KEYS.USER);
-      if (cachedUser) {
-        const userData = JSON.parse(cachedUser) as User & UserData;
-        return {
-          username: userData.username,
-          userId: userData.userId,
-          profileUrl: userData.profileUrl,
-          deviceToken: userData.deviceToken,
-          email: userData.email,
-        };
-      }
       return null;
     }
   };
@@ -210,8 +199,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     try {
       if (!user) throw new Error("No user logged in");
 
-      const userDocRef = doc(db, "users", user.uid);
-      await updateDoc(userDocRef, {
+      const userDocRef = firestore().collection("users").doc(user.userId);
+      await userDocRef.update({
         username: userData.username,
         profileUrl: userData.profileUrl || null,
       });
@@ -228,14 +217,16 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await signInWithEmailAndPassword(auth, email, password);
-      return { success: true, data: response?.user };
+      const response = await auth().signInWithEmailAndPassword(email, password);
+      console.log("Login successful:", response.user.email);
+      await handleUserAuthentication(response.user); // Ensure state updates after login
+      return { success: true, data: response.user };
     } catch (error: any) {
+      console.error("Login failed:", error);
       let msg = error.message;
-      if (msg.includes("(auth/invalid-email)")) msg = "Invalid Email";
-      if (msg.includes("(auth/invalid-credential)"))
-        msg = "Invalid Credentials";
-      if (msg.includes("(auth/network-request-failed)"))
+      if (msg.includes("auth/invalid-email")) msg = "Invalid Email";
+      if (msg.includes("auth/invalid-credential")) msg = "Invalid Credentials";
+      if (msg.includes("auth/network-request-failed"))
         msg = "No internet connection";
       return { success: false, msg };
     }
@@ -243,7 +234,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const logout = async () => {
     try {
-      await auth.signOut();
+      await auth().signOut();
       await handleUserSignedOut();
       console.log("User has been logged out.");
     } catch (error) {
@@ -253,39 +244,32 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const signUp = async (email: string, password: string) => {
     try {
-      const response = await createUserWithEmailAndPassword(
-        auth,
+      const response = await auth().createUserWithEmailAndPassword(
         email,
         password
       );
       console.log(`User ${response.user.email} has been created successfully.`);
 
-      // create user data in Firestore
-      const docRef = doc(db, "users", response.user.uid);
+      // Create user data in Firestore
+      const docRef = firestore().collection("users").doc(response.user.uid);
       const userData: UserData = {
         userId: response.user.uid,
         email,
-        deviceToken: deviceToken,
+        deviceToken: "",
       };
+      await docRef.set(userData);
 
-      await setDoc(docRef, userData);
+      // Automatically log in the user
+      await handleUserAuthentication(response.user);
 
-      // Cache the user data immediately after signup using MMKV
-      storage.set(
-        STORAGE_KEYS.USER,
-        JSON.stringify({
-          ...response.user,
-          ...userData,
-        })
-      );
-
-      return { success: true, data: response?.user };
+      return { success: true, data: response.user };
     } catch (error: any) {
+      console.error("Signup failed:", error.code, error.message);
       let msg = error.message;
-      if (msg.includes("(auth/invalid-email)")) msg = "Invalid Email";
-      if (msg.includes("(auth/network-request-failed)"))
+      if (msg.includes("auth/invalid-email")) msg = "Invalid Email";
+      if (msg.includes("auth/network-request-failed"))
         msg = "No internet connection";
-      if (msg.includes("(auth/email-already-in-use)"))
+      if (msg.includes("auth/email-already-in-use"))
         msg = "Email Already In Use";
       return { success: false, msg };
     }
