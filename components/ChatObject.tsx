@@ -1,12 +1,12 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { memo, useEffect, useState } from "react";
-import { collection, query, onSnapshot, doc, where } from "firebase/firestore";
 import getStyles from "../styles/Component_Styles";
 import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
 import { RoomData } from "../AppLayout/(main)/(homeStack)/home";
 import { Theme } from "../context/ThemeContext";
 import { useUnreadChatsStore } from "@/context/UnreadChatStore";
 import { useNavigation } from "@react-navigation/native";
+import firestore from "@react-native-firebase/firestore";
 
 const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
   const navigation = useNavigation();
@@ -18,16 +18,14 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
   const { addToUnread, removeFromUnread } = useUnreadChatsStore();
 
   useEffect(() => {
-    const docRef = doc(db, "rooms", roomId);
-    const messagesRef = collection(docRef, "messages");
+    const docRef = firestore().collection("rooms").doc(roomId);
+    const messagesRef = docRef.collection("messages");
 
-    const q = query(
-      messagesRef,
-      where("senderId", "==", room.otherParticipant.userId),
-      where("read", "==", false)
-    );
+    const q = messagesRef
+      .where("senderId", "==", room.otherParticipant.userId)
+      .where("read", "==", false);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = q.onSnapshot((snapshot) => {
       setUnreadCount(snapshot.docs.length);
     });
 

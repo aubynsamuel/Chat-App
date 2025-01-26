@@ -1,5 +1,5 @@
 import messaging from "@react-native-firebase/messaging";
-import notifee, { AndroidImportance } from "@notifee/react-native";
+import notifee, { AndroidColor } from "@notifee/react-native";
 import { messageData } from "./services/ExpoPushNotifications";
 import { markAsRead, sendReply } from "./services/NotificationActions";
 
@@ -48,21 +48,13 @@ export const displayNotification = async (
   profileUrl: string = require("./myAssets/Images/profile-picture-placeholder.webp")
 ) => {
   try {
-    const channelId = await notifee.createChannel({
-      id: "high-importance-channel",
-      name: "High Importance Notifications",
-      importance: AndroidImportance.HIGH,
-      vibration: true,
-    });
-
-    // Display a notification
     await notifee.displayNotification({
       title: title,
       body: body,
       android: {
-        channelId,
+        channelId: "high-importance-channel",
         smallIcon: "ic_launcher",
-        color: "#4CAF50",
+        color: AndroidColor.GREEN,
         pressAction: { id: "default" },
         autoCancel: true,
         showTimestamp: true,

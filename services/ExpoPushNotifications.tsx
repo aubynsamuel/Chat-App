@@ -29,7 +29,7 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
   // console.log("Rendered", renderRef.current++);
 
   useEffect(() => {
-    console.log("setting up Up Notification set up");
+    console.log("setting up Notifications");
     setupNotifications();
     createLowImportanceChannel();
     createHighImportanceChannel();
@@ -95,6 +95,7 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
       try {
         unsubscribeForegroundEvent();
         unsubscribeForegroundListener();
+        notifee.cancelDisplayedNotifications();
       } catch (error) {
         console.warn("Error cleaning up component ", error);
       }
@@ -133,7 +134,7 @@ const ExpoPushNotifications = ({ children }: { children: React.ReactNode }) => {
       await notifee.createChannel({
         id: "fcm_fallback_notification_channel",
         name: "Low Importance Notifications",
-        importance: AndroidImportance.LOW,
+        importance: AndroidImportance.NONE,
         vibration: false,
       });
     } catch (error) {

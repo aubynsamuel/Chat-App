@@ -9,17 +9,12 @@ import {
   ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useTheme, getStyles, useAuth } from "../../imports";
 import darkTheme from "../../Themes/DarkMode";
 import { useNavigation } from "@react-navigation/native";
+import storage from "@react-native-firebase/storage";
 
 const SetUserDetailsScreen = () => {
   const navigation = useNavigation();
@@ -56,18 +51,15 @@ const SetUserDetailsScreen = () => {
     }
 
     try {
-      let downloadURL = profileUrl;
+      let downloadURL: string | null | undefined = profileUrl;
 
       if (profileUrl && profileUrl.startsWith("file://")) {
-        const storage = getStorage();
-        const storageRef = ref(storage, `profilePictures/${user?.uid}`);
+        const storageRef = storage().ref(`profilePictures/${user?.userId}`);
 
         const response = await fetch(profileUrl);
         const blob = await response.blob();
 
-        const uploadTask = uploadBytesResumable(storageRef, blob, {
-          contentType: "image/jpeg",
-        });
+        const uploadTask = storageRef.put(blob);
 
         uploadTask.on(
           "state_changed",
@@ -82,7 +74,7 @@ const SetUserDetailsScreen = () => {
             setIsLoading(false);
           },
           async () => {
-            downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            downloadURL = await uploadTask.snapshot?.ref.getDownloadURL();
             console.log("File available at", downloadURL);
 
             const response = await updateProfile({

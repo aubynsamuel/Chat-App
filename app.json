@@ -2,7 +2,7 @@
   "expo": {
     "name": "Flash Send",
     "slug": "FlashSend",
-    "version": "3.1.0",
+    "version": "5.0.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "flashsend",
@@ -51,9 +51,6 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {
-        "origin": false
-      },
       "eas": {
         "projectId": "fe9b89da-f74b-4905-8d16-89fdb244fbfa"
       }

@@ -6,10 +6,8 @@ import Animated, {
   withTiming,
   useAnimatedStyle,
   interpolate,
-  useAnimatedGestureHandler,
-  runOnJS,
 } from "react-native-reanimated";
-import { PanGestureHandler } from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "../styles/Component_Styles";
 import { Theme } from "../context/ThemeContext";
@@ -28,6 +26,7 @@ const TopHeaderBar = memo(
     const navigation = useNavigation();
     const [imageFailed, setImageFailed] = useState(false);
     const styles = getStyles(theme);
+    const contextY = useSharedValue(0);
     const AnimatedTouchableOpacity =
       Animated.createAnimatedComponent(TouchableOpacity);
     const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -39,26 +38,22 @@ const TopHeaderBar = memo(
 
     const gestureProgress = useSharedValue(0);
 
-    const onGestureEvent = useAnimatedGestureHandler({
-      onStart: (_, context) => {
-        context.startY = gestureProgress.value;
-      },
-      onActive: (event, context: any) => {
+    const onGestureEvent = Gesture.Pan()
+      .onStart(() => {
+        contextY.value = gestureProgress.value;
+      })
+      .onUpdate((event) => {
         const progress =
-          context.startY + event.translationY / MAX_HEADER_HEIGHT;
+          contextY.value + event.translationY / MAX_HEADER_HEIGHT;
         gestureProgress.value = Math.max(0, Math.min(1, progress));
-      },
-      onEnd: (event) => {
+      })
+      .onEnd((event) => {
         const velocity = event.velocityY / 1000;
         const shouldExpand = gestureProgress.value > 0.5 || velocity > 0.5;
-
         gestureProgress.value = withTiming(shouldExpand ? 1 : 0, {
           duration: 300,
         });
-
-        runOnJS;
-      },
-    });
+      });
 
     const animatedHeaderStyle = useAnimatedStyle(() => ({
       height: interpolate(
@@ -95,7 +90,7 @@ const TopHeaderBar = memo(
     }));
 
     return (
-      <PanGestureHandler onGestureEvent={onGestureEvent}>
+      <GestureDetector gesture={onGestureEvent}>
         <Animated.View style={[styles.hcHeaderContainer, animatedHeaderStyle]}>
           {/* Back Button */}
           <Animated.View style={animatedButtonStyle}>
@@ -152,7 +147,7 @@ const TopHeaderBar = memo(
             </Menu>
           </View>
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     );
   }
 );

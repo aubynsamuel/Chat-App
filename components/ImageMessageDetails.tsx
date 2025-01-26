@@ -93,7 +93,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = memo(
         containerStyles={{
           top: 0,
           bottom: 0,
-          backgroundColor: "rgba(0,0,0,0.96)",
+          backgroundColor: "rgba(0,0,0,10)",
           paddingBottom: 0,
         }}
         children={

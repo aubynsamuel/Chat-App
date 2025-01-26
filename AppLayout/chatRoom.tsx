@@ -26,24 +26,12 @@ import {
   MessageImageProps,
   SendProps,
 } from "react-native-gifted-chat";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  setDoc,
-  where,
-  getDocs,
-  writeBatch,
-  deleteDoc,
-  updateDoc,
-} from "firebase/firestore";
+import firestore from "@react-native-firebase/firestore";
+import storage from "@react-native-firebase/storage";
 import { StatusBar, StatusBarStyle } from "expo-status-bar";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import {
-  db,
   useAuth,
   getCurrentTime,
   getRoomId,
@@ -52,14 +40,12 @@ import {
   cacheMessages,
   createRoomIfItDoesNotExist,
   getStyles,
-  storage,
   formatTime,
 } from "../imports";
 import TopHeaderBar from "../components/HeaderBar_ChatScreen";
 import EmptyChatRoomList from "../components/EmptyChatRoomList";
 import ChatRoomBackground from "../components/ChatRoomBackground";
 import { sendNotification } from "../services/NotificationActions";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import ActionButtons from "../components/ActionButtons";
 import CustomView from "../components/CustomView";
@@ -141,9 +127,9 @@ const ChatScreen = ({ route }: any) => {
   }, [roomId, user?.userId, messages]);
 
   const initializeChat = async () => {
-    const roomRef = doc(db, "rooms", roomId);
-    const messagesRef = collection(roomRef, "messages");
-    const q = query(messagesRef, orderBy("createdAt", "desc"));
+    const roomRef = firestore().collection("rooms").doc(roomId);
+    const messagesRef = roomRef.collection("messages");
+    const q = messagesRef.orderBy("createdAt", "desc");
 
     try {
       const cachedMessages = await fetchCachedMessages(roomId);
@@ -153,19 +139,7 @@ const ChatScreen = ({ route }: any) => {
 
       await createRoomIfItDoesNotExist(roomId, user, otherUsersUserId);
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        // snapshot.docChanges().forEach((change) => {
-        //   if (change.type === "added") {
-        //     const message = change.doc.data();
-        //     if (
-        //       message.senderId !== user?.userId &&
-        //       change.doc.data().createdAt?.toDate() > new Date(Date.now() - 1000)
-        //     ) {
-        //       Vibration.vibrate([0, 60, 60, 40]);
-        //     }
-        //   }
-        // });
-
+      const unsubscribe = q.onSnapshot((snapshot) => {
         const fetchedMessages = snapshot.docs.map((doc) => {
           const data = doc.data();
           return {
@@ -193,13 +167,12 @@ const ChatScreen = ({ route }: any) => {
         });
         setMessages(fetchedMessages);
         cacheMessages(roomId, fetchedMessages);
-        return unsubscribe;
       });
+      return unsubscribe;
     } catch (error) {
       console.error("Error initializing chat:", error);
     }
   };
-
   const openPicker = async (SelectType: any) => {
     const result: ImagePicker.ImagePickerResult =
       await ImagePicker.launchImageLibraryAsync({
@@ -223,9 +196,9 @@ const ChatScreen = ({ route }: any) => {
       if (media) {
         const response = await fetch(media.uri);
         const blob = await response.blob();
-        const storageRef = ref(storage, `chatMedia/${username}.jpg`);
-        await uploadBytes(storageRef, blob);
-        downloadURL = await getDownloadURL(storageRef);
+        const storageRef = storage().ref(`chatMedia/${username}.jpg`);
+        await storageRef.put(blob);
+        downloadURL = await storageRef.getDownloadURL();
       }
       return downloadURL;
     } catch (error) {
@@ -235,16 +208,14 @@ const ChatScreen = ({ route }: any) => {
   };
 
   const markMessagesAsRead = async () => {
-    const roomRef = doc(db, "rooms", roomId);
-    const messagesRef = collection(roomRef, "messages");
-    const unreadMessagesQuery = query(
-      messagesRef,
-      where("senderId", "!=", user?.userId),
-      where("read", "==", false)
-    );
+    const roomRef = firestore().collection("rooms").doc(roomId);
+    const messagesRef = roomRef.collection("messages");
+    const unreadMessagesQuery = messagesRef
+      .where("senderId", "!=", user?.userId)
+      .where("read", "==", false);
 
-    const snapshot = await getDocs(unreadMessagesQuery);
-    const batch = writeBatch(db);
+    const snapshot = await unreadMessagesQuery.get();
+    const batch = firestore().batch();
 
     snapshot.forEach((doc) => {
       batch.update(doc.ref, { read: true });
@@ -303,13 +274,11 @@ const ChatScreen = ({ route }: any) => {
       );
 
       try {
-        const roomRef = doc(db, "rooms", roomId);
-        const messagesRef = collection(roomRef, "messages");
+        const roomRef = firestore().collection("rooms").doc(roomId);
+        const messagesRef = roomRef.collection("messages");
 
-        // Add message to Firestore
-        await setDoc(doc(messagesRef), messageData);
+        await messagesRef.add(messageData);
 
-        // Update room last message
         updateRoomLastMessage(newMessage);
 
         // Send notification if other user token exists
@@ -346,10 +315,8 @@ const ChatScreen = ({ route }: any) => {
   };
 
   const updateRoomLastMessage = async (newMessage: IMessage) => {
-    const roomRef = doc(db, "rooms", roomId);
-    // Update room last message
-    await setDoc(
-      roomRef,
+    const roomRef = firestore().collection("rooms").doc(roomId);
+    await roomRef.set(
       {
         lastMessage: messageBody(newMessage),
         lastMessageTimestamp: getCurrentTime(),
@@ -385,19 +352,16 @@ const ChatScreen = ({ route }: any) => {
           style: "destructive",
           onPress: async () => {
             try {
-              const roomRef = doc(db, "rooms", roomId);
-              const messageRef = doc(
-                roomRef,
-                "messages",
-                message._id as string
-              );
+              const roomRef = firestore().collection("rooms").doc(roomId);
+              const messageRef = roomRef
+                .collection("messages")
+                .doc(message._id as string);
 
-              await deleteDoc(messageRef);
+              await messageRef.delete();
 
               setMessages((prevMessages: IMessage[]) =>
                 prevMessages.filter((msg) => msg._id !== message._id)
               );
-              // updateRoomLastMessage();
             } catch (error) {
               console.error("Failed to delete message", error);
             }
@@ -499,10 +463,12 @@ const ChatScreen = ({ route }: any) => {
     if (!editMessage || !editText) return;
 
     try {
-      const roomRef = doc(db, "rooms", roomId);
-      const messageRef = doc(roomRef, "messages", editMessage._id as string);
+      const roomRef = firestore().collection("rooms").doc(roomId);
+      const messageRef = roomRef
+        .collection("messages")
+        .doc(editMessage._id as string);
 
-      await updateDoc(messageRef, { content: editText });
+      await messageRef.update({ content: editText });
 
       setEditText("");
       setEditMessage(null);
@@ -513,7 +479,6 @@ const ChatScreen = ({ route }: any) => {
           msg._id === editMessage?._id ? { ...msg, text: editText } : msg
         )
       );
-      // updateRoomLastMessage();
     } catch (error) {
       console.error("Failed to edit message:", error);
       Alert.alert("Error", "Failed to edit message. Please try again.");
@@ -527,12 +492,11 @@ const ChatScreen = ({ route }: any) => {
     try {
       const response = await fetch(audioUri);
       const blob = await response.blob();
-      const storageRef = ref(
-        storage,
+      const storageRef = storage().ref(
         `chatAudio/${username}_${Date.now()}.m4a`
       );
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
+      await storageRef.put(blob);
+      const downloadURL = await storageRef.getDownloadURL();
       return downloadURL;
     } catch (error) {
       console.error("Error uploading audio:", error);
