@@ -12,6 +12,7 @@ import getStyles from "../styles/Component_Styles";
 import { Theme } from "../context/ThemeContext";
 import { useUnreadChatsStore } from "@/context/UnreadChatStore";
 import { darkTheme } from "@/imports";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const ChatList = memo(
   ({
@@ -76,12 +77,18 @@ const ChatList = memo(
         data={roomData}
         ListHeaderComponent={() => (
           <View style={headerStyles.container}>
-            <TouchableOpacity onPress={() => setFilter("all")}>
+            <TouchableOpacity
+              activeOpacity={activeTouchableOpacity}
+              onPress={() => setFilter("all")}
+            >
               <Text style={[headerStyles.text, chatListFilterContainer("all")]}>
                 All
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => setFilter("unread")}>
+            <TouchableOpacity
+              activeOpacity={activeTouchableOpacity}
+              onPress={() => setFilter("unread")}
+            >
               <Text
                 onPress={() => setFilter("unread")}
                 style={[headerStyles.text, chatListFilterContainer("unread")]}

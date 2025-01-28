@@ -19,6 +19,7 @@ import TabLayout from "./AppLayout/(main)/TabLayout";
 import { NavigationContainer } from "@react-navigation/native";
 import changeNavigationBarColor from "react-native-navigation-bar-color";
 import backgroundListener, { backgroundListenerFireBase } from "./background";
+import useNetworkStore from "./context/NetworkStore";
 // import TestNotification from "./components/TestNotification";
 
 const Stack = createNativeStackNavigator();
@@ -38,36 +39,15 @@ const RootLayout = () => {
     >
       <Stack.Navigator
         initialRouteName="index"
-        screenOptions={{
-          headerShown: false,
-        }}
+        screenOptions={{ headerShown: false }}
       >
-        <Stack.Screen
-          name="index"
-          component={Index}
-          options={
-            {
-              // navigationBarColor: selectedTheme.background,
-            }
-          }
-        />
+        <Stack.Screen name="index" component={Index} />
         <Stack.Screen name="(auth)" component={AuthLayout} />
-        <Stack.Screen
-          name="(main)"
-          component={TabLayout}
-          options={
-            {
-              // navigationBarColor: selectedTheme.background,
-            }
-          }
-        />
+        <Stack.Screen name="(main)" component={TabLayout} />
         <Stack.Screen
           name="chatRoom"
           component={ChatRoomWithContext}
-          options={{
-            animation: "none",
-            // navigationBarColor: selectedTheme.background,
-          }}
+          options={{ animation: "none" }}
         />
       </Stack.Navigator>
       <Toast />
@@ -77,9 +57,25 @@ const RootLayout = () => {
 
 const App = () => {
   const { getAudioCacheInstance } = useAudioManager();
+  // const isConnected = useNetworkStore((state) => state.isConnected);
+  // const isInternetReachable = useNetworkStore(
+  //   (state) => state.details?.isInternetReachable
+  // );
+
   useEffect(() => {
     getAudioCacheInstance();
+    useNetworkStore.getState().initialize();
+    return () => {
+      useNetworkStore.getState().cleanup();
+      console.log("Network listener cleaned");
+    };
   }, []);
+
+  // useEffect(() => {
+  //   console.log("Connection Status:", isConnected);
+  //   console.log("Is Internet Reachable:", isInternetReachable);
+  // }, [isConnected, isInternetReachable]);
+
   return (
     <NavigationContainer>
       <ExpoPushNotifications>

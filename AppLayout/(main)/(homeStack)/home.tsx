@@ -10,6 +10,8 @@ import TopHeaderBar from "../../../components/HeaderBar_HomeScreen";
 import ChatList from "../../../components/ChatList";
 import { deviceToken } from "../../../services/RegisterForPushNotifications";
 import { useNavigation } from "@react-navigation/native";
+import useNetworkStore from "@/context/NetworkStore";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 export interface RoomData {
   roomId: string;
@@ -31,6 +33,10 @@ function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
+  const isConnected = useNetworkStore((state) => state.isConnected);
+  const isInternetReachable = useNetworkStore(
+    (state) => state.details?.isInternetReachable
+  );
 
   useEffect(() => {
     NotificationTokenManager.initializeAndUpdateToken(user?.userId as string);
@@ -41,9 +47,10 @@ function HomeScreen() {
     if (user?.userId) {
       initializeRooms();
     }
-  }, [user]);
+  }, [user, isConnected, isInternetReachable]);
 
   const initializeRooms = async () => {
+    console.log("Initializing Rooms");
     setIsLoading(true);
     try {
       // First load from cache
@@ -75,49 +82,54 @@ function HomeScreen() {
   };
 
   const subscribeToRooms = () => {
-    const roomsRef = firestore().collection("rooms");
-    const roomsQuery = roomsRef
-      .where("participants", "array-contains", user?.userId)
-      .orderBy("lastMessageTimestamp", "desc");
+    try {
+      const roomsRef = firestore().collection("rooms");
+      const roomsQuery = roomsRef
+        .where("participants", "array-contains", user?.userId)
+        .orderBy("lastMessageTimestamp", "desc");
 
-    return roomsQuery.onSnapshot(async (snapshot) => {
-      const roomsData: RoomData[] = [];
+      return roomsQuery.onSnapshot(async (snapshot) => {
+        const roomsData: RoomData[] = [];
 
-      for (const roomDoc of snapshot.docs) {
-        const roomData = roomDoc.data();
-        const otherUserId = roomData.participants.find(
-          (id: string) => id !== user?.userId
-        );
+        for (const roomDoc of snapshot.docs) {
+          const roomData = roomDoc.data();
+          const otherUserId = roomData.participants.find(
+            (id: string) => id !== user?.userId
+          );
 
-        if (otherUserId) {
-          const userDocRef = firestore().collection("users").doc(otherUserId);
-          const userDoc = await userDocRef.get();
+          if (otherUserId) {
+            const userDocRef = firestore().collection("users").doc(otherUserId);
+            const userDoc = await userDocRef.get();
 
-          if (userDoc.exists) {
-            const userData = userDoc.data();
-            roomsData.push({
-              roomId: roomDoc.id,
-              lastMessage: roomData?.lastMessage,
-              lastMessageTimestamp: roomData?.lastMessageTimestamp,
-              lastMessageSenderId: roomData?.lastMessageSenderId,
-              otherParticipant: {
-                userId: otherUserId,
-                username: userData?.username,
-                profileUrl: userData?.profileUrl,
-                otherUsersDeviceToken: userData?.deviceToken,
-              },
-            });
+            if (userDoc.exists) {
+              const userData = userDoc.data();
+              roomsData.push({
+                roomId: roomDoc.id,
+                lastMessage: roomData?.lastMessage,
+                lastMessageTimestamp: roomData?.lastMessageTimestamp,
+                lastMessageSenderId: roomData?.lastMessageSenderId,
+                otherParticipant: {
+                  userId: otherUserId,
+                  username: userData?.username,
+                  profileUrl: userData?.profileUrl,
+                  otherUsersDeviceToken: userData?.deviceToken,
+                },
+              });
+            }
           }
         }
-      }
-      if (roomsData.length > 0) {
-        setRooms(roomsData);
-        await AsyncStorage.setItem(
-          `rooms_${user?.userId}`,
-          JSON.stringify(roomsData)
-        );
-      }
-    });
+        if (roomsData.length > 0) {
+          // console.log(roomsData);
+          setRooms(roomsData);
+          await AsyncStorage.setItem(
+            `rooms_${user?.userId}`,
+            JSON.stringify(roomsData)
+          );
+        }
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -150,6 +162,7 @@ function HomeScreen() {
         />
       </View>
       <TouchableOpacity
+        activeOpacity={activeTouchableOpacity}
         style={styles.floatingButton}
         onPress={() => navigation.navigate("searchUsers" as never)}
       >

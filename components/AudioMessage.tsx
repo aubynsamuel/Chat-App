@@ -19,6 +19,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { UserData } from "@/context/AuthContext";
 import { darkTheme } from "@/imports";
 import { useAudioManager } from "../Functions/AudioCacheManager";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface AudioPlayerComponentProps {
   selectedTheme: Theme;
@@ -242,6 +243,7 @@ const AudioPlayerComponent = memo(
 
     return (
       <TouchableOpacity
+        activeOpacity={activeTouchableOpacity}
         style={styles.audioContainer}
         onLongPress={() => handleMessagePress(props.currentMessage)}
       >
@@ -251,7 +253,10 @@ const AudioPlayerComponent = memo(
             resizeMode="cover"
             style={{ height: 40, width: 40, borderRadius: 100 }}
           />
-          <TouchableOpacity onPress={playAudio}>
+          <TouchableOpacity
+            activeOpacity={activeTouchableOpacity}
+            onPress={playAudio}
+          >
             {downloading ? (
               <ActivityIndicator
                 size="small"

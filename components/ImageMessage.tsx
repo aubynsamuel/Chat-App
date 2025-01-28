@@ -17,6 +17,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { UserData } from "@/context/AuthContext";
 import { IMessage } from "@/Functions/types";
 import { useTheme } from "../context/ThemeContext";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface RenderMessageImageProps {
   imageStyle?: ImageStyle;
@@ -129,9 +130,9 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
     return (
       <>
         <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           onPress={() => setModalVisible(true)}
           onLongPress={() => handleMessagePress(currentMessage)}
-          activeOpacity={0.8}
         >
           <Image
             source={{ uri: currentMessage.image }}
@@ -150,6 +151,7 @@ const RenderMessageImage: React.FC<RenderMessageImageProps> = memo(
           ) : null}
           <View style={styles.modalContainer}>
             <TouchableOpacity
+              activeOpacity={activeTouchableOpacity}
               style={styles.closeButton}
               onPress={() => setModalVisible(false)}
             >

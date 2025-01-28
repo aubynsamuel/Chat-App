@@ -11,6 +11,7 @@ import getStyles from "../styles/Component_Styles";
 import { useAuth } from "../imports";
 import { Theme } from "../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface HeaderBarProp {
   title: string;
@@ -43,6 +44,7 @@ const TopHeaderBar = memo(
           {/* Search button */}
           {searchButtonShown && (
             <TouchableOpacity
+              activeOpacity={activeTouchableOpacity}
               onPress={() => navigation.navigate("searchUsers" as never)}
             >
               <MaterialIcons

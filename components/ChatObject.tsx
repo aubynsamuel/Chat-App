@@ -1,23 +1,40 @@
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { memo, useEffect, useState } from "react";
 import getStyles from "../styles/Component_Styles";
-import { formatTimeWithoutSeconds, getRoomId, useAuth, db } from "../imports";
+import { formatTimeWithoutSeconds, getRoomId, useAuth } from "../imports";
 import { RoomData } from "../AppLayout/(main)/(homeStack)/home";
 import { Theme } from "../context/ThemeContext";
 import { useUnreadChatsStore } from "@/context/UnreadChatStore";
 import { useNavigation } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
+import useNetworkStore from "@/context/NetworkStore";
+import { activeTouchableOpacity } from "@/Functions/Constants";
+import { RootStackParamList } from "@/Functions/navigationTypes";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+type ChatNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "chatRoom"
+>;
 
 const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ChatNavigationProp>();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [imageFailed, setImageFailed] = useState(false);
   const styles = getStyles(theme);
   const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
   const { addToUnread, removeFromUnread } = useUnreadChatsStore();
+  const isConnected = useNetworkStore((state) => state.isConnected);
+  const isInternetReachable = useNetworkStore(
+    (state) => state.details?.isInternetReachable
+  );
 
   useEffect(() => {
+    console.log(
+      "Subscribing to rooms from chat object",
+      room.otherParticipant.username
+    );
     const docRef = firestore().collection("rooms").doc(roomId);
     const messagesRef = docRef.collection("messages");
 
@@ -29,8 +46,13 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
       setUnreadCount(snapshot.docs.length);
     });
 
-    return unsubscribe;
-  }, [user?.userId, room.otherParticipant.userId]);
+    return () => unsubscribe();
+  }, [
+    user?.userId,
+    room.otherParticipant.userId,
+    isConnected,
+    isInternetReachable,
+  ]);
 
   useEffect(() => {
     if (unreadCount > 0) {
@@ -50,7 +72,11 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
   };
 
   return (
-    <TouchableOpacity style={styles.chatBox} onPress={handlePress}>
+    <TouchableOpacity
+      activeOpacity={activeTouchableOpacity}
+      style={styles.chatBox}
+      onPress={handlePress}
+    >
       <View
         style={[styles.chatBox, { width: "82%", justifyContent: "flex-start" }]}
       >

@@ -113,7 +113,7 @@ const Toast: React.FC = () => {
 const styles = StyleSheet.create({
   toastContainer: {
     position: "absolute",
-    bottom: 60,
+    bottom: 65,
     backgroundColor: "rgba(0, 0, 0, 0.6)",
     paddingVertical: 12,
     paddingHorizontal: 20,

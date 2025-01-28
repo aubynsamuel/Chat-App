@@ -13,6 +13,7 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useTheme, useAuth, getStyles, SignUp, darkTheme } from "../../imports";
 import { useNavigation } from "@react-navigation/native";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const SignUpScreen = () => {
   const navigation = useNavigation();
@@ -137,6 +138,7 @@ const SignUpScreen = () => {
               onChangeText={(value) => (password.current = value)}
             />
             <TouchableOpacity
+              activeOpacity={activeTouchableOpacity}
               onPress={() => {
                 setPasswordReveal((prev) => !prev);
               }}
@@ -159,6 +161,7 @@ const SignUpScreen = () => {
         </View>
 
         <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           style={styles.suSignUpButton}
           onPress={handleSignUpPressed}
         >
@@ -174,6 +177,7 @@ const SignUpScreen = () => {
         >
           <Text style={styles.suHaveAnAccount}>Already have an account? </Text>
           <TouchableOpacity
+            activeOpacity={activeTouchableOpacity}
             onPress={() => navigation.navigate("login" as never)}
           >
             <Text style={styles.suLoginText}>Login</Text>

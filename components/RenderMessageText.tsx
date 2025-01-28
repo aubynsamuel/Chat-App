@@ -5,6 +5,7 @@ import { UserData } from "../context/AuthContext";
 import { Theme } from "../context/ThemeContext";
 import { memo } from "react";
 import { darkTheme } from "@/imports";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const RenderMessageText = memo(
   ({
@@ -25,7 +26,7 @@ const RenderMessageText = memo(
         {/* Display replied-to message if available */}
         {currentMessage.replyTo && (
           <TouchableOpacity
-            activeOpacity={0.5}
+            activeOpacity={activeTouchableOpacity}
             onPress={() => scrollToMessage(currentMessage.replyTo?._id)}
             style={
               {

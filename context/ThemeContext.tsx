@@ -77,18 +77,12 @@ export const ThemeContextProvider: React.FC<ThemeContextProviderProps> = ({
     string | undefined
   >(undefined);
 
-  const changeBackgroundPic = (chatBackground: string) => {
-    try {
-      storage.set("backgroundPicture", chatBackground);
-      setChatBackgroundPic(chatBackground);
-      console.log("Background picture cached successfully");
-    } catch (error) {
-      console.error("Error saving background picture:", error);
-      throw error; // Propagate error to handle in component
-    }
-  };
-
   useEffect(() => {
+    setTheme();
+    setBackgroundPicture();
+  }, []);
+
+  const setBackgroundPicture = () => {
     try {
       const backgroundPicture = storage.getString("backgroundPicture");
       if (backgroundPicture) {
@@ -97,9 +91,9 @@ export const ThemeContextProvider: React.FC<ThemeContextProviderProps> = ({
     } catch (error) {
       console.error("Error loading background picture:", error);
     }
-  }, []);
+  };
 
-  useEffect(() => {
+  const setTheme = () => {
     try {
       const themeIndex = storage.getString("selectedTheme");
       if (themeIndex !== undefined) {
@@ -112,7 +106,18 @@ export const ThemeContextProvider: React.FC<ThemeContextProviderProps> = ({
       console.error("Error loading theme from storage:", error);
       setSelectedTheme(themes[1]); // Default to second theme
     }
-  }, []);
+  };
+
+  const changeBackgroundPic = (chatBackground: string) => {
+    try {
+      storage.set("backgroundPicture", chatBackground);
+      setChatBackgroundPic(chatBackground);
+      console.log("Background picture cached successfully");
+    } catch (error) {
+      console.error("Error saving background picture:", error);
+      throw error; // Propagate error to handle in component
+    }
+  };
 
   const changeTheme = (themeIndex: number) => {
     try {

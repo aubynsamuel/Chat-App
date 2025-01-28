@@ -11,9 +11,12 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { useTheme, useAuth, db, getStyles } from "../../../imports";
+import { useTheme, useAuth, getStyles } from "../../../imports";
 import { useNavigation } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
+import { activeTouchableOpacity } from "@/Functions/Constants";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/Functions/navigationTypes";
 
 interface User {
   userId: string;
@@ -22,8 +25,13 @@ interface User {
   deviceToken: string;
 }
 
+type ChatNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "chatRoom"
+>;
+
 const SearchUsersScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<ChatNavigationProp>();
   const { user } = useAuth();
   const [searchText, setSearchText] = useState<string>("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -40,6 +48,7 @@ const SearchUsersScreen = () => {
     if (text.trim() === "") {
       setIsLoading(false);
       setFilteredUsers([]);
+      setErrorMessage("Search Users");
       return;
     }
 
@@ -64,7 +73,7 @@ const SearchUsersScreen = () => {
       setIsLoading(false);
       console.error("Error searching users:", error);
     } finally {
-      if (filteredUsers.length < 0) {
+      if (filteredUsers.length < 1) {
         setErrorMessage("No users found");
       } else {
         setErrorMessage(
@@ -102,12 +111,16 @@ const SearchUsersScreen = () => {
         animated={true}
       />
       <View style={styles.header}>
-        <MaterialIcons
-          name="arrow-back"
-          size={25}
-          color={selectedTheme.text.primary}
+        <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           onPress={() => navigation.goBack()}
-        />
+        >
+          <MaterialIcons
+            name="arrow-back"
+            size={25}
+            color={selectedTheme.text.primary}
+          />
+        </TouchableOpacity>
         <TextInput
           ref={inputRef}
           style={styles.searchInput}
@@ -124,6 +137,7 @@ const SearchUsersScreen = () => {
           keyExtractor={(item) => item.userId}
           renderItem={({ item }) => (
             <TouchableOpacity
+              activeOpacity={activeTouchableOpacity}
               style={styles.userItem}
               onPress={() => handleUserPress(item)}
             >
