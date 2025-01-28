@@ -68,6 +68,8 @@ import { useHighlightStore } from "@/context/MessageHighlightStore";
 import ScreenOverlay from "@/components/ScreenOverlay";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { useAudioManager } from "@/Functions/AudioCacheManager";
+import useNetworkStore from "@/context/NetworkStore";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 // import { Vibration } from "react-native";
 
 const ChatScreen = ({ route }: any) => {
@@ -106,6 +108,10 @@ const ChatScreen = ({ route }: any) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
   const { audioCacheManager } = useAudioManager();
+  const isConnected = useNetworkStore((state) => state.isConnected);
+  const isInternetReachable = useNetworkStore(
+    (state) => state.details?.isInternetReachable
+  );
 
   useEffect(() => {
     return () => {
@@ -120,13 +126,14 @@ const ChatScreen = ({ route }: any) => {
     return () => {
       if (unsubscribe) unsubscribe;
     };
-  }, [roomId, user, otherUsersUserId]);
+  }, [roomId, user, otherUsersUserId, isConnected, isInternetReachable]);
 
   useEffect(() => {
     markMessagesAsRead();
   }, [roomId, user?.userId, messages]);
 
   const initializeChat = async () => {
+    console.log("Initializing ChatRoom");
     const roomRef = firestore().collection("rooms").doc(roomId);
     const messagesRef = roomRef.collection("messages");
     const q = messagesRef.orderBy("createdAt", "desc");
@@ -655,7 +662,7 @@ const ChatScreen = ({ route }: any) => {
                     numberOfLines={5}
                   />
                   <TouchableOpacity
-                    activeOpacity={0.5}
+                    activeOpacity={activeTouchableOpacity}
                     onPress={() => {
                       setIsEditing(false);
                       handleEditSave();
@@ -665,7 +672,7 @@ const ChatScreen = ({ route }: any) => {
                     <Text style={styles.editButtonText as TextStyle}>✓</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    activeOpacity={0.5}
+                    activeOpacity={activeTouchableOpacity}
                     onPress={() => {
                       setIsEditing(false);
                     }}

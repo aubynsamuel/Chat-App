@@ -8,9 +8,6 @@ export {
 export { fetchCachedMessages, cacheMessages } from "./Functions/CacheMessages";
 export { default as createRoomIfItDoesNotExist } from "./Functions/CreateRoomIfItDoesNotExist";
 
-// Firebase
-export { db, usersRef, storage } from "./env/firebaseConfig";
-
 // Contexts
 export { useAuth } from "./context/AuthContext";
 export { useTheme } from "./context/ThemeContext";

@@ -14,6 +14,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useTheme, getStyles, useAuth } from "../../../imports";
 import { useNavigation } from "@react-navigation/native";
+import useNetworkStore from "@/context/NetworkStore";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
@@ -23,6 +25,9 @@ const EditProfileScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
+  const isInternetReachable = useNetworkStore(
+    (state) => state.details?.isInternetReachable
+  );
 
   const selectImage = async () => {
     try {
@@ -51,59 +56,66 @@ const EditProfileScreen = () => {
       return;
     }
 
-    try {
-      let downloadURL: string | null | undefined = profileUrl;
+    if (isInternetReachable) {
+      try {
+        let downloadURL: string | null | undefined = profileUrl;
 
-      if (profileUrl && profileUrl.startsWith("file://")) {
-        const storageRef = storage().ref(`profilePictures/${user?.userId}`);
+        if (profileUrl && profileUrl.startsWith("file://")) {
+          const storageRef = storage().ref(`profilePictures/${user?.userId}`);
 
-        const response = await fetch(profileUrl);
-        const blob = await response.blob();
+          const response = await fetch(profileUrl);
+          const blob = await response.blob();
 
-        const uploadTask = storageRef.put(blob);
+          const uploadTask = storageRef.put(blob);
 
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            const progress =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log("Upload is " + progress + "% done");
-          },
-          (error) => {
-            console.error("Upload failed:", error.message);
-            showToast("Picture Could Not Be Uploaded");
-            setIsLoading(false);
-          },
-          async () => {
-            downloadURL = await uploadTask.snapshot?.ref.getDownloadURL();
-            console.log("File available at", downloadURL);
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log("Upload is " + progress + "% done");
+            },
+            (error) => {
+              console.error("Upload failed:", error.message);
+              showToast("Picture Could Not Be Uploaded");
+              setIsLoading(false);
+            },
+            async () => {
+              downloadURL = await uploadTask.snapshot?.ref.getDownloadURL();
+              console.log("File available at", downloadURL);
 
-            const response = await updateProfile({
-              username,
-              profileUrl: downloadURL,
-            });
+              const response = await updateProfile({
+                username,
+                profileUrl: downloadURL,
+              });
 
-            if (!response.success) {
-              showToast(response.msg as string);
-            } else {
-              showToast("Profile updated successfully!");
+              if (!response.success) {
+                showToast(response.msg as string);
+              } else {
+                showToast("Profile updated successfully!");
+              }
+              setIsLoading(false);
             }
-            setIsLoading(false);
-          }
-        );
-      } else {
-        const response = await updateProfile({ username, profileUrl } as any);
-        if (!response.success) {
-          showToast(response.msg as string);
+          );
         } else {
-          showToast("Profile updated successfully!");
+          const response = await updateProfile({ username, profileUrl } as any);
+          if (!response.success) {
+            showToast(response.msg as string);
+          } else {
+            showToast("Profile updated successfully!");
+          }
+          setIsLoading(false);
         }
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        showToast("Failed to update profile");
         setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      showToast("Failed to update profile");
+    } else {
+      showToast("No internet connection");
+      console.log("No internet connection");
       setIsLoading(false);
+      return;
     }
   };
 
@@ -114,7 +126,10 @@ const EditProfileScreen = () => {
         animated={true}
       />
       {/* back icon */}
-      <TouchableOpacity onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        activeOpacity={activeTouchableOpacity}
+        onPress={() => navigation.goBack()}
+      >
         <MaterialIcons
           name="arrow-back"
           size={25}
@@ -132,7 +147,10 @@ const EditProfileScreen = () => {
             style={styles.epProfileImage}
           />
         )}
-        <TouchableOpacity onPress={selectImage}>
+        <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
+          onPress={selectImage}
+        >
           <Text style={styles.epChangePicText}>Change Profile Picture</Text>
         </TouchableOpacity>
 
@@ -154,6 +172,7 @@ const EditProfileScreen = () => {
 
         {/* Save Button */}
         <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           style={styles.epSaveButton}
           onPress={handleUpdateProfile}
         >
