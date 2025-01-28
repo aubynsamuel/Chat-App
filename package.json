@@ -1,7 +1,7 @@
 {
   "name": "flashsend",
   "main": "node_modules/expo/AppEntry",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "scripts": {
     "start": "expo start --dev-client",
     "reset-project": "node ./scripts/reset-project.js",
@@ -22,6 +22,7 @@
     "@gorhom/bottom-sheet": "^5.0.5",
     "@notifee/react-native": "^9.1.8",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-community/netinfo": "^11.4.1",
     "@react-native-firebase/app": "^21.7.1",
     "@react-native-firebase/auth": "^21.7.1",
     "@react-native-firebase/firestore": "^21.7.1",
