@@ -8,6 +8,7 @@ import { IMessage } from "../Functions/types";
 import { darkTheme, useAuth } from "../imports";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Theme } from "@/context/ThemeContext";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface InputToolBarProps {
   isReplying: boolean;
@@ -80,7 +81,10 @@ const ReplyPreview = memo(
             width: "94%",
           }}
         >
-          <TouchableOpacity style={{ alignSelf: "center", bottom: 5 }}>
+          <TouchableOpacity
+            activeOpacity={activeTouchableOpacity}
+            style={{ alignSelf: "center", bottom: 5 }}
+          >
             <MaterialIcons
               name="reply"
               size={28}
@@ -120,9 +124,9 @@ const ReplyPreview = memo(
         </View>
 
         <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           style={{ alignSelf: "center" }}
           onPress={onClose}
-          activeOpacity={0.5}
         >
           <MaterialIcons
             name="close"

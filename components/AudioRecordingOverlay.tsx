@@ -11,6 +11,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import ScreenOverlay from "./ScreenOverlay";
 import { formatTime } from "../imports";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface AudioRecordingOverlayProps {
   isRecording: boolean;
@@ -44,11 +45,11 @@ const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
             {!isRecording && (
               <View style={styles.controlsContainer as ViewStyle}>
                 <TouchableOpacity
+                  activeOpacity={activeTouchableOpacity}
                   style={[
                     styles.controlButton as any,
                     styles.discardButton as any,
                   ]}
-                  activeOpacity={0.7}
                   onPress={resetRecording}
                 >
                   <MaterialIcons name="delete" size={24} color="white" />
@@ -56,11 +57,11 @@ const AudioRecordingOverlay: React.FC<AudioRecordingOverlayProps> = memo(
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                  activeOpacity={activeTouchableOpacity}
                   style={[
                     styles.controlButton as any,
                     styles.sendButton as any,
                   ]}
-                  activeOpacity={0.7}
                   onPress={() => {
                     sendAudioMessage();
                     resetRecording();

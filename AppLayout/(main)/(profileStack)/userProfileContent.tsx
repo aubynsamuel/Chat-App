@@ -12,6 +12,7 @@ import { StatusBar } from "expo-status-bar";
 import * as ImagePicker from "expo-image-picker";
 import { useTheme, getStyles, useAuth } from "../../../imports";
 import { useNavigation } from "@react-navigation/native";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const UserProfileContent = ({ children }: { children: ReactNode }) => {
   const navigation = useNavigation();
@@ -67,6 +68,7 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
       <View style={styles.upOptionsContainer}>
         {/* Edit profile */}
         <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           style={styles.upOption}
           onPress={() => navigation.navigate("editProfile" as never)}
         >
@@ -108,7 +110,11 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
           </View>
         </View>
         {/*Change background picture */}
-        <TouchableOpacity style={styles.upOption} onPress={selectImage}>
+        <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
+          style={styles.upOption}
+          onPress={selectImage}
+        >
           <MaterialIcons
             name="image-search"
             size={25}
@@ -121,7 +127,11 @@ const UserProfileContent = ({ children }: { children: ReactNode }) => {
         {children}
 
         {/* Logout */}
-        <TouchableOpacity style={styles.upOption} onPress={handleLogout}>
+        <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
+          style={styles.upOption}
+          onPress={handleLogout}
+        >
           <MaterialIcons
             name="logout"
             size={25}

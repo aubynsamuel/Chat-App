@@ -11,6 +11,7 @@ import Animated, {
 import { darkTheme, useTheme } from "@/imports";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs/src/types";
 import { useUnreadChatsStore } from "@/context/UnreadChatStore";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const CustomTabBar = ({
   state,
@@ -120,10 +121,10 @@ const CustomTabBar = ({
 
         return (
           <TouchableOpacity
+            activeOpacity={activeTouchableOpacity}
             key={index}
             onPress={onPress}
             style={styles.tab}
-            activeOpacity={0.6}
             accessibilityRole="button"
             accessibilityState={isFocused ? { selected: true } : {}}
             accessibilityLabel={options.tabBarAccessibilityLabel}

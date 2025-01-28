@@ -15,6 +15,7 @@ import { StatusBar } from "expo-status-bar";
 import { IMessage } from "../Functions/types";
 import ScreenOverlay from "./ScreenOverlay";
 import { useChatContext } from "../context/ChatContext";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 export interface MediaFile {
   uri: string;
@@ -110,6 +111,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = memo(
             <View style={{ height: "100%", justifyContent: "center" }}>
               {/* Close button */}
               <TouchableOpacity
+                activeOpacity={activeTouchableOpacity}
                 style={styles.closeButton}
                 onPress={() => setImageModalVisibility(false)}
               >
@@ -146,6 +148,7 @@ const ImageMessageDetails: React.FC<ImageMessageDetailsProps> = memo(
                   />
                 </View>
                 <TouchableOpacity
+                  activeOpacity={activeTouchableOpacity}
                   style={styles.sendButton}
                   onPress={sendImageMessage}
                 >

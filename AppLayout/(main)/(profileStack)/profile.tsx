@@ -16,6 +16,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import UserProfileContent from "./userProfileContent";
 import { useTheme, getStyles, darkTheme } from "../../../imports";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface ThemeOption {
   id: string;
@@ -54,6 +55,7 @@ const UserProfileScreen = () => {
       <BottomSheetModalProvider>
         <UserProfileContent>
           <TouchableOpacity
+            activeOpacity={activeTouchableOpacity}
             onPress={handlePresentModalPress}
             style={styles.upOption}
           >
@@ -117,6 +119,7 @@ const UserProfileScreen = () => {
               {themes.map((item) => (
                 <View key={item.id} style={stylesSheet.themeContainer as any}>
                   <TouchableOpacity
+                    activeOpacity={activeTouchableOpacity}
                     onPress={() => changeTheme(parseInt(item.id, 10))}
                     style={[
                       stylesSheet.colorBox as any,

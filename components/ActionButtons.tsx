@@ -5,6 +5,7 @@ import { Alert } from "react-native";
 import { useChatContext } from "../context/ChatContext";
 import { darkTheme } from "@/imports";
 import { useTheme } from "@/context/ThemeContext";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface User {
   userId: string;
@@ -33,7 +34,7 @@ interface ActionButtonsProps {
 
 const Button: React.FC<ButtonProps> = memo(
   ({ onPress, size = 27, color = "rgba(0,0,0,0.9)", name }) => (
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity activeOpacity={activeTouchableOpacity} onPress={onPress}>
       <MaterialIcons size={size} color={color} name={name as any} />
     </TouchableOpacity>
   )

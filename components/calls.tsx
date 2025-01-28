@@ -49,7 +49,7 @@
 //     const callIconColor = item.type === "missed" ? "red" : "green";
 
 //     return (
-//       <TouchableOpacity style={styles.callItem} activeOpacity={0.8}>
+//       <TouchableOpacity style={styles.callItem} activeOpacity={activeTouchableOpacity}>
 //         <Image source={{ uri: item.avatar }} style={styles.avatar} />
 //         <View style={styles.callDetails}>
 //           <Text style={styles.name}>{item.name}</Text>
@@ -128,3 +128,25 @@
 // });
 
 // export default CallsScreen;
+
+// isTyping={true}
+// loadEarlier={true}
+// renderLoadEarlier={() => (
+//   <View
+//     style={{
+//       top: 5,
+//       alignItems: "center",
+//       backgroundColor: "lightgray",
+//       // width: "60%",
+//       paddingHorizontal: 20,
+//       borderRadius: 20,
+//       alignSelf: "center",
+//     }}
+//   >
+//     <Text>Loading Earlier Messages</Text>
+//     <ActivityIndicator
+//       size={"small"}
+//       color={selectedTheme.secondary}
+//     />
+//   </View>
+// )}

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Flash Send",
     "slug": "FlashSend",
-    "version": "5.1.0",
+    "version": "5.1.1",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "flashsend",

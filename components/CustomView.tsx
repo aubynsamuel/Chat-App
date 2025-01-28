@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { IMessage } from "../Functions/types";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 interface CustomViewProps {
   currentMessage: IMessage;
@@ -45,9 +46,9 @@ const CustomView: React.FC<CustomViewProps> = memo(
 
       return (
         <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           style={[styles.container, containerStyle]}
           onPress={openMapAsync}
-          activeOpacity={0.8}
         >
           <MapView
             style={[styles.mapView, mapViewStyle]}

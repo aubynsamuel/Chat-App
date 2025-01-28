@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import getStyles from "../styles/Component_Styles";
 import { Theme } from "../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const TopHeaderBar = memo(
   ({
@@ -95,6 +96,7 @@ const TopHeaderBar = memo(
           {/* Back Button */}
           <Animated.View style={animatedButtonStyle}>
             <AnimatedTouchableOpacity
+              activeOpacity={activeTouchableOpacity}
               onPress={() => {
                 Keyboard.dismiss();
                 navigation.goBack();

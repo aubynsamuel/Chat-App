@@ -4,6 +4,7 @@ import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
 import LottieView from "lottie-react-native";
 import { useChatContext } from "../context/ChatContext";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const RecordAudioButton = () => {
   const [isRecordingAllowed, setIsRecordingAllowed] = useState<boolean>(false);
@@ -136,10 +137,10 @@ const RecordAudioButton = () => {
 
   return (
     <TouchableOpacity
+      activeOpacity={activeTouchableOpacity}
       style={[styles.recordButton, recording && styles.recordingButton]}
       onPressIn={startRecording}
       onPressOut={stopRecording}
-      activeOpacity={0.7}
     >
       {!isRecording ? (
         <MaterialIcons

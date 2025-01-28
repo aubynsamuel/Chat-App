@@ -18,6 +18,7 @@ import {
   darkTheme,
 } from "../../imports";
 import { useNavigation } from "@react-navigation/native";
+import { activeTouchableOpacity } from "@/Functions/Constants";
 
 const LoginScreen = () => {
   const navigation = useNavigation();
@@ -132,6 +133,7 @@ const LoginScreen = () => {
               onChangeText={(value) => (password.current = value)}
             />
             <TouchableOpacity
+              activeOpacity={activeTouchableOpacity}
               onPress={() => {
                 setPasswordReveal((prev) => !prev);
               }}
@@ -154,12 +156,16 @@ const LoginScreen = () => {
         </View>
 
         {/* forgot password */}
-        <TouchableOpacity onPress={handleForgotPassword}>
+        <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
+          onPress={handleForgotPassword}
+        >
           <Text style={styles.lsForgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
 
         {/* Login Button */}
         <TouchableOpacity
+          activeOpacity={activeTouchableOpacity}
           style={styles.lsLoginButton}
           onPress={() => {
             handleLoginPressed();
@@ -178,6 +184,7 @@ const LoginScreen = () => {
             Don't have an account?{" "}
           </Text>
           <TouchableOpacity
+            activeOpacity={activeTouchableOpacity}
             onPress={() => navigation.navigate("signUp" as never)}
           >
             <Text style={styles.lsSignUp}>Sign up</Text>
