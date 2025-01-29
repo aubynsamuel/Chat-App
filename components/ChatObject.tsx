@@ -25,7 +25,6 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
   const styles = getStyles(theme);
   const roomId = getRoomId(user?.userId, room.otherParticipant.userId);
   const { addToUnread, removeFromUnread } = useUnreadChatsStore();
-  const isConnected = useNetworkStore((state) => state.isConnected);
   const isInternetReachable = useNetworkStore(
     (state) => state.details?.isInternetReachable
   );
@@ -47,12 +46,7 @@ const ChatObject = memo(({ room, theme }: { room: RoomData; theme: Theme }) => {
     });
 
     return () => unsubscribe();
-  }, [
-    user?.userId,
-    room.otherParticipant.userId,
-    isConnected,
-    isInternetReachable,
-  ]);
+  }, [user?.userId, room.otherParticipant.userId, isInternetReachable]);
 
   useEffect(() => {
     if (unreadCount > 0) {

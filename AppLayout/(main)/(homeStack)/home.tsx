@@ -33,7 +33,6 @@ function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const { selectedTheme } = useTheme();
   const styles = getStyles(selectedTheme);
-  const isConnected = useNetworkStore((state) => state.isConnected);
   const isInternetReachable = useNetworkStore(
     (state) => state.details?.isInternetReachable
   );
@@ -47,7 +46,7 @@ function HomeScreen() {
     if (user?.userId) {
       initializeRooms();
     }
-  }, [user, isConnected, isInternetReachable]);
+  }, [user, isInternetReachable]);
 
   const initializeRooms = async () => {
     console.log("Initializing Rooms");

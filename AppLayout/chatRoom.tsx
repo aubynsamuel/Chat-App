@@ -108,7 +108,6 @@ const ChatScreen = ({ route }: any) => {
   const [isReplying, setIsReplying] = useState(false);
   const [replyToMessage, setReplyToMessage] = useState<IMessage | null>(null);
   const { audioCacheManager } = useAudioManager();
-  const isConnected = useNetworkStore((state) => state.isConnected);
   const isInternetReachable = useNetworkStore(
     (state) => state.details?.isInternetReachable
   );
@@ -126,7 +125,7 @@ const ChatScreen = ({ route }: any) => {
     return () => {
       if (unsubscribe) unsubscribe;
     };
-  }, [roomId, user, otherUsersUserId, isConnected, isInternetReachable]);
+  }, [roomId, user, otherUsersUserId, isInternetReachable]);
 
   useEffect(() => {
     markMessagesAsRead();
